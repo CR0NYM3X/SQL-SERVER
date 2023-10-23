@@ -20,6 +20,7 @@ OSQL.EXE -S My_hostnameServ -d Mydba -U Usuario_test -i script.sql -o "C:\Users\
 -U Indicas el usuario con el que te vas a conectas 
 -o se guarda en un archivo como lgo toda la salida que se va ejecutar
 
-
-
 ```
+
+### Puertos por dafault que usa el sql server
+    puerto: 1433, 1434, 4022, 135, de tipo TCP y el 1434 UDP.
