@@ -2,8 +2,8 @@
 
 .- **Conceptos básicos sql server**<br>
 .- **Recoleccion de informacion de la base de datos** <br>
-.- Base de datos<br>
-.- Tablas<br>
+.- **Base de datos**<br>
+.- **Tablas**<br>
 .- Esquemas<br>
 .- Funciones <br>
 .- PROCEDURE <br>
