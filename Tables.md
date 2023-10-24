@@ -98,7 +98,7 @@ SELECT columna1, columna2 INTO #tempTablaGlobal FROM TuTablaExistente WHERE cond
 SELECT columna1, columna2 INTO ##tempTablaGlobal FROM TuTablaExistente WHERE condición;
 
 
------ Esta temporal solo existe en la consulta, al finalizar la consulta se borran las tablas temporales 
+----- Esta temporal CTE  solo existe en la consulta, al finalizar la consulta se borran las tablas temporales 
 WITH tmpTabla1 AS (
      SELECT * from my_Tabla1 where column1='maria'
 ),
