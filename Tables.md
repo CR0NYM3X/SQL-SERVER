@@ -83,6 +83,21 @@ CREATE TABLE Cliente (
 );
 ```
 
+### Crear una tabla temporal:
+```
+CREATE TABLE #tempEmpleados (
+    empleado_id INT,
+    nombre VARCHAR(50),
+    salario DECIMAL(10, 2)
+);
+
+--- Esta tabla se borra al cerrar la sesion  y solo puede ser consultada por la sesion que la creo
+SELECT columna1, columna2 INTO #tempTablaGlobal FROM TuTablaExistente WHERE condición;
+
+--- Esta tabla se borra al cerrar la sesion  y solo puede ser consultada por todas sesiones 
+SELECT columna1, columna2 INTO ##tempTablaGlobal FROM TuTablaExistente WHERE condición;
+```
+
 ### Insertar información en una tabla:
 ```
 INSERT my_tabla (column_2) VALUES ('Row #2');
