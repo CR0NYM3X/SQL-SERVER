@@ -96,6 +96,16 @@ SELECT columna1, columna2 INTO #tempTablaGlobal FROM TuTablaExistente WHERE cond
 
 --- Esta tabla se borra al cerrar la sesion  y solo puede ser consultada por todas sesiones 
 SELECT columna1, columna2 INTO ##tempTablaGlobal FROM TuTablaExistente WHERE condición;
+
+
+----- Esta temporal solo existe en la consulta, al finalizar la consulta se borran las tablas temporales 
+WITH tmpTabla1 AS (
+     SELECT * from my_Tabla1 where column1='maria'
+),
+tmpTabla2 AS (
+    SELECT * from my_Tabla2 where column1='pedro'
+)
+select * from tmpTabla1 inner join tmpTabla2 on tmpTabla1.column1=tmpTabla2.column1
 ```
 
 ### Insertar información en una tabla:
