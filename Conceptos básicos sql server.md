@@ -1,5 +1,12 @@
 
 
+### Estructura 
+```
+msdb.dbo.backupmediafamily
+
+[Base de datos].[esquema].[tabla]
+```
+
 ### Conectarse a sql server desde CMD 
 ```
 # Directorio donde se encuentra la herramienta:
