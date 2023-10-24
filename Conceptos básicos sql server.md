@@ -31,3 +31,17 @@ OSQL.EXE -S My_hostnameServ -d Mydba -U Usuario_test -i script.sql -o "C:\Users\
 
 ### Puertos por dafault que usa el sql server
     puerto: 1433, 1434, 4022, 135, de tipo TCP y el 1434 UDP.
+
+
+### Bases de Datos del Sistema en SQL Server:
+En SQL Server, las bases de datos del sistema son bases de datos que se utilizan para administrar y controlar el propio sistema de gestión de bases de datos. Algunas de las bases de datos del sistema más importantes en SQL Server son:<br>
+
+**`master:`** La base de datos "master" almacena información crítica sobre la configuración del servidor, inicios de sesión, seguridad y otros aspectos fundamentales. Esta base de datos es esencial para el funcionamiento del servidor y no se puede desactivar.<br>
+
+**`model:`** La base de datos "model" se utiliza como plantilla para crear nuevas bases de datos. Cualquier cambio que realices en "model" se aplicará a las bases de datos recién creadas.<br>
+
+**`msdb:`** La base de datos "msdb" almacena información sobre la programación de tareas, mantenimiento, copias de seguridad y otras tareas administrativas.<br>
+
+**`tempdb:`** La base de datos "tempdb" es una base de datos temporal que se utiliza para almacenar datos temporales y variables de sesión, así como para ayudar en la clasificación y unión de datos.
+
+
