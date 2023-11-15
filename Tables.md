@@ -30,7 +30,11 @@ SELECT
     SUM(a.used_pages) * 8 AS UsedSpaceKB, 
     CAST(ROUND(((SUM(a.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS UsedSpaceMB, 
     (SUM(a.total_pages) - SUM(a.used_pages)) * 8 AS UnusedSpaceKB,
-    CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS UnusedSpaceMB
+    CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS UnusedSpaceMB,
+	mf.physical_name AS FilePathDB,
+	LEFT(mf.physical_name, 1) letter /* ,
+	f.name AS FileGroupName,
+    mfgroup.physical_name AS FilePath */
 FROM 
     sys.tables t
 INNER JOIN      
@@ -41,15 +45,26 @@ INNER JOIN
     sys.allocation_units a ON p.partition_id = a.container_id
 LEFT OUTER JOIN 
     sys.schemas s ON t.schema_id = s.schema_id
+LEFT OUTER JOIN 
+    sys.master_files mf ON mf.database_id = DB_ID() AND mf.type_desc = 'ROWS'
+
+/* --- En caso de que la base de datos use grupos de archivos se puede usar esto
+INNER JOIN 
+    sys.filegroups f ON i.data_space_id = f.data_space_id
+INNER JOIN 
+    sys.master_files mfgroup ON f.data_space_id = mfgroup.data_space_id
+*/	
+
 WHERE 
     t.name NOT LIKE 'dt%' 
     AND t.is_ms_shipped = 0
-    AND i.object_id > 255 
-	 and t.name  LIKE '%MY_TABLA%'  ------ AQUÍ COLOCAS LA TABLA QUE BUSCAS 
+    AND i.object_id > 255
+	and t.name  LIKE '%MY_TABLA%'  ------ AQUÍ COLOCAS LA TABLA QUE BUSCAS 
 GROUP BY 
-    t.name, s.name, p.rows
+    t.name, s.name, p.rows , mf.physical_name  --, f.name,  mfgroup.physical_name 
 ORDER BY 
     TotalSpaceMB DESC, t.name
+
 
 ```
 
