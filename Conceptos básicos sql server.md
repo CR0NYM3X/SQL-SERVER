@@ -26,7 +26,25 @@ OSQL.EXE -S My_hostnameServ -d Mydba -U Usuario_test -i script.sql -o "C:\Users\
 -i Sirve para ejecutar scripts que tengan querys denstro del script
 -U Indicas el usuario con el que te vas a conectas 
 -o se guarda en un archivo como lgo toda la salida que se va ejecutar
+```
 
+Tambien puede conectarse de esta forma desde el cmd 
+```
+runas /netonly /user:DOMINIO\Usuario "C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\ManagementStudio\Ssms.exe"
+
+runas: se utiliza en Windows para ejecutar programas con diferentes credenciales de usuario que las actuales.
+ Sin embargo, runas no se usa directamente para conectarte a un servidor SQL Server de manera remota,
+pero puedes utilizarlo para ejecutar aplicaciones como SQL Server Management Studio (SSMS) con diferentes credenciales.
+
+/netonly: Indica que se realizará la autenticación de red remota,
+lo que significa que se usarán las credenciales proporcionadas solo para recursos de red
+ y no para los recursos locales.
+
+/user:MYDOMINIO\user1: Especifica el nombre del dominio y el usuario con el que se ejecutará la aplicación.
+ En este caso, MYDOMINIO es el nombre del dominio y user1 es el nombre de usuario.
+
+"C:\Program Files\Microsoft SQL Server\110\Tools\binn\VSShell\Common7\IDE\Ssms.exe": Es la ubicación de la aplicación
+SQL Server Management Studio (SSMS) en el sistema de archivos de Windows.
 ```
 
 ### Puertos por dafault que usa el sql server
