@@ -7,6 +7,14 @@ msdb.dbo.backupmediafamily
 [Base de datos].[esquema].[tabla]
 ```
 
+### comandos básicos
+```
+use mydba_test -- sirve para que use una base de datos
+
+go  ---  le indicas que está completo y que la interfaz de SQL Server debe ejecutar ese comando antes de continuar con cualquier otro comando siguiente
+```
+
+
 ### Conectarse a sql server desde CMD 
 ```
 # Directorio donde se encuentra la herramienta:
