@@ -25,7 +25,7 @@ Estos eventos corresponden principalmente a instrucciones CREATE, ALTER y DROP d
 */
 
 
-alter TRIGGER [DDL_Trigger_Login_Changed]
+Create TRIGGER [DDL_Trigger_Login_Changed]
 ON ALL SERVER
 
 /* DDL Events: https://learn.microsoft.com/en-us/sql/relational-databases/triggers/ddl-events?view=sql-server-ver16 
