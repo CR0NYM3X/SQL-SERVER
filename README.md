@@ -12,7 +12,7 @@
 .- View <br>
 .- Sequences <br>
 .- index <br>
-.- usuarios, accesos y  permisos <br>
+.- **usuarios, accesos y  permisos** <br>
 .- tablespace<br>
 .- Logs<br>
 .- Aplicar Relgas en tablas <br>
