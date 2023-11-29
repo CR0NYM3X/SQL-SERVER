@@ -44,7 +44,7 @@ select * from sys.database_principals where  type_desc in('WINDOWS_USER', 'SQL_U
 SELECT name,password_hash,default_database_name, is_expiration_checked, is_policy_checked  FROM sys.sql_logins order by name
 ```
 
-### ver hash password de un login, para pasar a otro server
+### ver hash password de todos login sql, no de los windows login, para pasar a otro server
 ```
 exec sp_help_revlogin
 ```
