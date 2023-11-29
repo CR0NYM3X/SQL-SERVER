@@ -99,7 +99,7 @@ EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'setu
 EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'sysadmin'
 ```
 
-**Crear reporte de permisos  Nivel servidor **
+**Crear reporte de permisos  Nivel servidor**
 ```
 select   CONNECTIONPROPERTY ('local_net_address') IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
 (SELECT
