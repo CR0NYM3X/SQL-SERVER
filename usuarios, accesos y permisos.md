@@ -87,6 +87,43 @@ DROP SERVER ROLE  testers;
 
 ```
 
+### Asignar permisos  Nivel servidor
+```
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'bulkadmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'dbcreator'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'diskadmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'processadmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'securityadmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'serveradmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'setupadmin'
+EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'sysadmin'
+```
+
+**Crear reporte de permisos  Nivel servidor **
+```
+select   CONNECTIONPROPERTY ('local_net_address') IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
+(SELECT
+    p.name AS UserName,
+    CASE WHEN r.name = 'sysadmin' THEN 1 ELSE 0 END as sysadmin,
+	CASE WHEN r.name = 'securityadmin' THEN 1 ELSE 0 END as securityadmin,
+	CASE WHEN r.name = 'serveradmin' THEN 1 ELSE 0 END as serveradmin,
+	CASE WHEN r.name = 'setupadmin' THEN 1 ELSE 0 END as setupadmin,
+	CASE WHEN r.name = 'processadmin' THEN 1 ELSE 0 END as processadmin,
+	CASE WHEN r.name = 'diskadmin' THEN 1 ELSE 0 END as diskadmin,
+	CASE WHEN r.name = 'dbcreator' THEN 1 ELSE 0 END as dbcreator,
+	CASE WHEN r.name = 'bulkadmin' THEN 1 ELSE 0 END as bulkadmin
+FROM sys.server_principals AS p
+JOIN sys.server_role_members AS rm ON p.principal_id = rm.member_principal_id 
+JOIN sys.server_principals AS r ON rm.role_principal_id = r.principal_id
+where p.name NOT LIKE 'NT AUTHORITY%'
+    AND p.name NOT LIKE 'NT SERVICE%'
+	AND p.name NOT LIKE 'public'
+	AND p.name NOT LIKE '##%'
+	AND p.name NOT LIKE 'dbo'
+	)a
+	group by UserName
+```
+
 
 ### Asignar permisos de administrador 
 Estos son permisos que permiten realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
@@ -314,42 +351,7 @@ select * from #userpriv_grant where
  order by usuario
 ```
 
-### Asignar permisos  Nivel servidor
-```
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'bulkadmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'dbcreator'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'diskadmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'processadmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'securityadmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'serveradmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'setupadmin'
-EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'sysadmin'
-```
 
-**Crear reporte de permisos  Nivel servidor **
-```
-select   CONNECTIONPROPERTY ('local_net_address') IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
-(SELECT
-    p.name AS UserName,
-    CASE WHEN r.name = 'sysadmin' THEN 1 ELSE 0 END as sysadmin,
-	CASE WHEN r.name = 'securityadmin' THEN 1 ELSE 0 END as securityadmin,
-	CASE WHEN r.name = 'serveradmin' THEN 1 ELSE 0 END as serveradmin,
-	CASE WHEN r.name = 'setupadmin' THEN 1 ELSE 0 END as setupadmin,
-	CASE WHEN r.name = 'processadmin' THEN 1 ELSE 0 END as processadmin,
-	CASE WHEN r.name = 'diskadmin' THEN 1 ELSE 0 END as diskadmin,
-	CASE WHEN r.name = 'dbcreator' THEN 1 ELSE 0 END as dbcreator,
-	CASE WHEN r.name = 'bulkadmin' THEN 1 ELSE 0 END as bulkadmin
-FROM sys.server_principals AS p
-JOIN sys.server_role_members AS rm ON p.principal_id = rm.member_principal_id 
-JOIN sys.server_principals AS r ON rm.role_principal_id = r.principal_id
-where p.name NOT LIKE 'NT AUTHORITY%'
-    AND p.name NOT LIKE 'NT SERVICE%'
-	AND p.name NOT LIKE 'public'
-	AND p.name NOT LIKE '##%'
-	AND p.name NOT LIKE 'dbo'
-	)a
-	group by UserName
-```
 	
 
 
