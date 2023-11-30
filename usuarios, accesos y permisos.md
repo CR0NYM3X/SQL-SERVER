@@ -389,5 +389,5 @@ https://learn.microsoft.com/en-us/sql/relational-databases/security/authenticati
 #### Pendientes por actualizar este documento :
 ```
 1- especificar para que sirve cada permiso
-
+2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos 
 ```
