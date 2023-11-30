@@ -21,7 +21,7 @@ msinfo32.exe
 winver -- ver la version de windows
 ```
 
-### Saber los discos duros y tamaños de windows
+### Saber el tamaños de los discos de windows  con cmd o powershell
 ```
 ----  powershell windows  
 Get-WmiObject Win32_LogicalDisk |
@@ -33,6 +33,31 @@ Select-Object DeviceID, VolumeName,
 wmic logicaldisk get deviceid, size, freespace, volumename /format:list
 wmic cpu get name, caption, maxclockspeed, numberofcores, numberoflogicalprocessors
 ```
+
+### Saber el tamaños de los discos de windows  con sql server
+```
+select DISTINCT  
+ GETDATE()  AS Fecha
+,CONNECTIONPROPERTY ('local_net_address') AS Ip_servidor
+,@@SERVERNAME AS NombreServidor
+    ,SUBSTRING(volume_mount_point, 1, 1) AS Disco
+        ,100.0 - ISNULL(ROUND(available_bytes / CAST(NULLIF(total_bytes, 0) AS FLOAT) * 100, 2), 0) as Porcentaje_Usado
+    ,total_bytes/1024/1024/1024 AS total_GB
+        ,total_bytes/1024/1024/1024 - available_bytes/1024/1024/1024 AS Usado_GB
+    ,available_bytes/1024/1024/1024 AS Disponible_GB
+    ,ISNULL(ROUND(available_bytes / CAST(NULLIF(total_bytes, 0) AS FLOAT) * 100, 2), 0) as Porcentaje_Disponible
+    --,f.physical_name
+        --,available_bytes 
+ from sys.master_files AS f
+CROSS APPLY
+ sys.dm_os_volume_stats(f.database_id, f.file_id)
+ INNER JOIN sys.sysaltfiles af ON f.database_id = af.dbid
+ where
+f.database_id not in (2) and f.physical_name not like '%.LDF%'
+--and available_bytes > 75161927680
+order by Porcentaje_Usado desc
+```
+
 
 
 ### Versión de la dba
