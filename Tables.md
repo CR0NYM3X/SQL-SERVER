@@ -8,19 +8,28 @@
 
 ### Saber la cantidad de filas/tuplas de una tabla
 ```
-select count(*) from my_tabla 
-
+-- Opcion #1
 SELECT
     t.name AS tabla,
     p.rows AS cnt_tuplas
 FROM sys.tables t
 INNER JOIN sys.partitions p ON t.object_id = p.object_id
 WHERE t.name IN ('my_tabla');
+
+-- Opcion #2
+EXEC sp_spaceused N'my_tabla_test';
+
+-- Opcion #3
+select count(*) from my_tabla
 ```
 
 
 ### Saber el Tamaño de las tablas :
 ```
+---- una descripcion muy generica, pedes saber la cantidad de filas que tiene 
+EXEC sp_spaceused N'my_tabla_test';
+
+---- un reporte mas completo del tamaño 
 SELECT 
     t.name AS TableName,
     s.name AS SchemaName,
