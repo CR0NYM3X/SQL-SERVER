@@ -56,6 +56,7 @@ SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections
 
 ### Ver el tamaño de la base de datos:
 ```
+---- este te dice en general cuanto pesa toda la base de datos 
 SELECT 
       database_name = DB_NAME(database_id)
     , log_size_mb = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
@@ -64,6 +65,22 @@ SELECT
 FROM sys.master_files WITH(NOWAIT)
 where database_id > 4 --- skip system databases 
 GROUP BY database_id
+
+---- este te dice cuanto pesa cada archivo data y log
+SELECT db.[database_id] AS 'Id_Bd',
+af.[filename] AS 'Ubicacion',
+db.[name] AS 'Base de datos',
+af.[name] AS 'Nombe Logico',
+CONVERT(numeric(15,2),((((CONVERT(numeric(15,2),SUM(size)) * (SELECT low FROM master.dbo.spt_values (NOLOCK) WHERE number = 1 
+AND type = 'E')) / 1024.)/1024.))) AS 'Tamaño en MB',
+CONVERT(numeric(15,2),((((CONVERT(numeric(15,2),SUM(af.size)) * (SELECT low FROM master.dbo.spt_values (NOLOCK) WHERE number = 1 
+AND type = 'E')) / 1024.)/1024.)/1024.)) AS 'Tamaño en GB'
+FROM sys.databases db INNER JOIN sys.sysaltfiles af ON db.database_id = af.dbid
+WHERE [fileid] in (1,2) GROUP BY db.[database_id] , db.[name], af.[name], af.[filename]
+Order by [Base de datos]
+
+
+
 ```
 
 ### Saber la base de datos, sizedata y sizelog y que unidad estan
