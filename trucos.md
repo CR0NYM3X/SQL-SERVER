@@ -27,3 +27,74 @@ SET @mi_variable = 10; -- Asignación de un valor a la variable
 
 SELECT @mi_variable AS 'Valor de la variable'; 
 ```
+
+### Condicionales 
+```
+DECLARE @variable INT = 10;
+
+IF @variable > 5
+BEGIN
+    PRINT 'La variable es mayor que 5.';
+END
+ELSE
+BEGIN
+    PRINT 'La variable no es mayor que 5.';
+END
+```
+
+### Bucles 
+- Ejemplo #1
+```
+DECLARE @contador INT = 1;
+
+WHILE @contador <= 5
+BEGIN
+    PRINT 'Valor del contador: ' + CAST(@contador AS NVARCHAR(10));
+    SET @contador = @contador + 1;
+END
+
+
+DECLARE @contador INT = 1;
+BEGIN
+    WHILE @contador <= 5
+    BEGIN
+        PRINT 'Valor del contador: ' + CAST(@contador AS NVARCHAR(10));
+        SET @contador = @contador + 1;
+    END
+END
+```
+
+- Ejemplo #2
+  Te imprime el nombre de todas las tablas 
+```
+DECLARE @tableName NVARCHAR(MAX);
+DECLARE @tableList NVARCHAR(MAX) = '';
+
+-- Declaración del cursor que obtiene los nombres de las tablas de la base de datos
+DECLARE tableCursor CURSOR FOR
+    SELECT TABLE_NAME
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_TYPE = 'BASE TABLE'; -- Solo tablas, sin vistas ni otros objetos
+
+OPEN tableCursor; -- Abre el cursor para comenzar a recorrer los resultados
+
+-- Obtiene la primera fila de resultados del cursor
+FETCH NEXT FROM tableCursor INTO @tableName;
+
+-- Comienza el bucle WHILE para recorrer todas las filas del cursor
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Concatena el nombre de la tabla al contenido de la variable @tableList
+    SET @tableList = @tableList + @tableName + CHAR(10);
+
+    -- Obtiene la siguiente fila de resultados del cursor
+    FETCH NEXT FROM tableCursor INTO @tableName;
+END
+
+CLOSE tableCursor; -- Cierra el cursor
+DEALLOCATE tableCursor; -- Libera los recursos asociados al cursor
+
+-- Imprime los nombres de las tablas almacenados en la variable @tableList
+PRINT 'Nombres de las tablas:';
+PRINT @tableList;
+```
