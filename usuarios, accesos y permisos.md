@@ -238,7 +238,7 @@ CREATE TABLE #userpriv (
 
 2.- ejecutamos esta query y el todo el resultado lo copiamos y el resultado lo volvemos a ejecutar
 select 'use '+ name + ' insert into  #userpriv select * from 
-(select CONNECTIONPROPERTY ('local_net_address') IP_SERVER, db , usuario , sum(db_accessadmin)  db_accessadmin ,sum(db_backupoperator) db_backupoperator,sum(db_datareader )	db_datareader,sum(db_datawriter) db_datawriter	,sum(db_ddladmin) db_ddladmin ,sum(db_denydatareader)  db_denydatareader ,sum(db_denydatawriter) db_denydatawriter,sum(db_owner) db_owner,sum(db_securityadmin ) db_securityadmin   from (SELECT 
+(select CONNECTIONPROPERTY ('+char(39) + 'local_net_address'+char(39) + ') IP_SERVER, db , usuario , sum(db_accessadmin)  db_accessadmin ,sum(db_backupoperator) db_backupoperator,sum(db_datareader )	db_datareader,sum(db_datawriter) db_datawriter	,sum(db_ddladmin) db_ddladmin ,sum(db_denydatareader)  db_denydatareader ,sum(db_denydatawriter) db_denydatawriter,sum(db_owner) db_owner,sum(db_securityadmin ) db_securityadmin   from (SELECT 
 DB_NAME() db,
     p.name AS Usuario,
 	CASE WHEN r.name = '+char(39) + 'db_accessadmin'+char(39) + '  THEN 1 ELSE 0 END as db_accessadmin,
@@ -253,7 +253,7 @@ DB_NAME() db,
 FROM sys.database_role_members m
 INNER JOIN sys.database_principals r ON m.role_principal_id = r.principal_id 
 INNER JOIN sys.database_principals p ON m.member_principal_id = p.principal_id and p.type_desc != '+char(39)+'DATABASE_ROLE'+char(39)+')a group by   db , usuario ) as a '
-	 cnt_db from sys.databases where database_id > 4 
+	 cnt_db from sys.databases where database_id > 4
 
 
 3.- Ver el reporte, limpiamos los usuario basura y nos mostrara los usuarios que solo tiene permisos elevados 
@@ -317,7 +317,7 @@ CREATE TABLE #userpriv_grant (
 
 2.- ejecutamos esta query y el todo el resultado lo copiamos y el resultado lo volvemos a ejecutar
 select 'use '+ name + ' insert into  #userpriv_grant select * from 
-(select (SELECT local_net_address FROM sys.dm_exec_connections WHERE session_id = @@SPID) IP_SERVER,
+(select  CONNECTIONPROPERTY ('+char(39) + 'local_net_address'+char(39) + ') IP_SERVER,
 	    DB_NAME() db,
 		Usuario,
 		sum(INSERT_ ) INSERT_,
