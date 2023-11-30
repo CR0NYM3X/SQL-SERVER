@@ -1,6 +1,12 @@
-# investigar más sobre: 
-1.- los tipos de creacion de base de datos como el tema de primaryetc etc 
-2.- si se pueden dividir/particionar los archivos de una base de datos
+# falta por investigar más sobre: 
+1.- los tipos de creacion de base de datos como el tema de primaryetc etc <br>
+2.- si se pueden dividir/particionar los archivos de una base de datos <br>
+3.- saber mas sobre estas tablas a detalles
+```
+select * from  sys.filegroups
+select * from sys.data_spaces 
+select * from  sys.master_files --- obtener las rutas pysica de la base de datos
+```
 
 ### tener descripcion generica de la base de datos 
     sp_helpfile
