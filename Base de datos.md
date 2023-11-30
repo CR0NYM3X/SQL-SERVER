@@ -1,5 +1,8 @@
 
 
+### tener descripcion generica de la base de datos 
+    sp_helpfile
+
 ### Consutar las base de datos que existen:
     select name FROM sys.databases
 
