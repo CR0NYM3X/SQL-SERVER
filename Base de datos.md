@@ -47,7 +47,15 @@ select * from sys.master_files;
 ```
 
 ### Elimina una base de datos 
-    DROP DATABASE databasename;
+```
+    EXEC msdb.dbo.sp_delete_database_backuphistory @database_name = N'SQLTestDB'
+GO
+
+USE [master];
+GO
+DROP DATABASE [SQLTestDB];
+GO
+```
 
 ### poner en estado online o offline 
     ALTER DATABASE NombreDeLaBaseDeDatos SET ONLINE;
