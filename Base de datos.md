@@ -45,6 +45,11 @@ select * from sys.master_files;
 
 ###  Ver el limite de conexiones que se permiten por Base de datos:
 
+```
+select  @@MAX_CONNECTIONS -- maximo conexiones
+
+SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections;
+```
 
 ### Ver el tamaño de la base de datos:
 ```
