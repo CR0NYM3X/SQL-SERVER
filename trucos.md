@@ -13,3 +13,7 @@ SELECT
         WHERE condicion -- Añade una condición para seleccionar las filas que deseas combinar
         FOR XML PATH('')), 1, 2, '') AS nueva_columna1
 ```
+
+
+### hacer el linke que no sea sensible a Mayúsculas o Minúsculas 
+select * from sys.server_principals where  name  like '%sysprogsclx%' COLLATE SQL_Latin1_General_CP1_CI_AS
