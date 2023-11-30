@@ -1,10 +1,24 @@
 
 
+### OBTENER, IP DEL SERVIDOR, EL HOSTNAME, VERSION Y CANTIDAD DE BASE DE DATOS 
+```
+select (SELECT local_net_address FROM sys.dm_exec_connections WHERE session_id = @@SPID) IP_SERVER, @@SERVERNAME hostname,
+(SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version , (select count(*)
+from sys.databases where database_id > 4 ) cnt_db
+```
 
 ### Saber la ip del server o tu ip
 ```
 	select CONNECTIONPROPERTY('client_net_address');
 	select CONNECTIONPROPERTY ('local_net_address') AS Ip_servidor
+```
+
+
+### saber las versiones de windows  
+```
+dxdiag
+msinfo32.exe
+winver -- ver la version de windows
 ```
 
 ### Saber los discos duros y tamaños de windows
