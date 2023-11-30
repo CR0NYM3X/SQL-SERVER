@@ -1,9 +1,9 @@
 # Objetivo:
-Aprender a salva guardar la información de una base de datos, para en caso de una incidencia, poder restaurarla seguir con la operación de la empresa
+Aprender hacer respaldos y restaurar la información de una base de datos, para prevenir tragedias 
 
 
 # Herramientas que se usan :
-Esta es la ruta de donde se encuentran las herramientas que se van usar , dependiendo de la version que tienes instalada, por ejemplo en este caso yo rengo la 130 <br>
+Esta es la ruta de donde se encuentran las herramientas que se van usar , dependiendo de la version que tienes instalada, por ejemplo en este caso yo tengo la 130 y uso esta ruta <br>
 
 **C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\130\Tools\Binn**
 
@@ -103,7 +103,7 @@ WITH (
 
 
 
-###  hacer un respaldo y restauracion de una base de datos 
+###  hacer un respaldo de una base de datos  y realizar la restauración
 [documentacion de backups](https://learn.microsoft.com/en-us/sql/relational-databases/backup-restore/create-a-full-database-backup-sql-server?view=sql-server-ver16)
 **hacer respaldo**
 ```
@@ -122,8 +122,8 @@ TO  DISK = N'C:\respaldo_nuevo_1.bak',
     DISK = N'C:\respaldo_nuevo_3.bak' 
 WITH NOFORMAT, NOINIT, NAME = N'new_dba_test2-Full Database Backup',SKIP, NOREWIND, NOUNLOAD,  STATS = 10
 GO
-******* Parametros *******
 
+******* PARÁMETROS *******
 WITH NOFORMAT, NOINIT
 
 WITH FORMAT --- Se eliminarán los conjuntos de respaldo anteriores
@@ -143,7 +143,7 @@ COMPRESSION --- comprimir el backup
 ```
 ******* QUERY BACKUP COMPLETO *******
 USE [master]
-RESTORE DATABASE [new_dba_test2] FROM  
+RESTORE DATABASE [MY_DBA_TEST] FROM  
 DISK =  N'C:\respaldo_nuevo_completo.bak'
 WITH  FILE = 1,  NOUNLOAD,  STATS = 5, REPLACE -- REPLACE SE USA PARA CUANDO LA BASE DE DATOS YA EXISTE ENTONCES LA REMPLAZA
 GO
@@ -156,7 +156,6 @@ DISK =  N'C:\respaldo_nuevo_1.bak',
 DISK =  N'C:\respaldo_nuevo_2.bak', 
 DISK =  N'C:\respaldo_nuevo_3.bak', 
 WITH  FILE = 1,  NOUNLOAD,  STATS = 5, REPLACE -- REPLACE SE USA PARA CUANDO LA BASE DE DATOS YA EXISTE ENTONCES LA REMPLAZA
-
 GO
 
 ```
