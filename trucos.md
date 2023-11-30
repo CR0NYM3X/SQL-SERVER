@@ -1,6 +1,41 @@
 
 
 
+
+
+### Ejecutar querys que se tienen guardadas en una variable usando funcion EXEC
+
+```
+DECLARE @str varchar(max)=''
+DECLARE @param1 varchar(50) 
+
+SET @param1 =  '10.16.32.209'
+SET @str='SELECT * FROM  my_tabla_server where ipservidor = '+char(39)+  @param1 +char(39)
+
+select @str
+EXEC (@str)
+
+--**********************************************************************************************
+
+SELECT st.text, *
+FROM sys.dm_exec_cached_plans cp
+CROSS APPLY sys.dm_exec_sql_text(cp.plan_handle) st
+WHERE st.text like '%SELECT * FROM  my_tabla_server%' 
+--**********************************************************************************************
+```
+
+### Ejecutar querys que se tienen guardadas en una variable usando funcion sp_executesql
+```
+DECLARE @param1 varchar(50) 
+DECLARE @param2 varchar(50) 
+
+SET @param1 =  '10.16.32.209'
+SET @param2 =  '10.44.153.102'
+
+EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2) order by ipservidor',N'@1 varchar(50),@2 varchar(50)'
+,@param1,@param2
+```
+
 ### concatenar 
 t1.columna4 + ' ' + t2.columna4  
 
@@ -98,3 +133,7 @@ DEALLOCATE tableCursor; -- Libera los recursos asociados al cursor
 PRINT 'Nombres de las tablas:';
 PRINT @tableList;
 ```
+
+
+### Bibliografía 
+https://sql-listo.com/t-sql/exec-vs-sp_executesql/
