@@ -12,7 +12,7 @@ En SQL server existen los permisos
 
 **permisos de administrador :** Estos son permisos que permiten realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
 
- 
+ [nota] cuando a un usuarios se asigna un permiso grant y al final tiene esto "WITH GRANT OPTION" y tiene la capacidad de otorgar esos mismos permisos a otros usuarios o roles.
 
 ### Conceptos Básicos 
 
@@ -352,7 +352,80 @@ select * from #userpriv_grant where
 ```
 
 
-	
+
+
+### Revokar permisos Nivel servidor
+```
+EXEC sp_dropsrvrolemember N'test_permisos', N'bulkadmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'dbcreator';
+EXEC sp_dropsrvrolemember N'test_permisos', N'diskadmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'processadmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'securityadmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'serveradmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'setupadmin';
+EXEC sp_dropsrvrolemember N'test_permisos', N'sysadmin';
+```
+
+### Revokar permisos nivel administrador
+```
+REVOKE ADMINISTER BULK OPERATIONS TO [my_user_test]
+REVOKE ALTER ANY CONNECTION TO [my_user_test]
+REVOKE ALTER ANY CREDENTIAL TO [my_user_test]
+REVOKE ALTER ANY DATABASE TO [my_user_test]
+REVOKE ALTER ANY ENDPOINT TO [my_user_test]
+REVOKE ALTER ANY EVENT NOTIFICATION TO [my_user_test]
+REVOKE ALTER ANY LINKED SERVER TO [my_user_test]
+REVOKE ALTER ANY LOGIN TO [my_user_test]
+REVOKE ALTER ANY SERVER AUDIT TO [my_user_test]
+REVOKE ALTER RESOURCES TO [my_user_test]
+REVOKE ALTER SERVER STATE TO [my_user_test]
+REVOKE ALTER SETTINGS TO [my_user_test]
+REVOKE ALTER TRACE TO [my_user_test]
+REVOKE AUTHENTICATE SERVER TO [my_user_test]
+REVOKE CONNECT SQL TO [my_user_test]
+REVOKE CONTROL SERVER TO [my_user_test]
+REVOKE CREATE ANY DATABASE TO [my_user_test]
+REVOKE CREATE DDL EVENT NOTIFICATION TO [my_user_test]
+REVOKE CREATE ENDPOINT TO [my_user_test]
+REVOKE CREATE TRACE EVENT NOTIFICATION TO [my_user_test]
+REVOKE EXTERNAL ACCESS ASSEMBLY TO [my_user_test]
+REVOKE SHUTDOWN TO [my_user_test]
+REVOKE UNSAFE ASSEMBLY TO [my_user_test]
+REVOKE VIEW ANY DATABASE TO [my_user_test]
+REVOKE VIEW ANY DEFINITION TO [my_user_test]
+REVOKE VIEW SERVER STATE TO [my_user_test]
+```
+
+ 
+### Revokar permisos nivel base de datos global
+```
+EXEC sp_droprolemember N'db_accessadmin', N'test_permisos'
+EXEC sp_droprolemember N'db_backupoperator', N'test_permisos'
+EXEC sp_droprolemember N'db_datareader', N'test_permisos'
+EXEC sp_droprolemember N'db_datawriter', N'test_permisos'
+EXEC sp_droprolemember N'db_ddladmin', N'test_permisos'
+EXEC sp_droprolemember N'db_denydatareader', N'test_permisos'
+EXEC sp_droprolemember N'db_denydatawriter', N'test_permisos'
+EXEC sp_droprolemember N'db_owner', N'test_permisos'
+EXEC sp_droprolemember N'db_securityadmin', N'test_permisos'
+```
+
+
+### Revokar permisos nivel base de datos especificos
+```
+REVOKE SELECT ON tabla_vista FROM usuario;
+REVOKE INSERT ON tabla FROM usuario;
+REVOKE UPDATE ON tabla FROM usuario;
+REVOKE DELETE ON tabla FROM usuario;
+REVOKE EXECUTE ON procedimiento_almacenado FROM usuario;
+REVOKE execute on SCHEMA::dbo TO  nuevo_test; -- eliminar los permisos de ejecucion en todo el esquema
+REVOKE REFERENCES ON tabla FROM usuario;
+REVOKE CONTROL ON tabla FROM usuario;
+REVOKE ALTER ON objeto FROM usuario;
+REVOKE VIEW DEFINITION FROM usuario;
+```
+
+
 
 
 
