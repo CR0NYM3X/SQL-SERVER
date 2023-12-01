@@ -1,5 +1,9 @@
 
-
+### Hacer casting o conversióin de datos
+```
+SELECT CAST(@numero AS VARCHAR(50)) AS NumeroComoVarchar;
+SELECT CONVERT(VARCHAR(50), @numero) AS NumeroComoVarchar;
+```
 
 
 
