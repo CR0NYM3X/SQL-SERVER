@@ -101,7 +101,7 @@ EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'sysa
 
 **Crear reporte de permisos  Nivel servidor**
 ```
-select   CONNECTIONPROPERTY ('local_net_address') IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
+select   CAST(CONNECTIONPROPERTY('local_net_address') AS VARCHAR(100)) IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
 (SELECT
     p.name AS UserName,
     CASE WHEN r.name = 'sysadmin' THEN 1 ELSE 0 END as sysadmin,
@@ -158,7 +158,7 @@ GRANT VIEW SERVER STATE TO [my_user_test]
 
 ### Crear un Reporte para ver quien tiene permisos de administrador
 ```
-select CONNECTIONPROPERTY ('local_net_address')  IP_SERVER,username,a1 as ADMINISTER_BULK_OPERATIONS ,a2  as ALTER_ANY_SERVER_AUDIT ,a3  as ALTER_ANY_CREDENTIAL ,a4  as ALTER_ANY_CONNECTION ,a5  as ALTER_ANY_DATABASE ,a6  as ALTER_ANY_EVENT_NOTIFICATION ,a7  as ALTER_ANY_ENDPOINT ,a8  as ALTER_ANY_LOGIN ,a9  as ALTER_ANY_LINKED_SERVER ,a10 as ALTER_RESOURCES ,a11 as ALTER_SERVER_STATE ,a12 as ALTER_SETTINGS ,a13 as ALTER_TRACE ,a14 as AUTHENTICATE_SERVER ,a15 as CONTROL_SERVER /*,a16 as CONNECT_SQL*/ ,a17 as CREATE_ANY_DATABASE ,a18 as CREATE_DDL_EVENT_NOTIFICATION ,a19 as CREATE_ENDPOINT ,a20 as CREATE_TRACE_EVENT_NOTIFICATION ,a21 as SHUTDOWN_ ,a22 as EXTERNAL_ACCESS_ASSEMBLY ,a23 as UNSAFE_ASSEMBLY  from  
+select CAST(CONNECTIONPROPERTY('local_net_address') AS VARCHAR(100))  IP_SERVER,username,a1 as ADMINISTER_BULK_OPERATIONS ,a2  as ALTER_ANY_SERVER_AUDIT ,a3  as ALTER_ANY_CREDENTIAL ,a4  as ALTER_ANY_CONNECTION ,a5  as ALTER_ANY_DATABASE ,a6  as ALTER_ANY_EVENT_NOTIFICATION ,a7  as ALTER_ANY_ENDPOINT ,a8  as ALTER_ANY_LOGIN ,a9  as ALTER_ANY_LINKED_SERVER ,a10 as ALTER_RESOURCES ,a11 as ALTER_SERVER_STATE ,a12 as ALTER_SETTINGS ,a13 as ALTER_TRACE ,a14 as AUTHENTICATE_SERVER ,a15 as CONTROL_SERVER /*,a16 as CONNECT_SQL*/ ,a17 as CREATE_ANY_DATABASE ,a18 as CREATE_DDL_EVENT_NOTIFICATION ,a19 as CREATE_ENDPOINT ,a20 as CREATE_TRACE_EVENT_NOTIFICATION ,a21 as SHUTDOWN_ ,a22 as EXTERNAL_ACCESS_ASSEMBLY ,a23 as UNSAFE_ASSEMBLY  from  
 (select * from 
 (select username, sum(a1)  a1 , sum(a2)  a2 , sum(a3)  a3 , sum(a4)  a4 , sum(a5)  a5 , sum(a6)  a6 , sum(a7)  a7 , sum(a8)  a8 , sum(a9)  a9 , sum(a10) a10, sum(a11) a11, sum(a12) a12, sum(a13) a13, sum(a14) a14, sum(a15) a15/*, sum(a16) a16*/, sum(a17) a17, sum(a18) a18, sum(a19) a19, sum(a20) a20, sum(a21) a21, sum(a22) a22, sum(a23) a23 from
 (SELECT
