@@ -222,7 +222,6 @@ EXEC sp_addrolemember N'db_securityadmin', N'my_user_test'
 ```
 1.-  creamos una la tabla temporal
 CREATE TABLE #userpriv (
-	IP_SERVER VARCHAR(200),
 	db VARCHAR(200),
     usuario VARCHAR(200),
     db_accessadmin BIT
@@ -238,7 +237,7 @@ CREATE TABLE #userpriv (
 
 2.- ejecutamos esta query y el todo el resultado lo copiamos y el resultado lo volvemos a ejecutar
 select 'use '+ name + ' insert into  #userpriv select * from 
-(select CONNECTIONPROPERTY ('+char(39) + 'local_net_address'+char(39) + ') IP_SERVER, db , usuario , sum(db_accessadmin)  db_accessadmin ,sum(db_backupoperator) db_backupoperator,sum(db_datareader )	db_datareader,sum(db_datawriter) db_datawriter	,sum(db_ddladmin) db_ddladmin ,sum(db_denydatareader)  db_denydatareader ,sum(db_denydatawriter) db_denydatawriter,sum(db_owner) db_owner,sum(db_securityadmin ) db_securityadmin   from (SELECT 
+(select  db , usuario , sum(db_accessadmin)  db_accessadmin ,sum(db_backupoperator) db_backupoperator,sum(db_datareader )	db_datareader,sum(db_datawriter) db_datawriter	,sum(db_ddladmin) db_ddladmin ,sum(db_denydatareader)  db_denydatareader ,sum(db_denydatawriter) db_denydatawriter,sum(db_owner) db_owner,sum(db_securityadmin ) db_securityadmin   from (SELECT 
 DB_NAME() db,
     p.name AS Usuario,
 	CASE WHEN r.name = '+char(39) + 'db_accessadmin'+char(39) + '  THEN 1 ELSE 0 END as db_accessadmin,
@@ -257,7 +256,7 @@ INNER JOIN sys.database_principals p ON m.member_principal_id = p.principal_id a
 
 
 3.- Ver el reporte, limpiamos los usuario basura y nos mostrara los usuarios que solo tiene permisos elevados 
-select * from #userpriv where 
+select CONNECTIONPROPERTY ('local_net_address') as IP_SERVER,* from #userpriv where 
  usuario NOT LIKE 'NT AUTHORITY%'
     AND usuario NOT LIKE 'NT SERVICE%'
 	AND usuario NOT LIKE 'public'
@@ -303,7 +302,6 @@ ORDER BY p.name;
 ```
 1.-  creamos una la tabla temporal
 CREATE TABLE #userpriv_grant (
-	IP_SERVER VARCHAR(200),
 	db VARCHAR(200),
     usuario VARCHAR(200),
     INSERT_ int
@@ -317,8 +315,7 @@ CREATE TABLE #userpriv_grant (
 
 2.- ejecutamos esta query y el todo el resultado lo copiamos y el resultado lo volvemos a ejecutar
 select 'use '+ name + ' insert into  #userpriv_grant select * from 
-(select  CONNECTIONPROPERTY ('+char(39) + 'local_net_address'+char(39) + ') IP_SERVER,
-	    DB_NAME() db,
+(select        DB_NAME() db,
 		Usuario,
 		sum(INSERT_ ) INSERT_,
 		sum(DELETE_ ) DELETE_,
@@ -342,7 +339,7 @@ from sys.databases where database_id > 4
 
 
 3.- Ver el reporte, limpiamos los usuario basura y nos mostrara los usuarios que solo tiene permisos elevados 
-select * from #userpriv_grant where 
+select CONNECTIONPROPERTY ('local_net_address') IP_SERVER,* from #userpriv_grant where 
  usuario NOT LIKE 'NT AUTHORITY%'
     AND usuario NOT LIKE 'NT SERVICE%'
 	AND usuario NOT LIKE 'public'
@@ -462,5 +459,6 @@ https://learn.microsoft.com/en-us/sql/relational-databases/security/authenticati
 #### Pendientes por actualizar este documento :
 ```
 1- especificar para que sirve cada permiso
-2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos 
+2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos
+3.- poder hacer que se ejecuten los reportes con sp_executesql 
 ```
