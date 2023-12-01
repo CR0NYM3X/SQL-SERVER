@@ -160,3 +160,19 @@ GO
 
 ```
 
+
+
+# Reparación de una base de datos
+**Comprobación de integridad de base de datos**
+Puedes utilizar el comando DBCC CHECKDB para verificar la integridad de la base de datos y localizar posibles errores. Este comando verifica la integridad física y lógica de la base de datos.
+```
+DBCC CHECKDB('NombreDeLaBaseDeDatos');
+```
+
+**Reparación de base de datos**
+Si se encuentran errores durante la comprobación de integridad, puedes intentar reparar la base de datos. El comando DBCC CHECKDB tiene una opción para reparar automáticamente ciertos errores:
+```
+DBCC CHECKDB('NombreDeLaBaseDeDatos') WITH REPAIR_ALLOW_DATA_LOSS;
+```
+
+
