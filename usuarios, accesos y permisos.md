@@ -424,7 +424,17 @@ REVOKE VIEW DEFINITION FROM usuario;
 
 
 
-
+#### Ver si un usuario esta en un rol
+```
+SELECT 
+    DP.name AS UserName,
+    DP.type_desc AS UserType,
+    DP.default_schema_name AS DefaultSchema,
+    RP.name AS RoleName
+FROM sys.database_principals DP
+LEFT JOIN sys.database_role_members DRM ON DRM.member_principal_id = DP.principal_id
+LEFT JOIN sys.database_principals RP ON DRM.role_principal_id = RP.principal_id
+```
 
 
 ### Bloquear la conexion de un usuario sin eliminarlo 
@@ -460,5 +470,6 @@ https://learn.microsoft.com/en-us/sql/relational-databases/security/authenticati
 ```
 1- especificar para que sirve cada permiso
 2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos
-3.- poder hacer que se ejecuten los reportes con sp_executesql 
+3.- poder hacer que se ejecuten los reportes con sp_executesql
+4.- ver que permisos tienen los roles 
 ```
