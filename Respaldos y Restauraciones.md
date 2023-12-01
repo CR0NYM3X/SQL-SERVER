@@ -163,16 +163,43 @@ GO
 
 
 # Reparación de una base de datos
-**Comprobación de integridad de base de datos**
-Puedes utilizar el comando DBCC CHECKDB para verificar la integridad de la base de datos y localizar posibles errores. Este comando verifica la integridad física y lógica de la base de datos.
+
+**1.- Colocar modo Emergencia:** Esto lo que hace es que coloca la dba en solo lectura, SQL Server trata de realizar un 
+chequeo de integridad de la base de datos y permite al administrador realizar ciertas acciones para intentar recuperar
+la base de datos.
 ```
-DBCC CHECKDB('NombreDeLaBaseDeDatos');
+ALTER DATABASE new_dba_test24 SET EMERGENCY
 ```
 
-**Reparación de base de datos**
-Si se encuentran errores durante la comprobación de integridad, puedes intentar reparar la base de datos. El comando DBCC CHECKDB tiene una opción para reparar automáticamente ciertos errores:
+**2.- Analiza la base de datos, para detectar errores:**
 ```
-DBCC CHECKDB('NombreDeLaBaseDeDatos') WITH REPAIR_ALLOW_DATA_LOSS;
+ DBCC CHECKDB (N'database_name') WITH ALL_ERRORMSGS, NO_INFOMSGS 
+```
+ 
+**Cambiar a modo Single_user** esto lo que hace es que los usuarios no va a poder modificar los datos, mientras la restauración está en curso.
+```
+ALTER DATABASE NombreDeLaBaseDeDatos SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+```
+
+**3.- Reparar la base de datos**
+Si viste que sí tiene errores, entonces ejecuta este comando
+```
+******* QUERY *******
+DBCC CHECKDB('NombreDeLaBaseDeDatos', REPAIR_REBUILD);
+
+******* OPCIONES DE PARÁMETROS *******
+REPAIR_REBUILD :  Esta opción es la recomendada
+REPAIR_ALLOW_DATA_LOSS : Esta opción puede eliminar algunas páginas de la base de datos. Por lo tanto, Microsoft no recomienda, en caso de ser muy necesario usar esta opción
+```
+
+**4.- Cambiar a modo Multi_user:** Esto hace que es que ya puedan tener acceso 
+```
+ALTER DATABASE [NombreDeLaBaseDeDatos] SET READ_WRITE;
+ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
 ```
 
 
+
+
+# Bibliografías :
+Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
