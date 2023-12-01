@@ -8,11 +8,29 @@ select * from sys.data_spaces
 select * from  sys.master_files --- obtener las rutas pysica de la base de datos
 ```
 
+### Cambiar los estados de la base de datos
+```
+******* MODO OFFLINE Y ONLINE *******
+use master 
+ALTER DATABASE new_dba_test24 SET OFFLINE;
+ALTER DATABASE new_dba_test24 SET ONLINE;
+
+******* MODO WRITE Y READ ONLY *******
+ALTER DATABASE [new_dba_test24] SET READ_WRITE WITH NO_WAIT;
+
+******* PARÁMETROS *******
+EMERGENCY: Este estado se utiliza cuando la base de datos está en un estado de emergencia. Usualmente se usa para recuperación crítica.
+RESTRICTED_USER: Limita el acceso a la base de datos solo a usuarios con roles específicos.
+SINGLE_USER: Permite acceso a un solo usuario. Otros usuarios no pueden conectarse a la base de datos.
+READ_WRITE: Modo de lectura/escritura normal
+
+```
+
 ### tener descripcion generica de la base de datos 
     sp_helpfile
 
 ### Consutar las base de datos que existen:
-    select name FROM sys.databases
+    select name,is_read_only,state_desc FROM sys.databases
 
 ### Crear una base de datos:
 ```
