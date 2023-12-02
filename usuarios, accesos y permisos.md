@@ -438,20 +438,38 @@ LEFT JOIN sys.database_principals RP ON DRM.role_principal_id = RP.principal_id
 
 
 ### Bloquear la conexion de un usuario sin eliminarlo 
---- este solo se puede hacer en la master
+
+```
+***** este solo se puede hacer en la master *****
 GRANT CONNECT SQL TO [test_permisos]
 DENY CONNECT SQL TO [test_permisos]
 
----- este se puede realizar en todas las base de datos 
+***** este se puede realizar en todas las base de datos *****
+
 ALTER LOGIN [test_permisos] ENABLE
 ALTER LOGIN [test_permisos] DISABLE
+```
+
+### Problemas para iniciar sesion
+**sp_change_users_login** es un procedimiento almacenado en SQL Server que solía utilizarse para corregir la desincronización entre un usuario de base de datos y su inicio de sesión correspondiente en el servidor de base de datos.
+```
+***** Identificar usuarios sin asociar con logins: *****
+EXEC sp_change_users_login 'Report';
+
+***** Vincular un usuario huérfano con un inicio de sesión: ***** 
+EXEC sp_change_users_login 'Update_One', 'nombre_de_usuario', 'nombre_de_login';
+
+***** OTRA OPCIÓN ES ***** 
+ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
+```
+
+
 
 ### info extra
 Procedimientos almacenados y funciones que muestran información de usuarios y sus permisos
 ```
 EXEC sp_helprotect
 EXEC sp_helpuser
-
 
 SELECT * FROM fn_my_permissions(NULL, 'DATABASE'); --- APPLICATION ROLE, ASSEMBLY, ASYMMETRIC KEY, CERTIFICATE, CONTRACT, DATABASE, ENDPOINT,
 FULLTEXT CATALOG, LOGIN, MESSAGE TYPE, OBJECT, REMOTE SERVICE BINDING, ROLE, ROUTE, SCHEMA, SERVER, SERVICE, SYMMETRIC KEY, TYPE, USER, XML SCHEMA COLLECTION.
@@ -463,6 +481,9 @@ Con esto puedes ver el codigo del procedimiento almacenado
 ```
 EXEC SP_HELPTEXT 'sp_grantdbaccess'
 ```
+
+
+
 
 https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/create-a-database-user?view=sql-server-ver16
 
