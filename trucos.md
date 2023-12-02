@@ -68,6 +68,7 @@ SELECT @mi_variable AS 'Valor de la variable';
 ```
 
 ### Condicionales 
+**IF**
 ```
 DECLARE @variable INT = 10;
 
@@ -79,6 +80,17 @@ ELSE
 BEGIN
     PRINT 'La variable no es mayor que 5.';
 END
+```
+
+**WHEN CASE**
+```
+SELECT 
+    CASE
+        WHEN condición_1 THEN resultado_1
+        WHEN condición_2 THEN resultado_2
+        ELSE resultado_por_defecto
+    END AS nombre_columna_resultado
+FROM tu_tabla;
 ```
 
 ### Bucles 
