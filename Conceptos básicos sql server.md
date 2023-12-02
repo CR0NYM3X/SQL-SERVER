@@ -40,6 +40,8 @@ Tambien puede conectarse de esta forma desde el cmd
 ```
 runas /netonly /user:DOMINIO\Usuario "C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\ManagementStudio\Ssms.exe"
 
+-- Tambien puede ser una ruta como: C:\Program Files (x86)\Microsoft SQL Server Management Studio 18\Common7\IDE\Ssms.exe
+
 runas: se utiliza en Windows para ejecutar programas con diferentes credenciales de usuario que las actuales.
  Sin embargo, runas no se usa directamente para conectarte a un servidor SQL Server de manera remota,
 pero puedes utilizarlo para ejecutar aplicaciones como SQL Server Management Studio (SSMS) con diferentes credenciales.
