@@ -273,11 +273,14 @@ GRANT VIEW DEFINITION ON SCHEMA::dbo TO [MYDOMINIO\my_user_test_windows];
 GRANT CONNECT, SELECT , UPDATE,  INSERT, DELETE, ALTER,  REFERENCES ON SCHEMA::dbo TO my_user_test;
 GRANT UPDATE ON dbo.my_tabla TO my_usuario;
 
---- permisos a todos los procedimientos 
-SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13) FROM sys.procedures;
+GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 
-grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows] 
+--- permisos a todos los procedimientos 
+
+
+grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows]
 GRANT EXECUTE ON SCHEMA::dbo TO my_user_test_windows; -- permiso de EXECUTE  a todos los objetos
+SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13) FROM sys.procedures;
 
 ```
 
