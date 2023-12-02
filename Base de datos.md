@@ -23,7 +23,8 @@ EMERGENCY: Este estado se utiliza cuando la base de datos está en un estado de 
 RESTRICTED_USER: Limita el acceso a la base de datos solo a usuarios con roles específicos.
 SINGLE_USER: Permite acceso a un solo usuario. Otros usuarios no pueden conectarse a la base de datos.
 READ_WRITE: Modo de lectura/escritura normal
-
+READ_ONLY: Modo lectura en la base de datos
+OFFLINE_SECONDARY: Se utiliza en grupos de disponibilidad Always On para deshabilitar temporalmente una réplica secundaria.
 ```
 
 ### tener descripcion generica de la base de datos 
