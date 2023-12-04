@@ -26,6 +26,13 @@ En SQL server existen los permisos
 
 # Ejemplos de uso :
 
+```
+select SUSER_SNAME() -- saber el usuario que estas usando actualmente
+select SUSER_ID()	-- saber el id del usuario que estas usando actualmente
+select USER_NAME(grantee_principal_id) -- saber que usuario tiene un id 
+```
+
+
 ### Buscar un usuario, login o role:
 
 **SQL_LOGIN** ->  son aquellos usuarios que cuando se crearon se les epecifico una contraseña 
