@@ -115,8 +115,8 @@ BEGIN
 END
 ```
 
-- Ejemplo #2
-  Te imprime el nombre de todas las tablas 
+- Ejemplo #2 
+ usando cursores   Te imprime el nombre de todas las tablas 
 ```
 DECLARE @tableName NVARCHAR(MAX);
 DECLARE @tableList NVARCHAR(MAX) = '';
@@ -148,6 +148,27 @@ DEALLOCATE tableCursor; -- Libera los recursos asociados al cursor
 -- Imprime los nombres de las tablas almacenados en la variable @tableList
 PRINT 'Nombres de las tablas:';
 PRINT @tableList;
+```
+
+- Ejemplo #3 usando cursores 
+```
+DECLARE @name_ NVARCHAR(100), @type_desc_ NVARCHAR(100), @create_date_ NVARCHAR(100)
+DECLARE @dbRoleMembers CURSOR
+
+SET @dbRoleMembers = CURSOR FOR
+select name,type_desc,create_date from sys.database_principals
+
+OPEN @dbRoleMembers
+FETCH NEXT FROM @dbRoleMembers INTO @name_, @type_desc_, @create_date_
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    PRINT 'Nombre: ' + @name_ + ', Tipo: ' + @type_desc_ + ', Fecha: ' + @create_date_
+    FETCH NEXT FROM @dbRoleMembers INTO @name_, @type_desc_, @create_date_
+END
+
+CLOSE @dbRoleMembers
+DEALLOCATE @dbRoleMembers
 ```
 
 
