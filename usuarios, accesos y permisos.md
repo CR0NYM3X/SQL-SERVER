@@ -493,6 +493,63 @@ ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
 ```
 
 
+### Copiar mismo permisos de un usuario o todos los usuarios 
+```
+******** PASO #1 | CREAR TABLA TEMPORAL ********
+CREATE TABLE #userpriv (
+	db VARCHAR(200),
+    usuario VARCHAR(200),
+    permiso VARCHAR(200)
+);
+
+
+******** PASO #2 | CONSULTAR Y INSERTAR LOS REGISTROS EN LA TEMPORAL ********
+ select 'use '+ name + ' insert into  #userpriv select * from 
+( SELECT DB_NAME() db, p.name user_nm, r.name permiso 
+FROM sys.database_role_members m
+INNER JOIN sys.database_principals r ON m.role_principal_id = r.principal_id  
+INNER JOIN sys.database_principals p ON m.member_principal_id = p.principal_id AND p.type_desc = ''SQL_USER''
+WHERE p.name IN (SELECT name FROM sys.server_principals WHERE type_desc IN (''WINDOWS_LOGIN'', ''SQL_LOGIN'', ''SERVER_ROLE'', ''WINDOWS_GROUP'')
+
+-- and name = ''jojojo'' --- aqui le pones el nombre del usuario que quieres buscar en todas las base de datos 
+
+)) as a '
+cnt_db from sys.databases where database_id > 4
+
+
+
+******** PASO #2 | IMPRIMIR LOS RESULTADOS ********
+
+DECLARE @dbName NVARCHAR(100), @roleName NVARCHAR(100), @privilege NVARCHAR(100)
+DECLARE @previousDbName NVARCHAR(100) = ''
+
+DECLARE @dbRoleMembers CURSOR
+
+SET @dbRoleMembers = CURSOR FOR
+select * from #userpriv order by db, usuario
+
+OPEN @dbRoleMembers
+FETCH NEXT FROM @dbRoleMembers INTO @dbName, @roleName, @privilege
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    IF @dbName <> @previousDbName
+    BEGIN
+        SET @previousDbName = @dbName
+        PRINT 'USE ' + QUOTENAME(@dbName) --- Este código devolverá las cosas con'[]' 
+    END
+    
+    PRINT 'EXEC sp_addrolemember  N''' + @privilege + ''', N''' + @roleName + ''' '
+    
+    FETCH NEXT FROM @dbRoleMembers INTO @dbName, @roleName, @privilege
+END
+
+CLOSE @dbRoleMembers
+DEALLOCATE @dbRoleMembers
+
+```
+
+
 
 ### info extra
 Procedimientos almacenados y funciones que muestran información de usuarios y sus permisos
