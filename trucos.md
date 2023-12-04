@@ -1,4 +1,9 @@
 
+### Ejecutar una consulta en todas las base de datos  
+```
+execute SYS.sp_MSforeachdb 'select @@version'
+```
+
 ### Hacer casting o conversióin de datos
 ```
 SELECT CAST(@numero AS VARCHAR(50)) AS NumeroComoVarchar;
