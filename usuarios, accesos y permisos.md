@@ -511,7 +511,7 @@ INNER JOIN sys.database_principals r ON m.role_principal_id = r.principal_id
 INNER JOIN sys.database_principals p ON m.member_principal_id = p.principal_id AND p.type_desc = ''SQL_USER''
 WHERE p.name IN (SELECT name FROM sys.server_principals WHERE type_desc IN (''WINDOWS_LOGIN'', ''SQL_LOGIN'', ''SERVER_ROLE'', ''WINDOWS_GROUP'')
 
--- and name = ''jojojo'' --- aqui le pones el nombre del usuario que quieres buscar en todas las base de datos 
+-- and name = ''MY_USER_TEST'' --- aqui le pones el nombre del usuario que quieres buscar en todas las base de datos 
 
 )) as a '
 cnt_db from sys.databases where database_id > 4
