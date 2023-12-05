@@ -78,6 +78,7 @@ CREATE USER [my_user_123] FOR LOGIN [my_user_123]
 
 -- eliminar usuarios de base de datos 
 DROP USER [alex]
+EXEC sp_revokedbaccess  'my_user_123','my_user_123'; 
 ```
 
 ### Crear un role o eliminar
