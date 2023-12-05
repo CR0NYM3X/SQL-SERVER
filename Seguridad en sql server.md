@@ -170,6 +170,19 @@ EXECUTE AS USER = 'MYDOMINIO\USER_ADMINS123';
 REVERT;
 ```
 
+**Ver que db tiene habilitada esta opcion**
+```
+SELECT a.name,b.is_trustworthy_on
+FROM master..sysdatabases as a
+INNER JOIN sys.databases as b
+ON a.name=b.name;
+```
+
+**Validar si el usuario actual es sysadmin**
+```
+SELECT is_srvrolemember('sysadmin')
+```
+
 **Deshabilitar o Habilitar estas opciones**
 Esto se tiene que ejecutar en la base de datos que quieres deshabilitarle esta opción
 ```
