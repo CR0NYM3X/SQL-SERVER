@@ -343,6 +343,14 @@ https://github.com/MicrosoftDocs/sql-docs/blob/live/docs/relational-databases/ex
 
 
 
+
+# pueden permitir la ejecución de código dinámico
+```
+EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2) order by ipservidor',N'@1 varchar(50),@2 varchar(50)'
+,@param1,@param2
+
+```
+
 # Bibliografías 
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-1-untrustworthy-databases/
 
