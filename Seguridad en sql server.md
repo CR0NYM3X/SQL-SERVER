@@ -353,6 +353,9 @@ EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2)
 
 # Bibliografías 
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-1-untrustworthy-databases/
+https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-2-user-impersonation/
+https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-3-sqli-and-user-impersonation/
+https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-procedures-part-4-enumerating-domain-accounts/
 
 https://book.hacktricks.xyz/network-services-pentesting/pentesting-mssql-microsoft-sql-server 
 
