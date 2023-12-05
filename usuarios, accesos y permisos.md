@@ -55,6 +55,10 @@ SELECT name,password_hash,default_database_name, is_expiration_checked, is_polic
 ```
 exec sp_help_revlogin
 ```
+### Saber quien es owner 
+```
+SELECT suser_sname(owner_sid),name FROM sys.databases
+```
 
 ### Creacion un login :
 Al crear el Login le especificamos de que forma se va conectar el servidor , que es con que nombre y contraseña 
