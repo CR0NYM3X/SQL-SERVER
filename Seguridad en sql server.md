@@ -4,6 +4,20 @@
 exec master..xp_cmdshell 'dir' -- ejecuta comandos 
 ```
 
+**Deshabilitar o Habilitar estas opciones**
+```
+********** DESHABILITAR EL PROCEDIMIENTO **********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 0;
+RECONFIGURE;
+
+********** HABILITADOR EL PROCEDIMIENTO **********
+EXEC sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
+```
+
+
 # Enviar correos desde sql server 
 ```
 EXEC msdb.dbo.sp_send_dbmail  
@@ -13,6 +27,19 @@ EXEC msdb.dbo.sp_send_dbmail
     @body = 'Cuerpo del Correo',
     @query = 'SELECT * FROM TuTabla',
     @attach_query_result_as_file = 1;
+```
+**Deshabilitar o Habilitar estas opciones**
+```
+********** DESHABILITAR EL PROCEDIMIENTO **********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'Database Mail XPs', 0;
+EXEC sp_configure 'SQL Mail XPs', 0;
+RECONFIGURE;
+
+********** HABILITADOR EL PROCEDIMIENTO **********
+EXEC sp_configure 'Database Mail XPs', 1;
+RECONFIGURE;
 ```
 
 # Cambiar las configuraciones del sql server 
@@ -27,7 +54,7 @@ sp_configure 'show advanced options', 1; --- cambia la configuración de sql ser
 # Lectura y modificacion del registro de windows 
 **xp_regread, xp_regwrite:** Estas funciones permiten leer y escribir en el registro /regedit del sistema. Si se usan sin restricciones, podrían abrir la puerta a cambios no autorizados en la configuración del servidor.
 ```
---- leer registros como la version de windows | con este ejemplo vamos a ver la version del sistema operativo 
+********** leer registros como la version de windows | con este ejemplo vamos a ver la version del sistema operativo  **********
 DECLARE @ProductName NVARCHAR(100), 
         @CurrentVersion NVARCHAR(100), 
         @BuildLab NVARCHAR(100),
@@ -46,9 +73,42 @@ SELECT @ProductName AS 'ProductName',
        @EditionID AS 'EditionID',
        @ProductId AS 'ProductId';
 
---- escribir  registros
+********** Leer registros Opcion #2 **********
+---  acceder a configuraciones y parámetros almacenados en el registro de Windows que están asociados con la instancia de SQL Server actual
+EXEC xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE',
+    N'Software\Microsoft\MSSQLServer\MSSQLServer' N'BackupDirectory';
+
+----- otros parámetros
+  N'Software\Microsoft\MSSQLServer\MSSQLServer', N'BackupDirectory';
+  N'System\CurrentControlSet\Services\MSSQLSERVER',  N'ImagePath';
+  N'Software\Microsoft\MSSQLServer\MSSQLServer', N'DefaultData';
+  N'Software\Microsoft\MSSQLServer\MSSQLServer', N'DefaultLog';
+  N'Software\Microsoft\Microsoft SQL Server\MSSQLServer\CurrentVersion', N'CurrentVersion';	
+  N'Software\Microsoft\MSSQLServer\Setup', N'SQLPath';
+  N'Software\Microsoft\MSSQLServer\MSSQLServer\SuperSocketNetLib\Tcp\IPAll', N'TcpPort';
+
+
+
+********** escribir en registros **********
 EXEC xp_regwrite 'HKEY_CURRENT_USER', 'Software\MyApp', 'Version', 'REG_SZ', '1.0';
 ```
+
+
+**Deshabilitar o Habilitar estas opciones**
+
+```
+********** DESHABILITAR EL PROCEDIMIENTO **********
+-- Revocar permisos para xp_instance_regread
+DENY EXECUTE ON xp_instance_regread TO [UsuarioOGrupo];
+
+-- Revocar permisos para xp_regread
+DENY EXECUTE ON xp_regread TO [UsuarioOGrupo];
+
+-- Revocar permisos para xp_regwrite
+DENY EXECUTE ON xp_regwrite TO [UsuarioOGrupo];
+```
+
 
 
 # Ejecucion de bibliotecas de objetos de windows 
@@ -100,7 +160,7 @@ RECONFIGURE;
 ```
 
 
-# Ejecucion querys suplatando el usuario 
+# Ejecuta una query asiendote pasar por un usuario 
 Estamos ejecutando una query como si estuvieramos conectados con este usuario
 ```
 EXECUTE AS USER = 'MYDOMINIO\USER_ADMINS123';
@@ -120,6 +180,153 @@ ALTER DATABASE [new_dba_test24] SET TRUSTWORTHY ON;
 ALTER DATABASE [new_dba_test24] SET TRUSTWORTHY OFF;
 ```
 
+# Ejecutar lenguajes como R o Python:
+procedimiento almacenado que permite ejecutar scripts escritos en lenguajes externos, como R o Python, dentro de SQL Server
+```
+CREATE TABLE Ejemplo (
+    ID INT PRIMARY KEY,
+    Valor INT
+);
+
+INSERT INTO Ejemplo VALUES (1, 10), (2, 20), (3, 30);
+
+EXEC sp_execute_external_script
+  @language = N'R',
+  @script = N'
+    # Seleccionamos los datos desde la tabla
+    InputDataSet <- InputDataSet;
+
+    # Sumamos 5 a cada valor en la columna "Valor"
+    InputDataSet$Valor <- InputDataSet$Valor + 5;
+
+    # Devolvemos el resultado
+    OutputDataSet <- InputDataSet;'
+  ,@input_data_1 = N'SELECT * FROM Ejemplo'
+  WITH RESULT SETS ((ID INT, Valor INT));
+```
+
+
+**Deshabilitar o Habilitar estas opciones**
+```
+********** DESHABILITAR EL PROCEDIMIENTO **********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'external scripts enabled', 0;
+RECONFIGURE;
+
+********** HABILITADOR EL PROCEDIMIENTO **********
+EXEC sp_configure 'external scripts enabled', 1;
+RECONFIGURE WITH OVERRIDE;
+```
+
+**links de ejecucion de R y pthon**
+https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-execute-external-script-transact-sql?view=sql-server-ver16
+https://www.mssqltips.com/sqlservertip/4747/sql-server-spexecuteexternalscript-stored-procedure-examples/
+https://blog.voogie.online/code/2020/11/04/Simple-example-of-sp_execute_external_script-using-python/
+
+
+# Abrir archivos externos como csv o txt
+[Doc Oficial OPENROWSET](https://learn.microsoft.com/es-es/sql/t-sql/functions/openrowset-transact-sql?view=sql-server-ver16) <br>
+[Doc Oficial OPENDATASOURCE](https://learn.microsoft.com/es-es/sql/t-sql/functions/opendatasource-transact-sql?view=sql-server-ver16)
+
+
+```
+**** Ejemplo #1 **** 
+SELECT * FROM OPENROWSET(
+   BULK 'C:\DATA\inv-2017-01-19.csv',
+   SINGLE_CLOB) AS DATA;
+
+**** Ejemplo #2 **** 
+-- Para crear un formato puedes usar
+bcp new_dba_test24.dbo.my_tabla_test format nul -c -x -f D:\XChange\test-csv.fmt -T
+
+ SELECT * FROM OPENROWSET(BULK N'D:\XChange\test-csv.csv',
+    FORMATFILE = N'D:\XChange\test-csv.fmt',
+    FIRSTROW=2) AS cars;
+
+
+**** Ejemplo #3 **** 
+
+-- Para acceder a datos de una base de datos externa desde SQL Server,  utilizarán las credenciales de Windows del usuario que está ejecutando la consulta
+SELECT a.*
+FROM OPENROWSET(
+    'SQLNCLI', -- Proveedor de datos específico
+    'Server=Seattle1;Trusted_Connection=yes;',
+    'SELECT TOP 10 GroupName, Name FROM AdventureWorks2022.HumanResources.Department'
+) AS a;
+
+**** Ejemplo #4 **** 
+--- OPENDATASOURCE Es una función en SQL Server que se utiliza para acceder a datos de fuentes externas mediante la especificación explícita de la conexión a esa fuente de datos. 
+SELECT *
+FROM OPENDATASOURCE(
+    'SQLNCLI',  -- Proveedor de datos específico (puede variar según el tipo de base de datos)
+    'Data Source=ServidorExterno;User ID=Usuario;Password=Contraseña'
+).NombreDeTuBaseDeDatos.dbo.NombreDeTuTabla;
+
+**** Ejemplo #5 **** 
+SELECT GroupName, Name, DepartmentID  
+FROM OPENDATASOURCE('MSOLEDBSQL', 'Server=Seattle1;Database=AdventureWorks2022;TrustServerCertificate=Yes;Trusted_Connection=Yes;').HumanResources.Department  
+ORDER BY GroupName, Name;  
+```
+
+**Deshabilitar o Habilitar estas opciones**
+Esto se tiene que ejecutar en la base de datos que quieres deshabilitarle esta opción
+```
+******** Habilitar  ******** 
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'Ad Hoc Distributed Queries', 1;
+RECONFIGURE;
+
+******** Deshabilitar EXECUTE AS: ********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'Ad Hoc Distributed Queries', 0;
+RECONFIGURE;
+```
+
+
+# Abrir JSON 
+Aunque es una función útil para manipular datos JSON, si no se limita adecuadamente, podría permitir la ejecución de código no seguro o inyección de datos.
+```
+DECLARE @json NVARCHAR(2048) = N'{
+   "String_value": "John",
+   "DoublePrecisionFloatingPoint_value": 45,
+   "DoublePrecisionFloatingPoint_value": 2.3456,
+   "BooleanTrue_value": true,
+   "BooleanFalse_value": false,
+   "Null_value": null,
+   "Array_value": ["a","r","r","a","y"],
+   "Object_value": {"obj":"ect"}
+}';
+```
+
+SELECT * FROM OpenJson(@json);
+
+**links de para abrir json**
+https://learn.microsoft.com/en-us/sql/t-sql/functions/openjson-transact-sql?view=sql-server-ver16
+https://database.guide/introduction-to-openjson-with-examples-sql-server/
+https://www.c-sharpcorner.com/article/using-openjson-function-in-sql-server/
+
+
+
+# Agregar procedimientos almecenados desde un archivo dll
+permite agregar procedimientos almacenados extendidos a SQL Server. Estos procedimientos almacenados pueden ser archivos DLL que se registran en SQL Server y se pueden ejecutar desde consultas SQL.
+```
+--Register the function (xp_hello)  
+sp_addextendedproc 'xp_hello', 'c:\xp_hello.dll';  
+  
+--The following will succeed in calling xp_hello  
+DECLARE @txt varchar(33);  
+EXEC xp_Hello @txt OUTPUT;  
+```
+
+**Deshabilitar o Habilitar estas opciones**
+```
+REVOKE EXECUTE ON sp_addextendedproc FROM [NombreUsuario];
+```
+**link de ejemplo para agregar  procedimientos almecenados **
+https://github.com/MicrosoftDocs/sql-docs/blob/live/docs/relational-databases/extended-stored-procedures-programming/adding-an-extended-stored-procedure-to-sql-server.md
 
 
 
@@ -131,6 +338,11 @@ https://book.hacktricks.xyz/network-services-pentesting/pentesting-mssql-microso
 https://www.madeiradata.com/post/how-to-protect-sql-server-from-hackers-and-penetration-tests
 
 https://pentera.io/blog/how-to-find-the-mssql-databases-version-with-the-tds-protocol/
+
+https://addendanalytics.com/blog/accessing-excel-files-using-openrowset-and-opendatasource-in-sql-server/#:~:text=%60OPENROWSET%60%20is%20an%20SQL%20Server,file%20directly%20into%20SQL%20Server.
+
+https://github.com/Ignitetechnologies/MSSQL-Pentest-Cheatsheet
+
 
 
 
