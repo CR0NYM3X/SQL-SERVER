@@ -1,5 +1,5 @@
 # Cuanta de servicio por default
-En SQL Server, NT SERVICE\SYSTEM es una cuenta de sistema incorporada en Windows que se utiliza para ejecutar servicios y procesos del sistema operativo. 
+En SQL Server, **`NT SERVICE\SYSTEM`** es una cuenta de sistema incorporada en Windows que se utiliza para ejecutar servicios y procesos del sistema operativo. 
 Esta cuenta tiene privilegios elevados y se utiliza para realizar tareas de alto nivel en el sistema. Cuando se configura SQL Server para usar una cuenta de servicio determinada, como en el caso de los servicios de SQL Server durante la instalación, puede optarse por usar NT SERVICE\SYSTEM como cuenta de servicio.
 
 
