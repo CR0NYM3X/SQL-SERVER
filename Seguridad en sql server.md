@@ -199,6 +199,16 @@ ALTER DATABASE [new_dba_test24] SET TRUSTWORTHY ON;
 ALTER DATABASE [new_dba_test24] SET TRUSTWORTHY OFF;
 ```
 
+
+# Suplantar a un usuario 
+SQL Server, otorga permiso al usuario [MyUser1] para actuar como si fuera el usuario sa (System Administrator). permite que un usuario tenga la capacidad de ejecutar sentencias 
+bajo la identidad de otro usuario. En este caso, estás otorgando a [MyUser1] la capacidad de actuar como el usuario sa.
+```
+GRANT IMPERSONATE ON LOGIN::sa to [MyUser1];
+```
+
+
+
 # Ejecutar lenguajes como R o Python:
 procedimiento almacenado que permite ejecutar scripts escritos en lenguajes externos, como R o Python, dentro de SQL Server
 ```
