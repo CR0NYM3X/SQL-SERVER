@@ -6,6 +6,9 @@
     select object_id, name,create_date, modify_date from sys.tables where name like '%my_tabla%' --
 ```
 
+### ver todas las descripcion de una tabla 
+sp_help 'mytabla'
+
 ### Saber la cantidad de filas/tuplas de una tabla
 ```
 -- Opcion #1
