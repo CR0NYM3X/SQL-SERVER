@@ -1,3 +1,11 @@
+# Validar el tipo de autenticación de sql server 
+Devolverá un valor 1 si solo se permite la autenticación integrada de Windows (también conocida como autenticación de Windows), lo que significa que el servidor está configurado para permitir
+únicamente iniciar sesión usando credenciales de Windows. Si devuelve 0, significa que también se permite la autenticación de SQL Server.
+```
+SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')
+```
+
+
 # Cuanta de servicio por default
 En SQL Server, **`NT SERVICE\SYSTEM`** es una cuenta de sistema incorporada en Windows que se utiliza para ejecutar servicios y procesos del sistema operativo. 
 Esta cuenta tiene privilegios elevados y se utiliza para realizar tareas de alto nivel en el sistema. Cuando se configura SQL Server para usar una cuenta de servicio determinada, como en el caso de los servicios de SQL Server durante la instalación, puede optarse por usar NT SERVICE\SYSTEM como cuenta de servicio.
