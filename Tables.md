@@ -187,8 +187,15 @@ DROP TABLE NombreDeTabla;
 truncate table my_tabla_old --- borra toda la informacion 
 ```
 
-
-
+# info extra
+```
+EXEC sys.sp_addextendedproperty @name = N'MiDescripcion', 
+                                @value = 'Esta es una tabla de ejemplo',
+                                @level0type = N'SCHEMA', 
+                                @level0name = 'dbo', 
+                                @level1type = N'TABLE', 
+                                @level1name = N'MiTabla';
+```
 
 
 
