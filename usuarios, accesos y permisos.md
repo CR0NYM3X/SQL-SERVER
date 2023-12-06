@@ -554,7 +554,10 @@ DEALLOCATE @dbRoleMembers
 
 ```
 
-
+# cambiar owner
+```
+EXEC sp_changedbowner 'NuevoPropietario';
+```
 
 ### info extra
 Procedimientos almacenados y funciones que muestran información de usuarios y sus permisos
