@@ -234,6 +234,19 @@ EXEC sp_addrolemember N'db_denydatareader', N'my_user_test'
 EXEC sp_addrolemember N'db_denydatawriter', N'my_user_test'
 EXEC sp_addrolemember N'db_owner', N'my_user_test'
 EXEC sp_addrolemember N'db_securityadmin', N'my_user_test'
+
+
+ALTER ROLE [db_accessadmin] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_backupoperator] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_datareader] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_datawriter] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_ddladmin] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_denydatareader] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_denydatawriter] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_owner] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+ALTER ROLE [db_securityadmin] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
+
+
 ```
 
 **Crear reporte de Permisos globales de todas las base de datos**
