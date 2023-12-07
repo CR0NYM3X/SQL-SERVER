@@ -29,7 +29,9 @@ En SQL server existen los permisos
 ```
 select SUSER_SNAME() -- saber el usuario que estas usando actualmente
 select SUSER_ID()	-- saber el id del usuario que estas usando actualmente
-select USER_NAME(grantee_principal_id) -- saber que usuario tiene un id 
+select USER_NAME(grantee_principal_id) -- saber que usuario tiene un id
+
+OBJECT_NAME(major_id) AS object_name
 ```
 
 
