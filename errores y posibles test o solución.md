@@ -28,7 +28,10 @@ Si el usuario no existe te retornara el error "El dominio especificado no existe
  echo %LOGONSERVER%
 
 ***** Ejemplo que retora esta consulta *****
-jefes
+\\jefes
+
+***** validar la ip  *****
+ping jefes
 
 ```
  
