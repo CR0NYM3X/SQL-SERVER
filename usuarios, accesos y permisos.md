@@ -62,12 +62,16 @@ exec sp_help_revlogin
 SELECT suser_sname(owner_sid),name FROM sys.databases
 ```
 
-### Creacion un login :
+### Creacion y eliminar un login :
 Al crear el Login le especificamos de que forma se va conectar el servidor , que es con que nombre y contraseña 
 
 ```
+*******  CREAR *******
 CREATE LOGIN [MYDOMINIO\miusuario] FROM WINDOWS WITH DEFAULT_DATABASE=[master]
 CREATE LOGIN [jose-mecanico] WITH PASSWORD=N'123123', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+
+******* ELIMINAR *******
+DROP LOGIN [MYDOMINIO\miusuario] 
 ```
 
 ### crear un usuario o eliminar:
