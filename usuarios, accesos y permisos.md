@@ -439,7 +439,10 @@ REVOKE ALTER ON objeto FROM usuario;
 REVOKE VIEW DEFINITION FROM usuario;
 ```
 
-
+# Quitar de un rol a un usuario 
+```
+ALTER ROLE [db_Rol_Lectura] DROP MEMBER [myempresa\omar.lopez]
+```
 
 #### Ver si un usuario esta en un rol
 ```
