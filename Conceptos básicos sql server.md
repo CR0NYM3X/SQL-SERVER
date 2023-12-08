@@ -43,8 +43,12 @@ OSQL.EXE -S My_hostnameServ -d Mydba -U Usuario_test -i script.sql -o "C:\Users\
 Tambien puede conectarse de esta forma desde el cmd 
 ```
 
-******** EJEMPLO ********
-runas /user:DOMINIO\Usuario "C:\Program Files (x86)\Microsoft SQL Server Management Studio 18\Common7\IDE\Ssms.exe"
+******** EJEMPLO #1 ********
+runas /user:DOMINIO\omar.lopez "C:\Program Files (x86)\Microsoft SQL Server Management Studio 18\Common7\IDE\Ssms.exe"
+
+******** EJEMPLO #2 ********
+runas /user:DOMINIO\omar.lopez "C:\Windows\System32\cmd.exe"
+
 
 -- Tambien puede ser una ruta como: "C:\Program Files (x86)\Microsoft SQL Server\150\Tools\Binn\ManagementStudio\Ssms.exe"
 
