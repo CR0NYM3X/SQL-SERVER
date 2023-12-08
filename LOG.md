@@ -1,5 +1,11 @@
 
 
+
+# Usando el Visor de Eventos:
+```
+Presiona Win + R, escribe eventvwr.msc y presiona Enter. Esto abrirá el Visor de Eventos.
+```
+
 # Verificar errores
 **xp_readerrorlog** se utiliza para leer los archivos de registro de errores de SQL Server. Estos archivos de registro almacenan información detallada sobre eventos, mensajes de error, advertencias
 ```
@@ -23,7 +29,10 @@ EXEC sp_readerrorlog 0, 1, 'I/O' --  identificar eventos relacionados con proble
 ****** Filtrar por fecha: ****** 
 EXEC sp_readerrorlog 0, 1, '2023-01-01', '2023-12-31'
 
+
 ```
+
+
 
 **Proporciona información sobre todos los mensajes de error del sistema en la base de datos actual.**
 ```
