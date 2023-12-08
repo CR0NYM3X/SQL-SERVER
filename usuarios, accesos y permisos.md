@@ -304,6 +304,9 @@ GRANT VIEW DEFINITION ON SCHEMA::dbo TO [MYDOMINIO\my_user_test_windows];
 GRANT CONNECT, SELECT , UPDATE,  INSERT, DELETE, ALTER,  REFERENCES ON SCHEMA::dbo TO my_user_test;
 GRANT UPDATE ON dbo.my_tabla TO my_usuario;
 
+GRANT VIEW ANY COLUMN ENCRYPTION KEY DEFINITION TO nombre_usuario;
+GRANT VIEW ANY COLUMN MASTER KEY DEFINITION TO nombre_usuario;
+
 GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 
 --- permisos a todos los procedimientos 
