@@ -262,7 +262,7 @@ https://www.mssqltips.com/sqlservertip/4747/sql-server-spexecuteexternalscript-s
 https://blog.voogie.online/code/2020/11/04/Simple-example-of-sp_execute_external_script-using-python/
 
 
-# Abrir archivos externos como csv o txt
+# Abrir archivos externos como csv o txt, o consultar tablas de manera remota
 [Doc Oficial OPENROWSET](https://learn.microsoft.com/es-es/sql/t-sql/functions/openrowset-transact-sql?view=sql-server-ver16) <br>
 [Doc Oficial OPENDATASOURCE](https://learn.microsoft.com/es-es/sql/t-sql/functions/opendatasource-transact-sql?view=sql-server-ver16)
 
