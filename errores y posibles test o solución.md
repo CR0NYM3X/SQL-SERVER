@@ -7,6 +7,7 @@
 ** Para cambiar la contraseña del usuario y dominio**
 ```
 https://aka.ms/ssprsetup
+https://mysignins.microsoft.com/security-info
 ```
 
 **Validar el usuario que esas en windows**
