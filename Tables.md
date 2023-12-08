@@ -112,19 +112,25 @@ CREATE TABLE Cliente (
 
 ### Crear una tabla temporal:
 ```
+********* OPCIÓN #1 ********* 
+DECLARE @LogInfo TABLE (LogDate DATETIME,ProcessInfo VARCHAR(100),txt VARCHAR(max))
+
+********* OPCIÓN #2 ********* 
 CREATE TABLE #tempEmpleados (
     empleado_id INT,
     nombre VARCHAR(50),
     salario DECIMAL(10, 2)
 );
 
+********* OPCIÓN #3 ********* 
 --- Esta tabla se borra al cerrar la sesion  y solo puede ser consultada por la sesion que la creo
 SELECT columna1, columna2 INTO #tempTablaGlobal FROM TuTablaExistente WHERE condición;
 
+********* OPCIÓN #4 ********* 
 --- Esta tabla se borra al cerrar la sesion  y solo puede ser consultada por todas sesiones 
 SELECT columna1, columna2 INTO ##tempTablaGlobal FROM TuTablaExistente WHERE condición;
 
-
+********* OPCIÓN #5 ********* 
 ----- Esta temporal CTE  solo existe en la consulta, al finalizar la consulta se borran las tablas temporales 
 WITH tmpTabla1 AS (
      SELECT * from my_Tabla1 where column1='maria'
