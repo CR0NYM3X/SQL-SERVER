@@ -25,6 +25,27 @@ EXEC sp_readerrorlog 0, 1, '2023-01-01', '2023-12-31'
 
 ```
 
+**Proporciona información sobre todos los mensajes de error del sistema en la base de datos actual.**
+```
+SELECT * FROM sys.messages WHERE language_id = 1033;
+```
+
+# funciones para validar errores  con TRY  - CATCH
+
+```
+BEGIN TRY
+    -- Generar un error intencional
+    SELECT 1/0;
+END TRY
+BEGIN CATCH
+    -- Manejar el error
+    SELECT ERROR_STATE(); -- Devuelve el estado de error del último error que ocurrió. 
+    SELECT ERROR_SEVERITY();  -- Devuelve el nivel de gravedad del último error que ocurrió. 
+    SELECT ERROR_NUMBER(); --  Devuelve el número de error del último error que ocurrió. Puede ser útil para identificar el código de error específico.
+    SELECT ERROR_MESSAGE();  -- devuelve el mensaje de error asociado con el error más reciente. Es útil cuando estás en un bloque CATCH 
+END CATCH;
+```
+
 # Examinar el log de transacciones
 ```
 SELECT [Current LSN], [Transaction ID], [Operation], [Context],
