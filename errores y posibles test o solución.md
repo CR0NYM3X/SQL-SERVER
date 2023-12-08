@@ -66,3 +66,8 @@ nltest /dsgetsite
 nltest /domain_trusts
 ```
 
+# link de apoyo
+************** The login is from an untrusted ************** <br>
+https://windowsreport.com/0x8009030c/ <br>
+https://dba.stackexchange.com/questions/191267/sspi-handshake-failed-with-error-code-0x8009030c-state-14
+
