@@ -4,6 +4,7 @@
 # Usando el Visor de Eventos:
 ```
 Presiona Win + R, escribe eventvwr.msc y presiona Enter. Esto abrirá el Visor de Eventos.
+- Los eventos relacionados con SQL Server podrían estar en los registros de Aplicación o Seguridad.
 ```
 
 # Verificar errores
