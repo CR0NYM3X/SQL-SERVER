@@ -15,7 +15,11 @@ go  ---  le indicas que está completo y que la interfaz de SQL Server debe ejec
 ```
 
 
-### Conectarse a sql server desde CMD 
+### Conectarse a sql server desde CMD
+[Link descargar SQLCMD](https://learn.microsoft.com/es-es/sql/tools/sqlcmd/sqlcmd-utility?view=sql-server-ver16&tabs=odbc%2Cwindows&pivots=cs1-bash) <br> 
+
+Puedes usar la herramienta de SQLCMD.exe o OSQL.exe
+
 ```
 # Directorio donde se encuentra la herramienta:
 C:\Program Files\Microsoft SQL Server\150\Tools\Binn
