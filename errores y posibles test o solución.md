@@ -4,6 +4,11 @@
 
 # Error \#1 : Login failed. The login is from an untrusted domain and cannot be used with Windows authentication.
 
+** Para cambiar la contraseña del usuario y dominio**
+```
+https://aka.ms/ssprsetup
+```
+
 **Validar el usuario que esas en windows**
 ver tu usuario de dominio, LOS grupos en los que estas Y las políticas que tienes  aplicadas 
 ```
