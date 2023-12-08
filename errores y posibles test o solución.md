@@ -8,6 +8,7 @@
 ```
 https://aka.ms/ssprsetup
 https://mysignins.microsoft.com/security-info
+https://myaccount.microsoft.com
 ```
 
 **Validar el usuario que esas en windows**
