@@ -606,6 +606,9 @@ EXEC SP_HELPTEXT 'sp_grantdbaccess'
 
 https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/create-a-database-user?view=sql-server-ver16
 
+https://gist.github.com/ryzr/e96e7a20179a0e520fbff094a6d7d8b1
+
+
 #### Pendientes por actualizar este documento :
 ```
 1- especificar para que sirve cada permiso
