@@ -197,6 +197,7 @@ truncate table my_tabla_old --- borra toda la informacion
 ```
 
 # info extra
+**agregar descripcion en las tablas **
 ```
 EXEC sys.sp_addextendedproperty @name = N'MiDescripcion', 
                                 @value = 'Esta es una tabla de ejemplo',
@@ -204,6 +205,56 @@ EXEC sys.sp_addextendedproperty @name = N'MiDescripcion',
                                 @level0name = 'dbo', 
                                 @level1type = N'TABLE', 
                                 @level1name = N'MiTabla';
+```
+
+### encriptar columnas 
+```
+SELECT * FROM sys.column_encryption_keys;
+SELECT * FROM sys.column_master_keys;
+
+
+CREATE CERTIFICATE HumanResources037  
+   WITH SUBJECT = 'Employee Social Security Numbers';  
+GO  
+
+CREATE SYMMETRIC KEY SSN_Key_01  
+    WITH ALGORITHM = AES_256  
+    ENCRYPTION BY CERTIFICATE HumanResources037;  
+GO  
+
+USE [AdventureWorks2022];  
+GO  
+
+-- Create a column in which to store the encrypted data.  
+ALTER TABLE HumanResources.Employee  
+    ADD EncryptedNationalIDNumber varbinary(128);   
+GO  
+
+-- Open the symmetric key with which to encrypt the data.  
+OPEN SYMMETRIC KEY SSN_Key_01  
+   DECRYPTION BY CERTIFICATE HumanResources037;  
+
+-- Encrypt the value in column NationalIDNumber with symmetric   
+-- key SSN_Key_01. Save the result in column EncryptedNationalIDNumber.  
+UPDATE HumanResources.Employee  
+SET EncryptedNationalIDNumber = EncryptByKey(Key_GUID('SSN_Key_01'), NationalIDNumber);  
+GO  
+
+-- Verify the encryption.  
+-- First, open the symmetric key with which to decrypt the data.  
+OPEN SYMMETRIC KEY SSN_Key_01  
+   DECRYPTION BY CERTIFICATE HumanResources037;  
+GO  
+
+-- Now list the original ID, the encrypted ID, and the   
+-- decrypted ciphertext. If the decryption worked, the original  
+-- and the decrypted ID will match.  
+SELECT NationalIDNumber, EncryptedNationalIDNumber   
+    AS 'Encrypted ID Number',  
+    CONVERT(nvarchar, DecryptByKey(EncryptedNationalIDNumber))   
+    AS 'Decrypted ID Number'  
+    FROM HumanResources.Employee;  
+GO
 ```
 
 
