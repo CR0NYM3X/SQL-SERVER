@@ -91,6 +91,9 @@ SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections
 
 ### Ver el tamaño de la base de datos:
 ```
+--- Procedimiento almacenado 
+sp_helpdb
+
 ---- este te dice en general cuanto pesa toda la base de datos 
 SELECT 
       database_name = DB_NAME(database_id)
