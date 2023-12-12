@@ -30,6 +30,8 @@ En SQL server existen los permisos
 select SUSER_SNAME() -- saber el usuario que estas usando actualmente
 select SUSER_ID()	-- saber el id del usuario que estas usando actualmente
 select USER_NAME(grantee_principal_id) -- saber que usuario tiene un id
+select CONNECTIONPROPERTY('local_net_address') --- ver la ip que usa tu usuario 
+SELECT * FROM sys.dm_exec_connections WHERE session_id = @@SPID ---  ver la ip que usa tu usuario
 
 OBJECT_NAME(major_id) AS object_name
 ```
