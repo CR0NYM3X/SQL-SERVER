@@ -20,6 +20,7 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 
 
 # tablas y vistas útiles para monitorear
+**`sys.sysindexes`** 
 **`sys.dm_exec_connections:`** Detalles de las conexiones activas al servidor. <br>
 **`sys.dm_exec_requests:`** Proporciona información sobre las solicitudes actuales en ejecución en el servidor. <br>
 **`sys.dm_exec_sessions:`** Contiene información sobre las sesiones actuales en el servidor, lo que puede ser útil para rastrear quién está conectado y qué están haciendo. <br>
