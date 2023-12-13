@@ -66,6 +66,8 @@ sp_configure 'show advanced options', 1; --- cambia la configuración de sql ser
 ```
 
 # Lectura y modificacion del registro de windows 
+
+
 **xp_regread, xp_regwrite:** Estas funciones permiten leer y escribir en el registro /regedit del sistema. Si se usan sin restricciones, podrían abrir la puerta a cambios no autorizados en la configuración del servidor.
 ```
 ********** leer registros como la version de windows | con este ejemplo vamos a ver la version del sistema operativo  **********
@@ -107,7 +109,7 @@ EXEC xp_instance_regread
 ********** escribir en registros **********
 EXEC xp_regwrite 'HKEY_CURRENT_USER', 'Software\MyApp', 'Version', 'REG_SZ', '1.0';
 ```
-
+https://book.hacktricks.xyz/generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys
 
 **Deshabilitar o Habilitar estas opciones**
 
