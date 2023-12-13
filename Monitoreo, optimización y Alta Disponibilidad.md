@@ -138,10 +138,29 @@ name ASFileName,
 (size/128.0)/1024 AS CurrentSizeGB,
 (size/128.0 -CAST(FILEPROPERTY(name,''SpaceUsed'')AS INT)/128.0)/1024 AS FreeSpaceGB 
 FROM sys.database_files'
+
+```
+
+Este comando actualiza las páginas de asignación de espacio de la base de datos actual. Asegura que la información de espacio utilizada se actualice correctamente para cada tabla.
+```
+DBCC UPDATEUSAGE(0)
+```
+
+Muestra información detallada sobre los archivos de la base de datos.
+```
+DBCC SHOWFILESTATS
 ```
 
 
+Tamaño de los archivos de la base de datos y espacio utilizado
+```
+EXEC sp_spaceused;
+```
 
+Proporciona detalles sobre el tamaño total del registro de transacciones, así como el espacio utilizado y el espacio libre dentro del registro.
+```
+DBCC SQLPERF(logspace);
+```
 
 # Ejemplos de usos de las tablas para monitorear 
 
