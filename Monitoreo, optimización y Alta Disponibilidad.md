@@ -26,9 +26,9 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sys.sysprocesses`**  detalles sobre las sesiones que estaban conectadas al servidor en un momento dado, incluyendo información sobre ID de sesión, estado de la sesión, tiempo de CPU utilizado, ID de usuario<br>
 **`sys.dm_exec_query_stats:`** Estadísticas de ejecución de consultas. <br>
 **`sys.dm_os_wait_stats:`** Ofrece estadísticas sobre los tipos de espera que están afectando el rendimiento del servidor. <br>
-**`sys.stats:`** almacena información sobre las estadísticas de las columnas de las tablas de la base de datos
-**`sys.dm_db_partition_stats`** almacenamiento y la distribución de las filas y páginas de datos de una tabla o índice en una base de datos.
-**`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.
+**`sys.stats:`** almacena información sobre las estadísticas de las columnas de las tablas de la base de datos<br>
+**`sys.dm_db_partition_stats`** almacenamiento y la distribución de las filas y páginas de datos de una tabla o índice en una base de datos.<br>
+**`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.<br>
 **`sys.dm_io_virtual_file_stats:`** Proporciona estadísticas de E/S a nivel de archivo, lo que es esencial para monitorear la actividad de E/S en el servidor. <br>
 **`sys.dm_db_index_physical_stats:`** Ofrece información detallada sobre el estado físico de los índices, lo que puede ser útil para identificar problemas de rendimiento relacionados con los índices. y ver si necesita una desfragmentacion <br>
 **`sys.dm_os_sys_info:`** Contiene información sobre la configuración del sistema y los recursos del servidor. <br>
