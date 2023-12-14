@@ -115,7 +115,24 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\    
 
 ********** escribir en registros **********
 EXEC xp_regwrite 'HKEY_CURRENT_USER', 'Software\MyApp', 'Version', 'REG_SZ', '1.0';
+
+
+EXECUTE master.sys.xp_instance_regwrite
+    'HKEY_LOCAL_MACHINE',
+    'Software\Microsoft\MSSQLSERVER\SQLServerAgent\MyNewKey',
+    'MyNewValue',
+    'REG_SZ',
+    'Now you see me!';
+
+EXECUTE master.sys.xp_instance_regread
+    'HKEY_LOCAL_MACHINE',
+    'Software\Microsoft\MSSQLSERVER\SQLServerAgent\MyNewKey',
+    'MyNewValue';
+
+
 ```
+Referencias: <br>
+https://sqlsolutionsgroup.com/working-registry-sql-server/ <br>
 https://book.hacktricks.xyz/generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys
 
 **Deshabilitar o Habilitar estas opciones**
@@ -130,6 +147,9 @@ DENY EXECUTE ON xp_regread TO [UsuarioOGrupo];
 
 -- Revocar permisos para xp_regwrite
 DENY EXECUTE ON xp_regwrite TO [UsuarioOGrupo];
+
+--- ejemplo como denegar 
+https://www.stigviewer.com/stig/ms_sql_server_2016_instance/2018-03-09/finding/V-79327
 ```
 
 
