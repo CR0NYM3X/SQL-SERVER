@@ -1,0 +1,303 @@
+USE [master]
+GO
+
+/****** Object:  StoredProcedure [dbo].[sp_analisisdba]    Script Date: 11/21/2023 3:50:06 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[sp_analisisdba]        
+as begin        
+DECLARE @runtime DATETIME
+	SET @runtime = GETDATE()    
+
+	SELECT '********* System Requests ********* ' as [dataset]
+	SELECT 
+		@runtime as runtime,     
+		der.session_id,     
+		blocking_session_id,    
+		der.request_id,      
+		der.command,      
+		DB_NAME(database_id) AS database_name,    
+		status,
+		start_time,
+		CONCAT(
+			RIGHT(CONCAT('0', total_elapsed_time / 1000 / 60 / 60), 2), ':', -- horas
+			RIGHT(CONCAT('0', (total_elapsed_time / 1000 / 60) % 60), 2), ':', -- minutos
+			RIGHT(CONCAT('0', (total_elapsed_time / 1000) % 60), 2), '.', -- segundos
+			RIGHT(CONCAT('0', (total_elapsed_time) % 1000), 3) -- milisegundos
+			) as total_elapsed_time ,
+		total_elapsed_time,
+		drgrp.name resource_pool,    
+		drgwg.name worload_group,
+		deib.event_info as [input_buffer],
+		deib.event_type,
+		deib.parameters,
+		dest.text AS [batch],      
+		SUBSTRING(dest.text, (der.statement_start_offset / 2) + 1, ((      
+			CASE       
+				WHEN der.statement_end_offset < 1 THEN LEN(CONVERT(nvarchar(max), dest.text)) * 2      
+			ELSE der.statement_end_offset      
+			END - der.statement_start_offset) / 2) + 1
+		) AS [statement],      
+		deqp.query_plan,      
+		cpu_time,    
+		logical_reads,     
+		logical_reads * 8 / 1024.00 / 1024.00 as [logical_read_gb],     
+		reads as [physical_reads],      
+		reads * 8 / 1024.00 / 1024.00 as [physical_reads_gb],      
+		writes,  
+		wait_type,      
+		wait_time,      
+		last_wait_type,    
+		wait_resource,    
+		der.open_transaction_count,      
+		der.open_resultset_count,      
+		transaction_id,      
+		percent_complete,      
+		estimated_completion_time,        
+		der.user_id,       
+		scheduler_id,     
+		transaction_isolation_level,      
+		lock_timeout,      
+		deadlock_priority,      
+		row_count,      
+		prev_error,      
+		nest_level,      
+		granted_query_memory    
+	FROM sys.dm_exec_requests der    
+	CROSS APPLY sys.dm_exec_sql_text (der.sql_handle) dest    
+	OUTER APPLY sys.dm_exec_query_plan (der.plan_handle) deqp    
+	INNER JOIN sys.dm_resource_governor_workload_groups drgwg    
+		ON drgwg.group_id = der.group_id     
+	INNER JOIN sys.dm_resource_governor_resource_pools drgrp    
+		ON drgwg.pool_id = drgrp.pool_id    
+	CROSS APPLY sys.dm_exec_input_buffer (der.session_id, der.request_id) deib
+	WHERE 
+		der.session_id <> @@SPID    
+	ORDER BY der.session_id  
+
+	SELECT N'********* System Connections ∩ System Sessions ********* ' as [dataset]
+	SELECT 
+		@runtime AS runtime,     
+		dec.session_id,     
+		DB_NAME(dest.dbid) as database_name,   
+		des.login_name,      
+		des.original_login_name,  
+		des.nt_user_name,   
+		des.host_name,  
+		dec.client_net_address,       
+		des.program_name,    
+		dec.connect_time,   
+		drgrp.name resource_pool,    
+		drgwg.name worload_group,    
+		dest.text AS [last_batch],       
+		des.client_interface_name,      
+		des.client_version,      
+		des.nt_domain,       
+		dec.most_recent_session_id,      
+		dec.net_transport,      
+		dec.encrypt_option,      
+		dec.auth_scheme,      
+		dec.num_reads,      
+		dec.num_writes,      
+		dec.last_read,      
+		dec.last_write,      
+		dec.client_tcp_port,      
+		dec.connection_id,      
+		dec.parent_connection_id,      
+		dec.protocol_type     
+	FROM   sys.dm_exec_connections dec    
+	INNER JOIN   sys.dm_exec_sessions des    
+		ON   des.session_id = dec.session_id    
+	CROSS APPLY sys.dm_exec_sql_text(dec.most_recent_sql_handle) dest    
+	INNER JOIN sys.dm_resource_governor_workload_groups drgwg    
+		ON drgwg.group_id = des.group_id     
+	INNER JOIN sys.dm_resource_governor_resource_pools drgrp    
+		ON drgwg.pool_id = drgrp.pool_id    
+	ORDER BY dec.session_id    
+
+	SELECT N'********* [tempdb] Usage ********* ' as [dataset]
+	SELECT  @runtime as runtime,    
+		SS.session_id,
+		SS.user_objects_alloc_page_count * 8 / 1024.00 as user_objects_alloc_mb,
+        SS.internal_objects_alloc_page_count * 8 / 1024.00 as internal_objects_alloc_mb,
+		(SS.user_objects_alloc_page_count
+               - SS.user_objects_dealloc_page_count ) * 8 / 1024.00 as active_user_objects_alloc_mb,
+        ABS(SS.internal_objects_alloc_page_count
+               - SS.internal_objects_dealloc_page_count ) * 8 / 1024.00 as active_internal_objects_alloc_mb,
+        (SS.user_objects_alloc_page_count
+               + internal_objects_alloc_page_count ) * 8 / 1024.00 as total_objects_alloc_mb
+	FROM    sys.dm_db_session_space_usage SS
+	LEFT JOIN sys.dm_exec_connections CN 
+		ON CN.session_id = SS.session_id
+	WHERE SS.user_objects_alloc_page_count
+               + internal_objects_alloc_page_count > 0
+	ORDER BY total_objects_alloc_mb DESC
+
+	--Locks Aquired       
+	SELECT '********* Locks Aquired  ********* ' as [dataset]
+	SELECT @runtime as runtime,    
+		t1.resource_type,    
+		db_name(resource_database_id) AS [database],    
+		t1.resource_associated_entity_id AS [blocked_objects],    
+		t1.request_mode,    
+		t1.request_session_id,    
+		t2.blocking_session_id    
+	FROM   sys.dm_tran_locks AS t1
+	INNER JOIN sys.dm_os_waiting_tasks AS t2    
+		ON t1.lock_owner_address = t2.resource_address    
+    
+	--System Waiting Tasks      
+	SELECT '********* System Waiting Tasks  ********* ' as [dataset]
+	SELECT @runtime as runtime,    
+		session_id,    
+		wait_duration_ms,    
+		resource_description    
+	FROM   sys.dm_os_waiting_tasks    
+	WHERE  resource_description IS NOT NULL    
+
+	SELECT '********* Long Transactions ********* ' as [dataset]
+	SELECT @runtime as runtime,    
+		dtst.session_id,
+		dtst.transaction_id,
+		dtat.name as [transaction_name],
+		dtst.is_user_transaction,
+		dtst.is_local,
+		dtst.open_transaction_count,
+		CONCAT(
+			RIGHT(CONCAT('0', datediff(millisecond, dtat.transaction_begin_time, getdate()) / 1000 / 60 / 60), 2), ':', -- horas
+			RIGHT(CONCAT('0', (datediff(millisecond, dtat.transaction_begin_time, getdate()) / 1000 / 60) % 60), 2), ':', -- minutos
+			RIGHT(CONCAT('0', (datediff(millisecond, dtat.transaction_begin_time, getdate()) / 1000) % 60), 2), '.', -- segundos
+			RIGHT(CONCAT('0', (datediff(millisecond, dtat.transaction_begin_time, getdate())) % 1000), 3) -- milisegundos
+			) as total_elapsed_time,
+		CASE dtat.transaction_type  
+			WHEN 1 THEN 'Read/write transaction'
+			WHEN 2 THEN 'Read-only transaction'
+			WHEN 3 THEN 'System transaction'
+			WHEN 4 THEN 'Distributed transaction' 
+		END as transaction_type
+		,CASE dtat.transaction_state    
+            WHEN 0 THEN 'The transaction has not been completely initialized yet.'
+            WHEN 1 THEN 'The transaction has been initialized but has not started.'
+            WHEN 2 THEN 'The transaction is active - has not been committed or rolled back.'
+            WHEN 3 THEN 'The transaction has ended. This is used for read-only transactions.'
+            WHEN 4 THEN 'The commit process has been initiated on the distributed transaction.'
+            WHEN 5 THEN 'The transaction is in a prepared state and waiting resolution.'
+            WHEN 6 THEN 'The transaction has been committed.'
+            WHEN 7 THEN 'The transaction is being rolled back.'
+            WHEN 8 THEN 'The transaction has been rolled back.' 
+		END AS transaction_state
+	FROM sys.dm_tran_session_transactions dtst
+	INNER JOIN sys.dm_tran_active_transactions dtat
+		ON dtst.transaction_id = dtat.transaction_id
+	ORDER BY total_elapsed_time DESC
+    
+	SELECT '********* Blocking Tree ********* ' as [dataset]
+	;WITH blocked_requests AS (
+		SELECT 
+			der_blocked.session_id, 
+			der_blocked.blocking_session_id, 
+			der_blocked.request_id, 
+			der_blocked.start_time,
+			dest_blocked.text AS [batch],
+			deib_blocked.event_info AS [input_buffer],
+			1 AS is_inactive_opened_transaction
+		FROM sys.dm_exec_requests der_blocked
+		CROSS APPLY sys.dm_exec_sql_text (der_blocked.sql_handle) dest_blocked
+		CROSS APPLY sys.dm_exec_input_buffer (der_blocked.session_id, der_blocked.request_id) deib_blocked
+		WHERE der_blocked.blocking_session_id > 0
+	), blocking_sessions AS (
+		-- blocking sessions with no active requests
+		SELECT 
+			des_blocking.session_id, 
+			0 AS blocking_session_id, 
+			null AS request_id, 
+			des_blocking.last_request_start_time AS start_time,
+			dest_blocking.text AS [batch],
+			deib_blocking.event_info AS [input_buffer],
+			0 AS is_inactive_opened_transaction
+		FROM sys.dm_exec_sessions des_blocking
+		INNER JOIN sys.dm_exec_connections dec_blocking
+			ON des_blocking.session_id = dec_blocking.session_id
+		INNER JOIN blocked_requests br
+			ON des_blocking.session_id = br.blocking_session_id
+		LEFT JOIN sys.dm_exec_requests der_blocking
+			ON der_blocking.session_id = des_blocking.session_id
+		CROSS APPLY sys.dm_exec_sql_text (dec_blocking.most_recent_sql_handle) dest_blocking
+		CROSS APPLY sys.dm_exec_input_buffer (dec_blocking.session_id, null) deib_blocking
+		-- set difference
+		WHERE der_blocking.session_id is null
+		UNION
+		-- blocking requests with no blocking_session_id (blocking header)
+		SELECT 
+			der_blocking.session_id, 
+			der_blocking.blocking_session_id, 
+			der_blocking.request_id, 
+			der_blocking.start_time,
+			dest_blocking.text AS [batch],
+			deib_blocking.event_info AS [input_buffer],
+			1 AS is_inactive_opened_transaction
+		FROM sys.dm_exec_requests der_blocking
+		INNER JOIN blocked_requests br
+			ON der_blocking.session_id = br.blocking_session_id
+			AND der_blocking.blocking_session_id = 0
+		CROSS APPLY sys.dm_exec_sql_text (der_blocking.sql_handle) dest_blocking
+		CROSS APPLY sys.dm_exec_input_buffer (der_blocking.session_id, der_blocking.request_id) deib_blocking 
+	), blocking_chain AS (
+		SELECT *
+		FROM blocked_requests
+		UNION
+		SELECT *
+		FROM blocking_sessions
+	), hierarchical_blocking AS (
+		SELECT 
+			cast(
+					replicate ('0', 4 - len(cast(session_id as varchar))) + 
+					cast (session_id as varchar) as varchar (1000)
+				) as level
+			,session_id, 
+			blocking_session_id, 
+			request_id, 
+			start_time,
+			batch,
+			input_buffer,
+			is_inactive_opened_transaction
+		FROM blocking_chain
+		WHERE blocking_chain.blocking_session_id = 0
+			OR blocking_chain.blocking_session_id = blocking_chain.session_id
+		UNION ALL  
+		SELECT 
+			cast (hierarchical_blocking.level + right (cast ((1000 + r.session_id) as varchar (100)), 4) as varchar (1000)) as level
+			,r.session_id, 
+			r.blocking_session_id, 
+			r.request_id, 
+			r.start_time,
+			r.batch,
+			r.input_buffer,
+			r.is_inactive_opened_transaction
+		FROM blocking_chain AS r  
+		INNER JOIN hierarchical_blocking 
+			ON r.blocking_session_id = hierarchical_blocking.session_id 
+		WHERE r.blocking_session_id > 0
+			OR r.blocking_session_id <> r.session_id
+	)
+	SELECT @runtime as runtime,    
+		N'    ' + replicate (N'|         ', len (level)/4 - 1) +  
+		CASE 
+			WHEN (len(level)/4 - 1) = 0  
+				THEN 'HEAD -  '  
+			ELSE '|------  ' 
+		END + cast (session_id AS nvarchar (10)) AS tree_level, 
+		start_time, 
+		batch, 
+		input_buffer, 
+		is_inactive_opened_transaction
+	FROM hierarchical_blocking
+	END
+GO
+
+
