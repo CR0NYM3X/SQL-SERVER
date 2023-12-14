@@ -1,0 +1,47 @@
+USE [master]
+GO
+
+/****** Object:  DdlTrigger [tri_VerificaUsuario]    Script Date: 12/7/2023 6:25:32 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER OFF
+GO
+
+
+CREATE TRIGGER [tri_VerificaUsuario]
+ON ALL SERVER
+FOR LOGON
+AS
+DECLARE @Ip varchar(15)
+BEGIN
+IF ( ORIGINAL_LOGIN()= 'user1'  OR
+	 ORIGINAL_LOGIN()= 'user2'  OR
+	 ORIGINAL_LOGIN()= 'user3'  OR
+
+)
+and
+( APP_NAME()='Microsoft SQL Server Management Studio - Query' OR
+APP_NAME()='Microsoft SQL Server Management Studio' OR
+APP_NAME()='Microsoft SQL Server Management Studio Express - Query' OR
+APP_NAME()='Query Tool (using ADO) Application for Windows NT operating system.' OR
+APP_NAME()='Analizador de consultas SQL' OR
+APP_NAME()='HeidiSQL' OR
+APP_NAME()='Aqua_Data_Studio' OR
+APP_NAME()='Microsoft SQL Server Management Studio - Transact-SQL IntelliSense' OR
+APP_NAME()='SQL Query Analyzer' OR
+APP_NAME()='SISTEMA_VR_OR'
+)
+OR (ORIGINAL_LOGIN()= 'EjecutaSps' )
+BEGIN
+ROLLBACK;
+SET @Ip = (SELECT client_net_address FROM sys.dm_exec_connections WHERE session_id = @@spid)
+PRINT'Usuario invalido, ' + CONVERT(varchar(50),ORIGINAL_LOGIN()) + ', Aplicacion: ' + CONVERT(varchar(100),APP_NAME()) + ', HostName: ' + RTRIM(LTRIM (HOST_NAME() ))+ ', Ip: ' + @Ip;
+END
+END
+GO
+
+ENABLE TRIGGER [tri_VerificaUsuario] ON ALL SERVER
+GO
+
+
