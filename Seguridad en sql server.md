@@ -67,9 +67,28 @@ sp_configure 'show advanced options', 1; --- cambia la configuración de sql ser
 
 # Lectura y modificacion del registro de windows 
 
-
 **xp_regread, xp_regwrite:** Estas funciones permiten leer y escribir en el registro /regedit del sistema. Si se usan sin restricciones, podrían abrir la puerta a cambios no autorizados en la configuración del servidor.
 ```
+********** procedimientos **********
+xp_regaddmultistring
+xp_regdeletekey
+xp_regdeletevalue
+xp_regenumvalues
+xp_regenumkeys
+xp_regread
+xp_regwrite
+xp_regremovemultistring
+xp_instance_regaddmultistring
+xp_instance_regdeletekey
+xp_instance_regdeletevalue
+xp_instance_regenumkeys
+xp_instance_regenumvalues
+xp_instance_regread
+xp_instance_regremovemultistring
+xp_instance_regwrite
+
+
+
 ********** leer registros como la version de windows | con este ejemplo vamos a ver la version del sistema operativo  **********
 DECLARE @ProductName NVARCHAR(100), 
         @CurrentVersion NVARCHAR(100), 
