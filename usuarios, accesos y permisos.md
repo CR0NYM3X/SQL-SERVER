@@ -302,6 +302,9 @@ select CONNECTIONPROPERTY ('local_net_address') as IP_SERVER,* from #userpriv wh
 **Permisos especificos:**
 Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
 ```
+GRANT CONTROL ON dbo.my_tabla TO [my_user_test]
+GRANT TAKE OWNERSHIP ON dbo.my_tabla TO [my_user_test]
+GRANT VIEW CHANGE TRACKING ON dbo.my_tabla TO [my_user_tes
 GRANT VIEW DEFINITION ON SCHEMA::dbo TO [MYDOMINIO\my_user_test_windows];
 GRANT CONNECT, SELECT , UPDATE,  INSERT, DELETE, ALTER,  REFERENCES ON SCHEMA::dbo TO my_user_test;
 GRANT UPDATE ON dbo.my_tabla TO my_usuario;
