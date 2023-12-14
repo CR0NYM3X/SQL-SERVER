@@ -104,6 +104,13 @@ EXEC xp_instance_regread
   N'Software\Microsoft\MSSQLServer\Setup', N'SQLPath';
   N'Software\Microsoft\MSSQLServer\MSSQLServer\SuperSocketNetLib\Tcp\IPAll', N'TcpPort';
 
+---- Para ver el último usuario que ha iniciado sesión en el sistema, puedes ir 
+ 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI', 'LastLoggedOnUser'  usuario
+ 'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI', 'LastLoggedOnDisplayName' --- saber el nombre completo
+
+--- usuarios registrados en el servidor
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\    ProfileImagePath
+
 
 
 ********** escribir en registros **********
