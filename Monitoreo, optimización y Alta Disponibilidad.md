@@ -105,7 +105,14 @@ FROM sys.tables;
  EXEC sp_executesql @sql;
 
 
+************** REINDEX CON PROC ********
+DBCC DBREINDEX ('HumanResources.Employee', PK_Employee_BusinessEntityID, 80);
+
 ```
+
+
+
+
 
 ### Verificación de planes de ejecución:
 Limpiar la caché de consultas puede ser útil en ciertos casos para que el optimizador de consultas pueda reevaluar los planes de ejecución.
