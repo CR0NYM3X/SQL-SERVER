@@ -44,3 +44,20 @@ GRANT EXECUTE ON SCHEMA::dbo TO sysDesarrolloMCCI; ---todas las funciones
 use master 
 SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13)
 FROM sys.procedures;
+
+
+
+
+
+SELECT OBJECT_NAME(OBJECT_ID),
+definition
+FROM sys.sql_modules
+WHERE definition LIKE '%' + 'BusinessEntityID' + '%'
+
+
+SELECT DISTINCT OBJECT_NAME(OBJECT_ID),
+object_definition(OBJECT_ID)
+FROM sys.Procedures
+WHERE object_definition(OBJECT_ID) LIKE '%' + 'BusinessEntityID' + '%'
+
+
