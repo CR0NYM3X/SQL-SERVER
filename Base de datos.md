@@ -3,6 +3,7 @@
 ```
 select   DB_ID()
 select   DB_NAME(5)
+select   SCHEMA_NAME(2)
 ```
 
 # falta por investigar más sobre: 
