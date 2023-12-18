@@ -123,6 +123,8 @@ CREATE TABLE Cliente (
 
 link: https://learn.microsoft.com/es-es/sql/relational-databases/partitions/create-partitioned-tables-and-indexes?view=sql-server-ver16
 ```
+
+*********** EJEMPLO #1 ***********
 CREATE PARTITION FUNCTION myRangePF1 (datetime2(0))  
     AS RANGE RIGHT FOR VALUES ('2022-04-01', '2022-05-01', '2022-06-01') ;  
 GO  
@@ -135,6 +137,16 @@ GO
 CREATE TABLE dbo.PartitionTable (col1 datetime2(0) PRIMARY KEY, col2 char(10))  
     ON myRangePS1 (col1) ;  
 GO
+
+
+
+*********** EJEMPLO #2 ***********
+
+
+CREATE PARTITION FUNCTION [ParticionadoCuenta](bigint) AS RANGE RIGHT FOR VALUES (1, 2, 3, 4)
+GO
+
+CREATE PARTITION SCHEME [ParticionadoCuenta] AS PARTITION [ParticionadoCuenta_Particion] TO ([PRIMARY], [CuentaNOSE], [CuentaPARAOTROS], [CuentaNUEVAS], [CuentaACUMULADAS])
 ```
 
 ### Crear una tabla temporal:
