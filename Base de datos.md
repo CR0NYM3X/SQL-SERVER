@@ -88,6 +88,37 @@ FROM sys.master_files a
 left join sys.databases  b  on a.database_id = b.database_id order by b.name
 ```
 
+###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS NO PARA DISMINUIR
+```
+*********** PARA BUSCAR EL NOMBRE DEL ARCHIVO ***********
+select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
+
+*********** HACER LA MODIFICACIÓN ***********
+ALTER DATABASE [MY_dba_TEST]
+MODIFY FILE (
+    NAME = 'NOMBRE_DE_FILEGROUP',
+    SIZE = 5GB
+);
+```
+
+### Reducir el tamaño de una base de datos 
+
+
+```
+*********** PARA BUSCAR EL NOMBRE DEL ARCHIVO A REDUCIR ***********
+select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
+
+******  reducir el tamaño de archivos de datos individuales  ******
+DBCC SHRINKFILE ('MibaseDeDatos_log', 1024); -- 1024 es el nuevo tamaño en MB
+
+******  se utiliza para reducir el tamaño de todos los archivos de datos de una base de datos. *****
+DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
+
+```
+
+
+select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
+
 ### Cambiar el nombre a una base de datos:
     ALTER DATABASE my_db_old Modify Name = my_db_new ;
 
