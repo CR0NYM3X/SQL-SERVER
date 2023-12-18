@@ -177,17 +177,16 @@ SELECT * FROM sys.dm_exec_connections WHERE client_net_address = '192.59.21.100'
 SELECT * FROM sys.dm_exec_sessions WHERE login_name = 'MYDOMINIO\omar.lopez'
 SELECT * --spid, loginame, hostname, program_name FROM sys.sysprocesses WHERE loginame= 'MYDOMINIO\omar.lopez' and status = 'runnable' OR status = 'sleeping'
 
-**************
 
-SELECT qs.execution_count, qs.total_elapsed_time, qs.total_elapsed_time/qs.execution_count AS avg_elapsed_time, 
-    qt.text AS [Query Text], qp.query_plan AS [Query Plan]
+************** ESTADISTICAS DE EJECUCIÓN DE CONSULTAS **************
+SELECT qs.execution_count, 
+       CAST((CAST(qs.total_elapsed_time as float)/60000) AS DECIMAL(10, 3)) as total_time, 
+	   CAST(CAST((qs.total_elapsed_time/qs.execution_count)as float)/60000 AS DECIMAL(10, 3))  AS time_por_ejecucion, 
+       qt.text AS [Query Text], 
+	   qp.query_plan AS [Query Plan]
 FROM sys.dm_exec_query_stats qs
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
 CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
-
-
-
-
 ```
 
 
