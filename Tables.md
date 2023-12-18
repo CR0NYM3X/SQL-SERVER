@@ -119,6 +119,24 @@ CREATE TABLE Cliente (
 );
 ```
 
+### Hacer particiones 
+
+link: https://learn.microsoft.com/es-es/sql/relational-databases/partitions/create-partitioned-tables-and-indexes?view=sql-server-ver16
+```
+CREATE PARTITION FUNCTION myRangePF1 (datetime2(0))  
+    AS RANGE RIGHT FOR VALUES ('2022-04-01', '2022-05-01', '2022-06-01') ;  
+GO  
+
+CREATE PARTITION SCHEME myRangePS1  
+    AS PARTITION myRangePF1  
+    ALL TO ('PRIMARY') ;  
+GO  
+
+CREATE TABLE dbo.PartitionTable (col1 datetime2(0) PRIMARY KEY, col2 char(10))  
+    ON myRangePS1 (col1) ;  
+GO
+```
+
 ### Crear una tabla temporal:
 ```
 ********* OPCIÓN #1 ********* 
