@@ -1,4 +1,11 @@
 
+### Crear sinonimos para tablas 
+```
+CREATE SYNONYM MiCliente FOR dbo.Clientes;
+
+SELECT * FROM MiCliente;
+```
+
 ### Buscar tablas :
 ```
     select * from INFORMATION_SCHEMA.TABLES  where table_name like '%my_tabla%'
