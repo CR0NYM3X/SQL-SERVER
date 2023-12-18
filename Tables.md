@@ -11,7 +11,7 @@ sp_help 'mytabla'
 
 ### Saber la cantidad de filas/tuplas de una tabla
 ```
--- Opcion #1
+****** Opcion #1 ******
 SELECT
     t.name AS tabla,
     p.rows AS cnt_tuplas
@@ -19,11 +19,20 @@ FROM sys.tables t
 INNER JOIN sys.partitions p ON t.object_id = p.object_id
 WHERE t.name IN ('my_tabla');
 
--- Opcion #2
+****** Opcion #2 ******
+select   OBJECT_NAME(object_id),row_count from sys.dm_db_partition_stats    where OBJECT_NAME(object_id)  
+IN('my_tabla1', 'my_tabla2')
+group by  object_id,row_count order by row_count desc
+
+****** Opcion #3 ******
 EXEC sp_spaceused N'my_tabla_test';
 
--- Opcion #3
+****** Opcion #4 ******
 select count(*) from my_tabla
+
+
+
+
 ```
 
 
