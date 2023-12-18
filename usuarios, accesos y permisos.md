@@ -86,7 +86,7 @@ go
 
 -- agregar usuarios las dos querys sirven para lo mismo 
 EXEC sp_grantdbaccess 'my_user_123','my_user_123'; 
-CREATE USER [my_user_123] FOR LOGIN [my_user_123]
+CREATE USER [my_user_123] FOR LOGIN [my_user_123] WITH DEFAULT_SCHEMA=[dbo]
 
 -- eliminar usuarios de base de datos 
 DROP USER [alex]
