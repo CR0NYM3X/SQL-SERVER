@@ -223,6 +223,11 @@ begin
 EXEC [dba1_test].[dbo].[sp_fulltext_database] @action = 'enable'
 end
 GO
+
+************* EJEMPLO DE USO *************
+SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'palabra1 OR palabra2');
+SELECT * FROM Documentos WHERE CONTAINS(Contenido, '"frase exacta"');
+SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n)');
 ```
 
 ### ver sesiones activas o inactivas
