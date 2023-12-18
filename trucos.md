@@ -182,5 +182,22 @@ DEALLOCATE @dbRoleMembers
 ```
 
 
+### trabajando con columnas 
+```
+SELECT value AS Valor
+FROM (
+    VALUES 
+        (10), 
+        (25),
+		(23)
+) AS ArrayDatos(value);
+
+
+DECLARE @cadena VARCHAR(100) = 'uno,dos,tres,cuatro';
+
+SELECT value AS Valor
+FROM STRING_SPLIT(@cadena, ',');
+```
+
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
