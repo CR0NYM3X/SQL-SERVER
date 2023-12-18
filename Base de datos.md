@@ -73,6 +73,13 @@ LOG ON (
  WITH CATALOG_COLLATION = DATABASE_DEFAULT;
 ```
 
+### Ver la ruta de archivos  MDF, NDF, LDF  donde se guarda las base de datos 
+```
+SELECT a.name as name_file  , physical_name AS RutaArchivo, a.database_id,b.name as name_database
+FROM sys.master_files a
+left join sys.databases  b  on a.database_id = b.database_id order by b.name
+```
+
 ### Cambiar el nombre a una base de datos:
     ALTER DATABASE my_db_old Modify Name = my_db_new ;
 
