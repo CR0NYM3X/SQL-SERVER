@@ -215,7 +215,15 @@ DBCC INPUTBUFFER (88)   -- num session_id
 ```
 kill 80 
 ```
-
+### Habilitar la busqueda de texto
+Permite realizar búsquedas eficientes en texto no estructurado o semi-estructurado. Este tipo de búsqueda es útil cuando necesitas buscar patrones de texto, palabras clave o frases dentro de grandes cantidades de datos de texto, como artículos, descripciones, documentos 
+```
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [dba1_test].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+```
 
 ### ver sesiones activas o inactivas
 ```
