@@ -34,19 +34,43 @@ OFFLINE_SECONDARY: Se utiliza en grupos de disponibilidad Always On para deshabi
     select name,is_read_only,state_desc FROM sys.databases
 
 ### Crear una base de datos:
+******* **CONCEPTOS** ******* <BR>
+**`MDF (Primary Data File):`**  extensión por defecto, almacenan los datos principales y las estructuras de las tablas, índices, procedimientos almacenados y otros objetos. <BR>
+**`NDF (Secondary Data File):`**   archivos de datos secundarios asociados a filegroups ,  Estos archivos también almacenan datos, y se pueden utilizar para organizar y distribuir los datos <BR>
+**`LDF (Log Data File):`** registro de transacciones, almacenan la secuencia de operaciones de la base de datos, como las transacciones, cambios en los datos y operaciones de recuperación, esenciales para garantizar la consistencia y la recuperación en caso de fallo del sistema.
+
+
 ```
-CREATE DATABASE Sales ON
-(NAME = Sales_dat, --- este especificamos el nombre como se va guardar la data
-    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\saledat.mdf',
-    SIZE = 10, ---Especifica el tamaño inicial del archivo de datos en megabytes. En este ejemplo, se inicia con 10 MB.
-    MAXSIZE = 50, --- tamaño maximo  
-    FILEGROWTH = 5) -- -Indica cómo crecerá el archivo de registro automáticamente.
-LOG ON
-(NAME = Sales_log, --- este especificamos el nombre  donde se va guarda los log de la dba
-    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\salelog.ldf',
-    SIZE = 5 MB, 
-    MAXSIZE = 25 MB,
-    FILEGROWTH = 5 MB);
+CREATE DATABASE NombreBaseDatos ON 
+PRIMARY (
+    NAME = 'DatosPrimarios',
+    FILENAME = 'C:\dba\RutaArchivoDatosPrimarios.mdf',
+    SIZE = 100MB,   -- Tamaño inicial del archivo de datos primarios
+    MAXSIZE = UNLIMITED,  -- Tamaño máximo del archivo de datos primarios, puedes especificar el numero y se interpreta en megas ejemplo solo poner 50, que son cincuenta megas 
+    FILEGROWTH = 20MB  -- Crecimiento automático del archivo de datos primarios
+),
+FILEGROUP GrupoSecundario1 (
+    NAME = 'GrupoSecundario1',
+    FILENAME = 'C:\dba\RutaArchivoSecundario1.ndf',
+    SIZE = 50MB,   -- Tamaño inicial del archivo del filegroup secundario
+    MAXSIZE = UNLIMITED,  -- Tamaño máximo del filegroup secundario
+    FILEGROWTH = 10MB  -- Crecimiento automático del filegroup secundario
+),
+FILEGROUP GrupoSecundario2 (
+    NAME = 'GrupoSecundario2',
+    FILENAME = 'C:\dba\RutaArchivoSecundario2.ndf',
+    SIZE = 50MB,   -- Tamaño inicial del archivo del filegroup secundario
+    MAXSIZE = UNLIMITED,  -- Tamaño máximo del filegroup secundario
+    FILEGROWTH = 10MB  -- Crecimiento automático del filegroup secundario
+)
+LOG ON (
+    NAME = 'LogTransacciones',
+    FILENAME = 'C:\dba\RutaArchivoLog.ldf',
+    SIZE = 50MB,  -- Tamaño inicial del archivo de registro de transacciones
+    MAXSIZE = 1GB,  -- Tamaño máximo del archivo de registro de transacciones
+    FILEGROWTH = 20%  -- Crecimiento automático del archivo de registro de transacciones, puedes ponerlo 5 MB
+)
+ WITH CATALOG_COLLATION = DATABASE_DEFAULT;
 ```
 
 ### Cambiar el nombre a una base de datos:
