@@ -1,3 +1,10 @@
+
+### funciones 
+```
+select   DB_ID()
+select   DB_NAME(5)
+```
+
 # falta por investigar más sobre: 
 1.- los tipos de creacion de base de datos como el tema de primaryetc etc <br>
 2.- si se pueden dividir/particionar los archivos de una base de datos <br>
