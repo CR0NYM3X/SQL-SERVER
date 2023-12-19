@@ -73,6 +73,8 @@ Pasar tablas de un servidor a otro desde SQL  management studio
 
 **Exportar la informacion con bcp**
 en estos casos no se puede exportar con el encabezado
+
+**`[NOTA IMPORTANTE] --->`** Se recomienda utilizar delimitadores diferente a la comilla,  ya que si la tabla que vas exportar tiene campos varchar puede tener comillas dentro de la columna y esto puede entorpecer al momento de importar la información ,por ejemplo yo uso "|"
 ```
 --- Exportando toda la tabla
 bcp my_dba_test.dbo.my_tabla_test out "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r\n
@@ -87,6 +89,9 @@ sqlcmd -S servidor -d base_de_datos -Q "SELECT * FROM mi_tabla WHERE condicion_c
 ```
 
 **Importar la información con bcp**
+
+**`[NOTA IMPORTANTE] --->`** Cuando se hace un copiado de información con millones de registros , el espacio usado del log transaccional se va llenando y aumenta rapidamente, por lo que si el log transaccional llega a su limite de espacio, puede tener problemas para copiar la información, para ir monitoreando el tamaño utilizado,   [ingresa a este link, para ver la query que  monitorea el espacio usado del log transaccional](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/Base%20de%20datos.md#saber-el-tama%C3%B1o-utilizado-de-los-archivos-mdf-ndf-y-ldf), una vez terminado el copiado, el espacio usado de log empieza a disminur, para validar si se esta copiando la información, lo validamos con el procedimiento sp_who2 en donde el campo status estara en RUNNABLE  y campo command estara en BULK INSERT  
+
 ```
 bcp  my_dba_test.dbo.my_tabla_test in  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r\n -F 2
 
