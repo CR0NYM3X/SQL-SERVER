@@ -1,3 +1,7 @@
+### Reiniciar el contador id
+```
+ DBCC CHECKIDENT ('Credito.dbo.CatCiudad', RESEED, 0)
+```
 
 ### Crear sinonimos para tablas 
 ```
