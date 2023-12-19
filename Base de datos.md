@@ -121,12 +121,16 @@ DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
 ```
 ******* OPCION #1 *******
 SELECT
-	DB_NAME(database_id),
+    DB_NAME(database_id) AS 'Nombre de la base de datos',
     name AS 'Nombre del archivo',
     size * 8 / 1024 AS 'Tamaño actual (MB)',
     FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)',
-    physical_name AS 'Ruta física'
-FROM sys.master_files order by database_id
+    physical_name AS 'Ruta física',
+    CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)',
+     CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+FROM sys.master_files
+where database_id =  DB_ID()
+ORDER BY database_id;
 
 ******* OPCION #2 *******
 SELECT name, size/128.0 FileSizeInMB,
@@ -138,8 +142,6 @@ FROM sys.database_files;
 DBCC SQLPERF(logspace);
 ```
 
-
-select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
 
 ### Cambiar el nombre a una base de datos:
     ALTER DATABASE my_db_old Modify Name = my_db_new ;
