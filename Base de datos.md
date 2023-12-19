@@ -97,7 +97,8 @@ select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_
 ALTER DATABASE [MY_dba_TEST]
 MODIFY FILE (
     NAME = 'NOMBRE_DE_FILEGROUP',
-    SIZE = 5GB
+    SIZE = 5GB,
+    FILEGROWTH = 100MB
 );
 ```
 
