@@ -78,7 +78,7 @@ en estos casos no se puede exportar con el encabezado
 bcp my_dba_test.dbo.my_tabla_test out "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r\n
 
 --- Exportando con condicional en la tabla
-bcp "select * from my_tabla_test where nombre='jose' " queryout  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r "\n" -d new_dba_test2
+bcp "select * from my_tabla_test where nombre='jose' " queryout  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r "\n" -d new_dba_test2
 ```
 
 **Exportar la informacion con sqlcmd**
@@ -88,7 +88,7 @@ sqlcmd -S servidor -d base_de_datos -Q "SELECT * FROM mi_tabla WHERE condicion_c
 
 **Importar la información con bcp**
 ```
-bcp  my_dba_test.dbo.my_tabla_test in  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -c -t, -r\n -F 2
+bcp  my_dba_test.dbo.my_tabla_test in  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r\n -F 2
 
 -- El parametro -F 2 le indica al programa que inicie desde la linea 2 y no desde la primera linea,
 esto sirve para cuando el documento tiene el encabezado de cada columna, aunque el BCP en automatico puede salta el encabezado 
@@ -99,7 +99,7 @@ esto sirve para cuando el documento tiene el encabezado de cada columna, aunque 
 BULK INSERT my_tabla_test
 FROM 'C:\my_tabla_test.csv'
 WITH (
-    FIELDTERMINATOR = ',',
+    FIELDTERMINATOR = '|',
     ROWTERMINATOR = '\n',
     FIRSTROW = 1 --- si tiene encabezado ponle el numero 2
 );
