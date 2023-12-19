@@ -199,5 +199,17 @@ SELECT value AS Valor
 FROM STRING_SPLIT(@cadena, ',');
 ```
 
+
+#  paginación de resultados.
+```
+SELECT *
+FROM (
+    SELECT 
+        *,
+        ROW_NUMBER() OVER (ORDER BY firstname) AS RowNum
+    FROM [Employees]
+) AS SubQuery
+```
+
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
