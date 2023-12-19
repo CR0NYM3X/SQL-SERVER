@@ -117,6 +117,27 @@ DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
 
 ```
 
+### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
+```
+******* OPCION #1 *******
+SELECT
+	DB_NAME(database_id),
+    name AS 'Nombre del archivo',
+    size * 8 / 1024 AS 'Tamaño actual (MB)',
+    FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)',
+    physical_name AS 'Ruta física'
+FROM sys.master_files order by database_id
+
+******* OPCION #2 *******
+SELECT name, size/128.0 FileSizeInMB,
+size/128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS int)/128.0 
+   AS EmptySpaceInMB
+FROM sys.database_files;
+
+******* OPCION #3 *******
+DBCC SQLPERF(logspace);
+```
+
 
 select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
 
@@ -208,13 +229,7 @@ select * from
 ### saber el tipo de encoding
     SELECT name, collation_name  FROM sys.databases
 
-### Saber el tamaño de los archivos de la base de datos
-```
-SELECT name, size/128.0 FileSizeInMB,
-size/128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS int)/128.0 
-   AS EmptySpaceInMB
-FROM sys.database_files;
-```
+
 ### Info extra
 ```
  sys.dm_os_volume_stats(f.database_id, f.file_id)
