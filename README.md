@@ -23,3 +23,6 @@
 .- Migración de Datos
 
 
+# Páginas para info de sql server:
+https://blog.sqlauthority.com/
+
