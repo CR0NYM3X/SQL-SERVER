@@ -1,4 +1,10 @@
 
+# Cambiar de compatiblidad o version 
+```
+ALTER DATABASE [new_dba_test24] SET COMPATIBILITY_LEVEL = 100
+SELECT compatibility_level,* FROM sys.databases
+```
+
 ### funciones 
 ```
 select   DB_ID()
