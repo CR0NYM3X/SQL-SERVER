@@ -209,6 +209,13 @@ ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
 ```
 
 
+# Mejorar el rendimiento de consulta de tablas pesadas
+```
+******* activar la información de estadísticas de E/S y tiempo de ejecución *********
+SET STATISTICS IO, TIME on
+
+```
+
 
 
 # Bibliografías :
