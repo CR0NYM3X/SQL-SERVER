@@ -47,7 +47,7 @@ OFFLINE_SECONDARY: Se utiliza en grupos de disponibilidad Always On para deshabi
 **`NDF (Secondary Data File):`**   archivos de datos secundarios asociados a filegroups ,  Estos archivos también almacenan datos, y se pueden utilizar para organizar y distribuir los datos <BR>
 **`LDF (Log Data File):`** registro de transacciones, almacenan la secuencia de operaciones de la base de datos, como las transacciones, cambios en los datos y operaciones de recuperación, esenciales para garantizar la consistencia y la recuperación en caso de fallo del sistema.
 
-**`[NOTA]`** El **FILEGROWTH** es relevante para el crecimiento de la base de datos hasta que alcance su tamaño máximo (MAXSIZE). Una vez que se llega al límite máximo, la base de datos no puede crecer más, independientemente del FILEGROWTH.
+**`[NOTA]`** El campo **FILEGROWTH** es relevante/inutil si se asigno un tamaño maximo en el campo (MAXSIZE). por ejemplo, si se asigno como maximo 100GB y colocasque que icrementara 1GB en el campo FILEGROWTH, esto no va funcionar , no va incrementar la dba, esto solo funciona cuando se coloca como MAXSIZE ilimitado.
 
 ```
 CREATE DATABASE NombreBaseDatos ON 
