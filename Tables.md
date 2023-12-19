@@ -1,4 +1,4 @@
-### Reiniciar el contador id
+### Reiniciar el incrementable IDENTITY
 ```
  DBCC CHECKIDENT ('Credito.dbo.CatCiudad', RESEED, 0)
 ```
