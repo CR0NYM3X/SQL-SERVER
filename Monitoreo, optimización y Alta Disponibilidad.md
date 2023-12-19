@@ -47,6 +47,28 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.
 
 
+# ingresar el proc sp_who2  a una tabla temporal
+```
+************ CREAMOS TABLA TMP ************
+CREATE TABLE #sp_who2 (SPID INT, Status VARCHAR(255),
+Login  VARCHAR(255), HostName  VARCHAR(255),
+BlkBy  VARCHAR(255), DBName  VARCHAR(255),
+Command VARCHAR(255), CPUTime INT,
+DiskIO INT, LastBatch VARCHAR(255),
+ProgramName VARCHAR(255), SPID1 INT,
+REQUESTID INT);
+
+************ INSERTAMOS LOS DATOS EN LA TABLA ************
+INSERT INTO #sp_who2 EXEC sp_who2
+
+************ CONSULTAMOS ************ 
+SELECT      * FROM    #sp_who2 WHERE       login like '%respa%'  ORDER BY    SPID ASC;
+
+************ ELIMINAMOS TABLA ************
+drop table #sp_who2
+```
+
+
 # Información que puede servir:
 - ver máximo de conexiones
 ```
