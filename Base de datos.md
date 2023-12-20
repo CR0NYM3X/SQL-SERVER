@@ -281,11 +281,25 @@ WITH (DROP_EXISTING = ON)
 ON NuevoFilegroup_ON_F;
 
 
+SELECT 
+	p.partition_number AS partition_number,
+	f.name AS file_group, 
+	p.rows AS row_count
+FROM sys.partitions p
+JOIN sys.destination_data_spaces dds ON p.partition_number = dds.destination_id
+JOIN sys.filegroups f ON dds.data_space_id = f.data_space_id
+WHERE OBJECT_NAME(OBJECT_ID) = 'order_reports'
+order by partition_number;
+
+SELECT * FROM sys.partition_schemes;
+
 FilesGrups
 https://www.mssqltips.com/sqlservertip/5832/move-sql-server-tables-to-different-filegroups/
 
 Particiones 
 https://www.sqlservertutorial.net/sql-server-administration/sql-server-table-partitioning/
+https://www.sqlservertutorial.net/sql-server-administration/sql-server-partition-existing-table/
+https://database.guide/create-a-partitioned-table-in-sql-server-t-sql/
 
 ```
 
