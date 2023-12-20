@@ -246,6 +246,24 @@ DROP TABLE NombreDeTabla;
 truncate table my_tabla_old --- borra toda la informacion 
 ```
 
+
+### saber los filgroups de cada tabla
+```
+SELECT 
+    OBJECT_NAME(p.object_id) AS TableName,
+    i.name AS IndexName,
+    i.type_desc AS IndexType,
+    ds.name AS FilegroupName
+FROM 
+    sys.indexes AS i
+INNER JOIN 
+    sys.filegroups AS ds ON i.data_space_id = ds.data_space_id
+INNER JOIN 
+    sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
+--WHERE     OBJECT_NAME(p.object_id) = 'NombreDeTuTabla';
+order by p.object_id
+```
+
 # info extra
 **agregar descripcion en las tablas **
 ```
