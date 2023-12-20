@@ -195,7 +195,8 @@ FROM sys.database_files;
 DBCC SQLPERF(logspace);
 ```
 
-se utiliza para corregir las páginas de asignación de espacio y actualizar la información de uso de espacio de la base de datos en el catálogo del sistema..
+se utiliza para corregir las páginas de asignación de espacio y actualizar la información de uso de espacio de la base de datos en el catálogo del sistema y  son responsables de los reportes de uso de espacio mediante comandos como sp_spaceused que sirve para ver el espacio usado de las tablas 
+**`[NOTA ]--->`**  Usar casos excepcionales donde los datos de asignación de espacio necesiten ponerse al día después de cambios extensos.
 ```
 DBCC UPDATEUSAGE(0)
 ```
