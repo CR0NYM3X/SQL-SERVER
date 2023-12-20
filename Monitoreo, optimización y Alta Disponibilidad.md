@@ -302,7 +302,6 @@ WHERE
 
 ```
 
-
-#Bibliografías : 
+# Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/
 
