@@ -325,6 +325,7 @@ SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [Tu
 
 **Ver permisos especificos pero de manera generica**
 ```
+********* OPCION #1 *********
 SELECT
     p.name AS Usuario,
     STUFF((
@@ -337,6 +338,19 @@ WHERE p.type_desc IN ('SQL_USER', 'WINDOWS_USER', 'WINDOWS_GROUP')
 	AND principal_id > 4 -- Excluye usuarios de sistema
     AND p.name NOT LIKE '##%' -- Excluye usuarios de sistema
 ORDER BY p.name;
+
+
+********* OPCION #1 *********
+ SELECT 
+    dp.class_desc, 
+    dp.permission_name, 
+    dp.state_desc, 
+    OBJECT_NAME(major_id) AS object_name, 
+    USER_NAME(grantee_principal_id) AS grantee
+FROM sys.database_permissions dp
+WHERE  USER_NAME(grantee_principal_id)  = 'my_user1' =  ---- grantee_principal_id = DATABASE_PRINCIPAL_ID('my_user1');
+
+
 
 ```
 
