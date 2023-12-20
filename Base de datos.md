@@ -246,52 +246,93 @@ select * from
     SELECT name, collation_name  FROM sys.databases
 
 
-### Mover tablas a filegroups 
+### CREAR PARTICIONES Y FILEGROUPS 
 ```
-ALTER DATABASE monitoreo_app
-ADD FILEGROUP NuevoFilegroup_ON_F;
+ CREATE TABLE Personas (
+    PersonaID INT PRIMARY KEY,
+    Nombre NVARCHAR(50),
+    FechaNacimiento DATE,
+    Ciudad NVARCHAR(50)
+); 
+
+Select * from Personas 
 
 
-ALTER DATABASE monitoreo_app
-ADD FILE (
-    NAME = NuevoArchivo_ON_F,
-    FILENAME = 'F:\RutaHaciaF\NuevoArchivo.ndf',
-    SIZE = 5GB, -- Ajusta el tamaño según sea necesario
-    MAXSIZE = 20GB, -- Tamaño máximo permitido en el disco F
-    FILEGROWTH = 1GB
-)
-TO FILEGROUP NuevoFilegroup_ON_F;
+1.- ********** Agregar un filegroups a una base de datos **********
 
+ALTER DATABASE [new_dba_test24]
+ADD FILEGROUP FILEGROUP_1;
 
+2.-  ********** Ver si se agrego ********** 
 SELECT * FROM sys.filegroups
 
+4.- ********** Generar el archivo fisico del ndf y agregarlo al filegroups ********** 
+ ALTER DATABASE [new_dba_test24]   
+ADD FILE   
+(  
+    NAME = FILEGROUP_1_dat,  
+    FILENAME = 'F:\SQLLOG\new_dba_test_FILEGROUP.ndf',  
+    SIZE = 5MB,  
+    MAXSIZE = 100MB,  
+    FILEGROWTH = 5MB  
+)  
+TO FILEGROUP FILEGROUP_1;
+
+5.-  ********** Ver si se agrego a la base de datos  ********** 
+select * from FROM sys.master_files
 
 
-SELECT o.[name] AS TableName, i.[name] AS IndexName, fg.[name] AS FileGroupName
-FROM sys.indexes i
-INNER JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
-INNER JOIN sys.all_objects o ON i.[object_id] = o.[object_id]
-WHERE i.data_space_id = fg.data_space_id AND o.type = 'U'
+6.- **********  Create a Partition Function ********** 
+create PARTITION FUNCTION fun_particion_personas(int)  -- date 
+    AS RANGE LEFT /*RIGHT*/ FOR VALUES (1, 100, 1000);
+GO
+ 
+
+7.-   ********** Ver si se creo la funcion  ********** 
+SELECT * FROM sys.partition_functions;
 
 
 
-CREATE UNIQUE CLUSTERED INDEX PK_registro_servidor
-ON registros_servidores(columna_clave) -- Reemplaza 'columna_clave' con tu clave primaria
-WITH (DROP_EXISTING = ON)
-ON NuevoFilegroup_ON_F;
+8.-  ********** Create a Partition Scheme ********** 
+CREATE PARTITION SCHEME partition_schema_test  
+    AS PARTITION fun_particion_personas  
+    TO (FILEGROUP_1, FILEGROUP_2, FILEGROUP_3, FILEGROUP_4);  
+GO
 
-
-SELECT 
-	p.partition_number AS partition_number,
-	f.name AS file_group, 
-	p.rows AS row_count
-FROM sys.partitions p
-JOIN sys.destination_data_spaces dds ON p.partition_number = dds.destination_id
-JOIN sys.filegroups f ON dds.data_space_id = f.data_space_id
-WHERE OBJECT_NAME(OBJECT_ID) = 'order_reports'
-order by partition_number;
-
+9.-  ********** Ver si se creo la particion de esquema ********** 
 SELECT * FROM sys.partition_schemes;
+
+
+
+10.- **********  Create the Partitioned Table ********** 
+CREATE TABLE Movies (
+    MovieId int IDENTITY PRIMARY KEY, 
+    MovieName varchar(60)
+    )  
+    ON particion_personas(MovieId);  
+GO
+
+
+11.- **********  ver la información de la tabla ********** 
+SELECT name FROM OtherDb.dbo.Movies;
+
+12.- **********  Ver las tablas que tienen particiones  ********** 
+SELECT 
+    object_schema_name(i.object_id) AS [Schema],
+    object_name(i.object_id) AS [Object],
+    i.name AS [Index],
+    s.name AS [Partition Scheme]
+    FROM sys.indexes i
+    INNER JOIN sys.partition_schemes s ON i.data_space_id = s.data_space_id;
+
+
+
+13.-  ********** ver las cantidades de tuplas/ filas que tiene cada particion  ********** 
+SELECT partition_number,row_count FROM sys.dm_db_partition_stats WHERE object_id = OBJECT_ID('dbo.Movies');
+
+
+
+/////////////////////////// BIBLIOGRAFÍA ///////////////////////////
 
 FilesGrups
 https://www.mssqltips.com/sqlservertip/5832/move-sql-server-tables-to-different-filegroups/
