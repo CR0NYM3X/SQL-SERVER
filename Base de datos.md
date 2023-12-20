@@ -281,7 +281,11 @@ WITH (DROP_EXISTING = ON)
 ON NuevoFilegroup_ON_F;
 
 
+FilesGrups
 https://www.mssqltips.com/sqlservertip/5832/move-sql-server-tables-to-different-filegroups/
+
+Particiones 
+https://www.sqlservertutorial.net/sql-server-administration/sql-server-table-partitioning/
 
 ```
 
@@ -310,6 +314,7 @@ Se pueden basar en una columna específica (columna particionada) y así organiz
 
 - Ejemplo de uso de Particiones:
 En una tabla de registros históricos con datos que se extienden a lo largo de varios años, se podría utilizar particiones basadas en la fecha. Por ejemplo, se pueden crear particiones mensuales o anuales para organizar los datos. Esto facilitaría la gestión y el mantenimiento, así como la realización de consultas específicas sobre intervalos de tiempo con mayor eficiencia.
+
 ```
 
 
