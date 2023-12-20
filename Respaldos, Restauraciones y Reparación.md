@@ -124,7 +124,7 @@ WITH (
 ```
 ******* QUERY BACKUP COMPLETO *******
 USE [master]
-BACKUP DATABASE [MY_DBA_TEST]
+BACKUP DATABASE [MY_DBA_TEST]  ---- BACKUP LOG database_name 
 TO  DISK = N'C:\respaldo_nuevo_completo.bak' 
 WITH NOFORMAT, NOINIT, NAME = N'new_dba_test2-Full Database Backup',SKIP, NOREWIND, NOUNLOAD,  STATS = 10
 GO
