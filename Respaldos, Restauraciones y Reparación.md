@@ -63,14 +63,14 @@ Respaldos solo de data <br>
 
 # Ejemplos de uso:
 
-# Obtener la estructura de la base de datos
+# Obtener la estructura de los objetos de una la base de datos
 ![dba-struc-obj-sql](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/img/estructra_objetos_db.png)
 
-# Obtener la estructura de los objetos de una la base de datos
+# Obtener la estructura de la base de datos
 ![dba-struc-sql](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/img/estructura_de_dba.png)
 
 # Ambientación 
-Pasar tablas de un servidor a otro desde SQL  management studio
+Pasar tablas de un servidor SQL Server  a otro SQL Server  desde SQL  management studio
 ![ambiente-sql](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/img/ambientaci%C3%B3n.jpg)
 
 ### 1.- exportar toda la información de una tabla en un archivo csv y volverla a importar
