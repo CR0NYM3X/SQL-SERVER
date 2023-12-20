@@ -24,5 +24,5 @@
 
 
 # Páginas para info de sql server:
-https://blog.sqlauthority.com/
-
+https://blog.sqlauthority.com/ <br>
+https://www.mssqltips.com/
