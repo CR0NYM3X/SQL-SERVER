@@ -25,4 +25,5 @@
 
 # Páginas para info de sql server:
 https://blog.sqlauthority.com/ <br>
-https://www.mssqltips.com/sql-server-categories/
+https://www.mssqltips.com/sql-server-categories/ <br>
+https://www.sqlservertutorial.net/
