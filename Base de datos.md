@@ -1,4 +1,9 @@
 
+# saber todos los objetos que hay 
+```
+select * from  sys.all_objects
+```
+
 # Cambiar de compatiblidad o version 
 ```
 ALTER DATABASE [new_dba_test24] SET COMPATIBILITY_LEVEL = 100
@@ -104,9 +109,10 @@ select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_
 ALTER DATABASE [MY_dba_TEST]
 MODIFY FILE (
     NAME = 'NOMBRE_DE_FILEGROUP',
-    SIZE = 5GB,
+ -- SIZE = 5GB,
     MAXSIZE = UNLIMITED,
     FILEGROWTH = 100MB
+ -- FILENAME = 'F:\NuevoDirectorio\NombreArchivo.mdf'
 );
 ```
 
@@ -240,10 +246,72 @@ select * from
     SELECT name, collation_name  FROM sys.databases
 
 
-### Info extra
+### Mover tablas a filegroups 
+```
+ALTER DATABASE monitoreo_app
+ADD FILEGROUP NuevoFilegroup_ON_F;
+
+
+ALTER DATABASE monitoreo_app
+ADD FILE (
+    NAME = NuevoArchivo_ON_F,
+    FILENAME = 'F:\RutaHaciaF\NuevoArchivo.ndf',
+    SIZE = 5GB, -- Ajusta el tamaño según sea necesario
+    MAXSIZE = 20GB, -- Tamaño máximo permitido en el disco F
+    FILEGROWTH = 1GB
+)
+TO FILEGROUP NuevoFilegroup_ON_F;
+
+
+SELECT * FROM sys.filegroups
+
+
+
+SELECT o.[name] AS TableName, i.[name] AS IndexName, fg.[name] AS FileGroupName
+FROM sys.indexes i
+INNER JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
+INNER JOIN sys.all_objects o ON i.[object_id] = o.[object_id]
+WHERE i.data_space_id = fg.data_space_id AND o.type = 'U'
+
+
+
+CREATE UNIQUE CLUSTERED INDEX PK_registro_servidor
+ON registros_servidores(columna_clave) -- Reemplaza 'columna_clave' con tu clave primaria
+WITH (DROP_EXISTING = ON)
+ON NuevoFilegroup_ON_F;
+
+
+https://www.mssqltips.com/sqlservertip/5832/move-sql-server-tables-to-different-filegroups/
+
+```
+
+
+
+# Info extra
 ```
  sys.dm_os_volume_stats(f.database_id, f.file_id)
 ```
+
+### DIFERENCIA DE Filegroups Y Particiones
+```
+- Filegroups:
+Son conjuntos lógicos de archivos de base de datos.
+Permiten distribuir y administrar la ubicación física de los datos en la base de datos.
+Pueden ayudar a mejorar el rendimiento, ya que permiten colocar objetos específicos en diferentes discos o unidades de almacenamiento.
+Se pueden realizar copias de seguridad y restauraciones de un filegroup específico, lo que facilita la gestión de datos.
+
+- Ejemplo de uso de Filegroups:
+ Supongamos que se tiene una base de datos con tablas grandes y tablas más pequeñas. Para mejorar el rendimiento, se podrían asignar filegroups separados para las tablas grandes y las tablas pequeñas. De esta manera, los datos de las tablas grandes podrían residir en discos rápidos, mientras que los de las tablas más pequeñas podrían estar en discos más económicos.
+
+- Particiones:
+Dividen tablas o índices en secciones más pequeñas y manejables.
+Facilitan la administración y el mantenimiento de grandes volúmenes de datos al dividirlos en partes más pequeñas y lógicas.
+Se pueden basar en una columna específica (columna particionada) y así organizar los datos en función de valores de esa columna.
+
+- Ejemplo de uso de Particiones:
+En una tabla de registros históricos con datos que se extienden a lo largo de varios años, se podría utilizar particiones basadas en la fecha. Por ejemplo, se pueden crear particiones mensuales o anuales para organizar los datos. Esto facilitaría la gestión y el mantenimiento, así como la realización de consultas específicas sobre intervalos de tiempo con mayor eficiencia.
+```
+
 
 ### Bibliografía 
 ```
