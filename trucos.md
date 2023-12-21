@@ -11,6 +11,7 @@ execute SYS.sp_MSforeachdb 'select @@version'
 
 ### Hacer casting o conversióin de datos
 ```
+cast( 5000 as  decimal(10,2))
 SELECT CAST(@numero AS VARCHAR(50)) AS NumeroComoVarchar;
 SELECT CONVERT(VARCHAR(50), @numero) AS NumeroComoVarchar;
 ```
