@@ -278,6 +278,78 @@ SELECT * FROM Documentos WHERE CONTAINS(Contenido, '"frase exacta"');
 SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n)');
 ```
 
+
+### Monitor CPU and Memory usage for all SQL Server instances
+
+```SQL 
+
+declare 
+    @CPU_Usage_Percentage int, 
+    @Total_SQL_Server_Memory_MB int
+
+
+-- CPU
+WITH y AS (
+    SELECT      
+        CONVERT(VARCHAR(5), 100 - ca.c.value('.', 'INT')) AS system_idle,
+        CONVERT(VARCHAR(30), rb.event_date) AS event_date,
+        CONVERT(VARCHAR(8000), rb.record) AS record
+    FROM (   
+        SELECT 
+            CONVERT(XML, dorb.record) AS record,
+            DATEADD(ms, ( ts.ms_ticks - dorb.timestamp ), GETDATE()) AS event_date
+        FROM   sys.dm_os_ring_buffers AS dorb
+            CROSS JOIN ( 
+                SELECT 
+                    dosi.ms_ticks 
+                FROM sys.dm_os_sys_info AS dosi ) AS ts
+                WHERE   dorb.ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'
+                        AND record LIKE '%%' ) AS rb
+            CROSS APPLY rb.record.nodes('/Record/SchedulerMonitorEvent/SystemHealth/SystemIdle') AS ca(c)
+        )
+    SELECT @CPU_Usage_Percentage = (select 
+        TOP 1 y.system_idle
+    FROM y 
+    ORDER BY y.event_date DESC)
+
+
+-- memory
+select @Total_SQL_Server_Memory_MB = (select 
+    cntr_value / 1024
+from sys.dm_os_performance_counters pc
+where   [object_name] = 'SQLServer:Memory Manager'
+        and counter_name = 'Total Server Memory (KB)'                                                                                                        
+)
+
+
+select 
+    SERVERPROPERTY('SERVERNAME') AS 'Instance',
+    (SELECT  sqlserver_start_time FROM sys.dm_os_sys_info) as sqlserver_start_time,
+    (SELECT  cpu_count   FROM sys.dm_os_sys_info) as cpu_count,
+    (SELECT hyperthread_ratio  FROM sys.dm_os_sys_info) as hyperthread_ratio,
+    @CPU_Usage_Percentage           [CPU_Usage_Percentage], 
+    @Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
+-- (SELECT value_in_use FROM sys.configurations WHERE name like '%max server memory%') AS 'Max Server Memory RAM',
+   (SELECT physical_memory_in_use_kb/1024 FROM sys.dm_os_process_memory) AS 'SQL Server Memory RAM Usage (MB)',
+   (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Total Memory Ram OS (MB)',
+   (SELECT (total_physical_memory_kb - available_physical_memory_kb)/1024 FROM sys.dm_os_sys_memory) as Memory_used_OS,
+   (SELECT available_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Available Memory RAM OS (MB)',
+   (SELECT system_memory_state_desc FROM sys.dm_os_sys_memory) AS 'System Memory State',
+   (SELECT [cntr_value] FROM sys.dm_os_performance_counters WHERE [object_name] LIKE '%Manager%' AND [counter_name] = 'Page life expectancy') AS 'Page Life Expectancy',
+   GETDATE() AS 'Data Sample Timestamp'
+
+
+
+
+
+-- Otros links:
+-- Link : https://learn.microsoft.com/en-us/sql/relational-databases/performance-monitor/monitor-memory-usage?view=sql-server-ver16
+-- Link:  https://www.mssqltips.com/sqlservertip/5724/monitor-cpu-and-memory-usage-for-all-sql-server-instances-using-powershell/
+-- Link : https://dba.stackexchange.com/questions/298516/how-to-know-real-sql-server-memory-and-cpu-usage
+-- Link : http://udayarumilli.com/monitor-cpu-utilization-io-usage-and-memory-usage-in-sql-server/
+
+```
+
 ### ver sesiones activas o inactivas
 ```
 SELECT 
