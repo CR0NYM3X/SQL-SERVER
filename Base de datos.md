@@ -334,6 +334,41 @@ SELECT partition_number,row_count FROM sys.dm_db_partition_stats WHERE object_id
 
 
 
+************* VER CONFIGURACIÓN DE LAS PARTICIONES *************
+
+SELECT FN.name, FN.fanout, VL.boundary_id, VL.value 
+FROM sys.partition_functions FN
+INNER JOIN sys.partition_range_values VL
+ON FN.function_id = VL.function_id
+
+
+SELECT
+	 t.name tabla
+--	,FILEGROUP_NAME(i.data_space_id)
+	,t.type_desc tipo_tb 
+	,i.name index_
+	,i.type_desc tipo_index
+	,is_primary_key
+	,f.name filegroup_
+	,f.type_desc filegroup_type 
+	,rows 
+	,partition_number
+	,z.name,physical_name 
+FROM SYS.tables t
+INNER JOIN      
+    sys.indexes i ON t.object_id = i.object_id
+INNER JOIN 
+	sys.data_spaces  f on  i.data_space_id = f.data_space_id
+INNER JOIN 
+	sys.partitions g ON t.object_id = g.object_id and  i.index_id = g.index_id
+left JOIN 
+	sys.master_files z ON  z.data_space_id = f.data_space_id and z.type_desc = 'ROWS' and database_id= DB_ID()
+	order by t.name, partition_number desc 
+
+
+********
+SELECT *, $PARTITION.pfDatos(FECHA) [Partition] FROM dbo.Movies 
+
 /////////////////////////// BIBLIOGRAFÍA ///////////////////////////
 
 FilesGrups
