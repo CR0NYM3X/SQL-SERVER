@@ -325,7 +325,20 @@ SELECT NationalIDNumber, EncryptedNationalIDNumber
 GO
 ```
 
+# Enmascarar columnas  
+```
+link: https://www.geopits.com/blog/dynamic-data-masking-in-sql-server.html
 
+EXECUTE AS USER = 'test2';
+	select * from PasswordEnvioMensajeria
+REVERT;
+
+ Alter table [Table Name] ALTER [Column Name] ADD MASKED WITH (FUNCTION = 'default()')
+
+
+GRANT unmask   TO test2;
+revoke unmask   TO test2;
+```
 
 ### Bibliografia :
 ```
