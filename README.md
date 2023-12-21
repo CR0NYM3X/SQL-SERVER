@@ -27,5 +27,6 @@
 https://blog.sqlauthority.com/ <br>
 https://www.mssqltips.com/sql-server-categories/ <br>
 https://www.sqlservertutorial.net/
+https://udayarumilli.com/mssql-security-interview-questions-answers/
 
 https://database.guide/category/dbms/rdbms/sql-server/
