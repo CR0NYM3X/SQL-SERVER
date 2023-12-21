@@ -1,17 +1,18 @@
 
+
 # saber todos los objetos que hay 
-```
+```SQL
 select * from  sys.all_objects
 ```
 
 # Cambiar de compatiblidad o version 
-```
+```SQL
 ALTER DATABASE [new_dba_test24] SET COMPATIBILITY_LEVEL = 100
 SELECT compatibility_level,* FROM sys.databases
 ```
 
 ### funciones 
-```
+```SQL
 select   DB_ID()
 select   DB_NAME(5)
 select   SCHEMA_NAME(2)
@@ -21,14 +22,14 @@ select   SCHEMA_NAME(2)
 1.- los tipos de creacion de base de datos como el tema de primaryetc etc <br>
 2.- si se pueden dividir/particionar los archivos de una base de datos <br>
 3.- saber mas sobre estas tablas a detalles
-```
+```SQL
 select * from  sys.filegroups
 select * from sys.data_spaces 
 select * from  sys.master_files --- obtener las rutas pysica de la base de datos
 ```
 
 ### Cambiar los estados de la base de datos
-```
+```SQL
 ******* MODO OFFLINE Y ONLINE *******
 use master 
 ALTER DATABASE new_dba_test24 SET OFFLINE;
@@ -60,7 +61,7 @@ OFFLINE_SECONDARY: Se utiliza en grupos de disponibilidad Always On para deshabi
 
 **`[NOTA]`** El campo **FILEGROWTH** es relevante/inutil si se asigno un tamaño maximo en el campo (MAXSIZE). por ejemplo, si se asigno como maximo 100GB y colocasque que icrementara 1GB en el campo FILEGROWTH, esto no va funcionar , no va incrementar la dba, esto solo funciona cuando se coloca como MAXSIZE ilimitado.
 
-```
+```SQL
 CREATE DATABASE NombreBaseDatos ON 
 PRIMARY (
     NAME = 'DatosPrimarios',
@@ -94,7 +95,7 @@ LOG ON (
 ```
 
 ### Ver la ruta de archivos  MDF, NDF, LDF  donde se guarda las base de datos 
-```
+```SQL
 SELECT a.name as name_file  , physical_name AS RutaArchivo, a.database_id,b.name as name_database
 FROM sys.master_files a
 left join sys.databases  b  on a.database_id = b.database_id order by b.name
@@ -119,7 +120,7 @@ MODIFY FILE (
 ### Reducir el tamaño de una base de datos 
 
 
-```
+```SQL
 *********** PARA BUSCAR EL NOMBRE DEL ARCHIVO A REDUCIR ***********
 select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
 
@@ -132,7 +133,7 @@ DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
 ```
 
 ### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
-```
+```SQL
 ******* OPCION #1 *******
 SELECT
     DB_NAME(database_id) AS 'Nombre de la base de datos',
@@ -161,20 +162,20 @@ DBCC SQLPERF(logspace);
     ALTER DATABASE my_db_old Modify Name = my_db_new ;
 
 ### Saber la base de datos en la que estoy conectado
-```
+```SQL
 select * from sys.databases where database_id=  DB_ID(); 
 
 SELECT DB_NAME()
 ```
 
 ### Saber la rutas donde se guardan las base de datos 
-```
+```SQL
 select * from sys.sysaltfiles ;
 select * from sys.master_files;
 ```
 
 ### Elimina una base de datos 
-```
+```SQL
     EXEC msdb.dbo.sp_delete_database_backuphistory @database_name = N'SQLTestDB'
 GO
 
@@ -185,20 +186,21 @@ GO
 ```
 
 ### poner en estado online o offline 
+```SQL
     ALTER DATABASE NombreDeLaBaseDeDatos SET ONLINE;
     ALTER DATABASE NombreDeLaBaseDeDatos SET OFFLINE;
-
+```
 
 ###  Ver el limite de conexiones que se permiten por Base de datos:
 
-```
+```SQL
 select  @@MAX_CONNECTIONS -- maximo conexiones
 
 SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections;
 ```
 
 ### Ver el tamaño de la base de datos:
-```
+```SQL
 --- Procedimiento almacenado 
 sp_helpdb
 
@@ -230,7 +232,7 @@ Order by [Base de datos]
 ```
 
 ### Saber la base de datos, sizedata y sizelog y que unidad estan
-```
+```SQL
 select * from 
   (select name , ( select filename from sys.sysaltfiles where dbid= database_id and fileid=1 ) as sqldata,
   ( select filename from sys.sysaltfiles where dbid= database_id and fileid=2 ) as sqllog,
@@ -247,7 +249,7 @@ select * from
 
 
 ### CREAR PARTICIONES Y FILEGROUPS 
-```
+```SQL
  CREATE TABLE Personas (
     PersonaID INT PRIMARY KEY,
     Nombre NVARCHAR(50),
@@ -350,7 +352,7 @@ https://www.guillesql.es/Articulos/Particionamiento_tablas_indices_SQLServer_Par
 
 
 # Info extra
-```
+```SQL
  sys.dm_os_volume_stats(f.database_id, f.file_id)
 ```
 
