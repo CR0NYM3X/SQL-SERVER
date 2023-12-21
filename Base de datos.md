@@ -342,6 +342,9 @@ https://www.sqlservertutorial.net/sql-server-administration/sql-server-table-par
 https://www.sqlservertutorial.net/sql-server-administration/sql-server-partition-existing-table/
 https://database.guide/create-a-partitioned-table-in-sql-server-t-sql/
 
+https://www.gpsos.es/2019/04/particionamiento-de-tablas-e-indices-t-sql-en-sql-server/
+https://www.guillesql.es/Articulos/Particionamiento_tablas_indices_SQLServer_Partitioning.html
+
 ```
 
 
