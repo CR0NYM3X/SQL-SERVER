@@ -296,9 +296,30 @@ WHERE
 ---  status = 'running' -- Filtra las conexiones activas
 ```
 
-###
+### info extra
 ```
  
+
+SELECT 
+	cpu_count
+	,hyperthread_ratio
+	,((physical_memory_in_bytes/1024 /*KB*/) /1024 /*MB*/)
+FROM sys.dm_os_sys_info
+
+ 
+
+SELECT cast((physical_memory_in_use_kb/1024)as  decimal(10,2)), * FROM sys.dm_os_process_memory
+
+SELECT 
+	cast(cast(((total_physical_memory_kb/1024 /*MG*/) ) as  decimal(10,2))/1024 as  decimal(15,2)) total_physical_memory
+	,cast(cast(((available_physical_memory_kb/1024 /*MG*/) ) as  decimal(10,2))/1024 as  decimal(15,2)) available_physical_memory  
+FROM sys.dm_os_sys_memory
+
+
+
+	SELECT * FROM  sys.dm_os_tasks  where task_state = 'RUNNING'
+	SELECT * FROM  sys.dm_os_threads
+	 
 
 ```
 
