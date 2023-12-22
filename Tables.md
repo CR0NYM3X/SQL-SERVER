@@ -325,8 +325,8 @@ SELECT NationalIDNumber, EncryptedNationalIDNumber
 GO
 ```
 
-# Enmascarar columnas  
-```
+# Enmascarar columnas  / Dynamic Data Masking
+```SQL
 link: https://www.geopits.com/blog/dynamic-data-masking-in-sql-server.html
 
 EXECUTE AS USER = 'test2';
@@ -334,6 +334,11 @@ EXECUTE AS USER = 'test2';
 REVERT;
 
  Alter table [Table Name] ALTER [Column Name] ADD MASKED WITH (FUNCTION = 'default()')
+---
+DEFAULT: Oculta los datos reemplazándolos con una máscara predeterminada según el tipo de datos.
+EMAIL(): Muestra solo los primeros caracteres del correo electrónico y oculta el resto.
+PARTIAL(X,Y): Muestra los primeros X caracteres y los últimos Y caracteres, ocultando el resto.
+RANDOM(X,Y): Reemplaza el valor original con un valor aleatorio entre X e Y.
 
 
 GRANT unmask   TO test2;
