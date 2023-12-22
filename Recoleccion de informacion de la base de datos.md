@@ -1,4 +1,6 @@
 
+### ver el modelo del servidor 
+wmic csproduct get name, identifyingnumber
 
 ### OBTENER, IP DEL SERVIDOR, EL HOSTNAME, VERSION Y CANTIDAD DE BASE DE DATOS 
 ```
