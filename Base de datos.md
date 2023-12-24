@@ -6,6 +6,7 @@ select * from  sys.all_objects
 ```
 
 # Cambiar de compatiblidad o version 
+Esto sirve si cuantas con funciones que son de version mas antiguas y quieres que sean compatibles con tu sql server
 ```SQL
 ALTER DATABASE [new_dba_test24] SET COMPATIBILITY_LEVEL = 100
 SELECT compatibility_level,* FROM sys.databases
@@ -26,6 +27,8 @@ select   SCHEMA_NAME(2)
 select * from  sys.filegroups
 select * from sys.data_spaces 
 select * from  sys.master_files --- obtener las rutas pysica de la base de datos
+select * from  sys.sysaltfiles
+select * FROM sys.database_files;
 ```
 
 ### Cambiar los estados de la base de datos
@@ -102,7 +105,7 @@ left join sys.databases  b  on a.database_id = b.database_id order by b.name
 ```
 
 ###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS NO PARA DISMINUIR
-```
+```sql
 *********** PARA BUSCAR EL NOMBRE DEL ARCHIVO ***********
 select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
 
@@ -136,16 +139,18 @@ DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
 ```SQL
 ******* OPCION #1 *******
 SELECT
-    DB_NAME(database_id) AS 'Nombre de la base de datos',
-    name AS 'Nombre del archivo',
-    size * 8 / 1024 AS 'Tamaño actual (MB)',
-    FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)',
-    physical_name AS 'Ruta física',
-    CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)',
-     CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+     DB_NAME(database_id) AS 'Nombre de la base de datos'
+    ,name AS 'Nombre del archivo'
+    ,size * 8 / 1024 AS 'Tamaño total del archivo (MB)'
+    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)'
+    ,CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+    ,FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)'
+    ,(size * 8 / 1024) - (FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 ) as 'Espacio disponible (MB)'
+    ,physical_name AS 'Ruta física'
+    ,LEFT(physical_name, 1) unidad_disco
 FROM sys.master_files
-where database_id =  DB_ID()
-ORDER BY database_id;
+	where database_id =  DB_ID()
+ORDER BY LEFT(physical_name, 1) asc, database_id;
 
 ******* OPCION #2 *******
 SELECT name, size/128.0 FileSizeInMB,
@@ -205,30 +210,14 @@ SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections
 sp_helpdb
 
 ---- este te dice en general cuanto pesa toda la base de datos 
-SELECT 
+ SELECT 
       database_name = DB_NAME(database_id)
-    , log_size_mb = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
-    , row_size_mb = CAST(SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
+    , LDF_size_mb = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
+    , MDF_size_mb = CAST(SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
     , total_size_mb = CAST(SUM(size) * 8. / 1024 AS DECIMAL(8,2)) 
 FROM sys.master_files WITH(NOWAIT)
 where database_id > 4 --- skip system databases 
 GROUP BY database_id
-
----- este te dice cuanto pesa cada archivo data y log
-SELECT db.[database_id] AS 'Id_Bd',
-af.[filename] AS 'Ubicacion',
-db.[name] AS 'Base de datos',
-af.[name] AS 'Nombe Logico',
-CONVERT(numeric(15,2),((((CONVERT(numeric(15,2),SUM(size)) * (SELECT low FROM master.dbo.spt_values (NOLOCK) WHERE number = 1 
-AND type = 'E')) / 1024.)/1024.))) AS 'Tamaño en MB',
-CONVERT(numeric(15,2),((((CONVERT(numeric(15,2),SUM(af.size)) * (SELECT low FROM master.dbo.spt_values (NOLOCK) WHERE number = 1 
-AND type = 'E')) / 1024.)/1024.)/1024.)) AS 'Tamaño en GB'
-FROM sys.databases db INNER JOIN sys.sysaltfiles af ON db.database_id = af.dbid
-WHERE [fileid] in (1,2) GROUP BY db.[database_id] , db.[name], af.[name], af.[filename]
-Order by [Base de datos]
-
-
-
 ```
 
 ### Saber la base de datos, sizedata y sizelog y que unidad estan
