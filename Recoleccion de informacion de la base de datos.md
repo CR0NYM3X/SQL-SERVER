@@ -2,12 +2,31 @@
 ### ver el modelo del servidor 
 wmic csproduct get name, identifyingnumber
 
-### OBTENER, IP DEL SERVIDOR, EL HOSTNAME, VERSION Y CANTIDAD DE BASE DE DATOS 
+### OBTENER, IP DEL SERVIDOR, puerto del servidor, EL HOSTNAME, VERSION Y CANTIDAD DE BASE DE DATOS 
+```sql
+select     (SELECT local_net_address FROM sys.dm_exec_connections where   session_id = @@SPID  ) IP_SERVER,
+	   (SELECT  local_tcp_port FROM sys.dm_exec_connections where   session_id = @@SPID  ) PORT_SERVER,
+            @@SERVERNAME hostname,
+	    @@servicename instancia,
+           (SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version , 
+	   (select count(*) from sys.databases where database_id > 4 ) cnt_db
+
+
 ```
-select (SELECT local_net_address FROM sys.dm_exec_connections WHERE session_id = @@SPID) IP_SERVER, @@SERVERNAME hostname,
-(SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version , (select count(*)
-from sys.databases where database_id > 4 ) cnt_db
+
+### Saber cuantas instanacias tiene el servidor 
+```SQL
+
+********** SABER LAS CANTIDADES DE INSTANCIAS QUE HAY EN EL SERVIDOR **********
+EXEC xp_regread 'HKEY_LOCAL_MACHINE', 'SOFTWARE\Microsoft\Microsoft SQL Server', 'InstalledInstances'
+
+
+********** CONECTADO EN ESCRITORIO REMOTO USAMOS LA HERRAMIENTA SQLCMD **********
+SQLCMD -L
+
 ```
+
+
 
 ### Saber la ip del server o tu ip
 ```
