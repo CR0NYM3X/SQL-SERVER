@@ -68,7 +68,7 @@ sp_configure 'show advanced options', 1; --- cambia la configuración de sql ser
 # Lectura y modificacion del registro de windows 
 
 **xp_regread, xp_regwrite:** Estas funciones permiten leer y escribir en el registro /regedit del sistema. Si se usan sin restricciones, podrían abrir la puerta a cambios no autorizados en la configuración del servidor.
-```
+```SQL
 ********** procedimientos **********
 xp_regaddmultistring
 xp_regdeletekey
@@ -107,6 +107,9 @@ SELECT @ProductName AS 'ProductName',
        @BuildLab AS 'BuildLab',
        @EditionID AS 'EditionID',
        @ProductId AS 'ProductId';
+
+********** SABER LAS CANTIDADES DE INSTANCIAS QUE HAY EN EL SERVIDOR **********
+EXEC xp_regread 'HKEY_LOCAL_MACHINE', 'SOFTWARE\Microsoft\Microsoft SQL Server', 'InstalledInstances'
 
 ********** Leer registros Opcion #2 **********
 ---  acceder a configuraciones y parámetros almacenados en el registro de Windows que están asociados con la instancia de SQL Server actual
