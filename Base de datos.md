@@ -97,11 +97,31 @@ LOG ON (
  WITH CATALOG_COLLATION = DATABASE_DEFAULT;
 ```
 
-### Ver la ruta de archivos  MDF, NDF, LDF  donde se guarda las base de datos 
+### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
 ```SQL
-SELECT a.name as name_file  , physical_name AS RutaArchivo, a.database_id,b.name as name_database
-FROM sys.master_files a
-left join sys.databases  b  on a.database_id = b.database_id order by b.name
+******* OPCION #1 *******
+SELECT
+     DB_NAME(database_id) AS 'Nombre de la base de datos'
+    ,name AS 'Nombre del archivo'
+    ,size * 8 / 1024 AS 'Tamaño total del archivo (MB)'
+    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)'
+    ,CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+    ,FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)'
+    ,(size * 8 / 1024) - (FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 ) as 'Espacio disponible (MB)'
+    ,physical_name AS 'Ruta física'
+    ,LEFT(physical_name, 1) unidad_disco
+FROM sys.master_files
+	where database_id =  DB_ID()
+ORDER BY LEFT(physical_name, 1) asc, database_id;
+
+******* OPCION #2 *******
+SELECT name, size/128.0 FileSizeInMB,
+size/128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS int)/128.0 
+   AS EmptySpaceInMB
+FROM sys.database_files;
+
+******* OPCION #3 *******
+DBCC SQLPERF(logspace);
 ```
 
 ###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS NO PARA DISMINUIR
@@ -135,32 +155,6 @@ DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
 
 ```
 
-### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
-```SQL
-******* OPCION #1 *******
-SELECT
-     DB_NAME(database_id) AS 'Nombre de la base de datos'
-    ,name AS 'Nombre del archivo'
-    ,size * 8 / 1024 AS 'Tamaño total del archivo (MB)'
-    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)'
-    ,CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
-    ,FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)'
-    ,(size * 8 / 1024) - (FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 ) as 'Espacio disponible (MB)'
-    ,physical_name AS 'Ruta física'
-    ,LEFT(physical_name, 1) unidad_disco
-FROM sys.master_files
-	where database_id =  DB_ID()
-ORDER BY LEFT(physical_name, 1) asc, database_id;
-
-******* OPCION #2 *******
-SELECT name, size/128.0 FileSizeInMB,
-size/128.0 - CAST(FILEPROPERTY(name, 'SpaceUsed') AS int)/128.0 
-   AS EmptySpaceInMB
-FROM sys.database_files;
-
-******* OPCION #3 *******
-DBCC SQLPERF(logspace);
-```
 
 
 ### Cambiar el nombre a una base de datos:
