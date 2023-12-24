@@ -112,7 +112,7 @@ SELECT @ProductName AS 'ProductName',
 ---  acceder a configuraciones y parámetros almacenados en el registro de Windows que están asociados con la instancia de SQL Server actual
 EXEC xp_instance_regread 
     N'HKEY_LOCAL_MACHINE',
-    N'Software\Microsoft\MSSQLServer\MSSQLServer' N'BackupDirectory';
+    N'Software\Microsoft\MSSQLServer\MSSQLServer', N'BackupDirectory';
 
 ----- otros parámetros
   N'Software\Microsoft\MSSQLServer\MSSQLServer', N'BackupDirectory';
