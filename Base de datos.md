@@ -94,7 +94,12 @@ LOG ON (
     MAXSIZE = 1GB,  -- Tamaño máximo del archivo de registro de transacciones
     FILEGROWTH = 20%  -- Crecimiento automático del archivo de registro de transacciones, puedes ponerlo 5 MB
 )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT;
+COLLATE   Latin1_General_CI_AS;
+```
+# Modificar el collate de una base de datos 
+```sql
+ALTER DATABASE MyOptionsTest  
+COLLATE French_CI_AS ;  
 ```
 
 ### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
