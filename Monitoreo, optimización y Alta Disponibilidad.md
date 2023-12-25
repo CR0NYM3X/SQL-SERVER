@@ -45,6 +45,7 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sys.dm_os_performance_counters:`** Ofrece información sobre contadores de rendimiento de SQL Server que pueden ser cruciales para monitorear el rendimiento general del servidor.  <br>
 **`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado
 **`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.
+SELECT * FROM sys.dm_tran_active_transactions;
 
 
 # ingresar el proc sp_who2  a una tabla temporal
@@ -237,6 +238,24 @@ SELECT qs.execution_count,
 FROM sys.dm_exec_query_stats qs
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
 CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
+
+
+
+ 	SELECT TOP 10
+	        t.text ,
+	        execution_count ,
+	        statement_start_offset AS stmt_start_offset ,
+	        sql_handle ,
+	        plan_handle ,
+	        total_logical_reads / execution_count AS avg_logical_reads ,
+	        total_logical_writes / execution_count AS avg_logical_writes ,
+	        total_physical_reads / execution_count AS avg_physical_reads
+	FROM	sys.dm_exec_query_stats AS s
+	        CROSS APPLY sys.dm_exec_sql_text(s.sql_handle) AS t
+	ORDER BY avg_physical_reads DESC;
+
+
+
 ```
 
 
@@ -283,7 +302,9 @@ SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n
 
 ### Monitor CPU and Memory usage for all SQL Server instances
 
-```SQL 
+```SQL
+
+---  SELECT @@cpu_busy AS "CPU Busy"
 
 declare 
     @CPU_Usage_Percentage int, 
@@ -398,5 +419,5 @@ FROM sys.dm_os_sys_memory
 ```
 
 # Bibliografías : 
-https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/
-
+https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
+monitorear: https://sqlperformance.com/2015/03/io-subsystem/monitoring-read-write-latency
