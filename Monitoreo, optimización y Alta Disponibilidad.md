@@ -174,16 +174,18 @@ FROM sys.database_files'
 ```
 ******* OPCION #1 *******
 SELECT
-    DB_NAME(database_id) AS 'Nombre de la base de datos',
-    name AS 'Nombre del archivo',
-    size * 8 / 1024 AS 'Tamaño actual (MB)',
-    FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)',
-    physical_name AS 'Ruta física',
-    CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)',
-     CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+     DB_NAME(database_id) AS 'Nombre de la base de datos'
+    ,name AS 'Nombre del archivo'
+    ,size * 8 / 1024 AS 'Tamaño total del archivo (MB)'
+    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)'
+    ,CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+    ,FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)'
+    ,(size * 8 / 1024) - (FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 ) as 'Espacio disponible (MB)'
+    ,physical_name AS 'Ruta física'
+    ,LEFT(physical_name, 1) unidad_disco
 FROM sys.master_files
-where database_id =  DB_ID()
-ORDER BY database_id;
+	where database_id =  DB_ID()
+ORDER BY LEFT(physical_name, 1) asc, database_id;
 
 ******* OPCION #2 *******
 SELECT name, size/128.0 FileSizeInMB,
