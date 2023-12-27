@@ -338,12 +338,13 @@ select
 	WHERE counter_name IN ('CPU usage %', 'CPU usage % base') AND instance_name = 'default' ) t) as decimal(18,2)) CPU_SQL,
 
 
-	@Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
--- (SELECT physical_memory_in_use_kb/1024 FROM sys.dm_os_process_memory) AS 'SQL Server Memory RAM Usage (MB)',
-   (SELECT value_in_use FROM sys.configurations WHERE name like '%max server memory%') AS 'Max Server Memory RAM',
+
    (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Total Memory Ram OS (MB)',
    (SELECT (total_physical_memory_kb - available_physical_memory_kb)/1024 FROM sys.dm_os_sys_memory) as Memory_used_OS,
    (SELECT available_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Available Memory RAM OS (MB)',
+   @Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
+-- (SELECT physical_memory_in_use_kb/1024 FROM sys.dm_os_process_memory) AS 'SQL Server Memory RAM Usage RAM (MB)',
+   (SELECT value_in_use FROM sys.configurations WHERE name like '%max server memory%') AS 'Max SQL Server Memory RAM (MB)',
    (SELECT system_memory_state_desc FROM sys.dm_os_sys_memory) AS 'System Memory State',
    (SELECT [cntr_value] FROM sys.dm_os_performance_counters WHERE [object_name] LIKE '%Manager%' AND [counter_name] = 'Page life expectancy') AS 'Page Life Expectancy',
    GETDATE() AS 'Data Sample Timestamp'
