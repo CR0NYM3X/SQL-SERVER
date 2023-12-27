@@ -46,6 +46,7 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado
 **`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.
 SELECT * FROM sys.dm_tran_active_transactions;
+SELECT * FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL) AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert 
 
 
 # ingresar el proc sp_who2  a una tabla temporal
@@ -304,36 +305,12 @@ SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n
 
 ```SQL
 
+
+
 ---  SELECT @@cpu_busy AS "CPU Busy"
 
 declare 
-    @CPU_Usage_Percentage int, 
     @Total_SQL_Server_Memory_MB int
-
-
--- CPU
-WITH y AS (
-    SELECT      
-        CONVERT(VARCHAR(5), 100 - ca.c.value('.', 'INT')) AS system_idle,
-        CONVERT(VARCHAR(30), rb.event_date) AS event_date,
-        CONVERT(VARCHAR(8000), rb.record) AS record
-    FROM (   
-        SELECT 
-            CONVERT(XML, dorb.record) AS record,
-            DATEADD(ms, ( ts.ms_ticks - dorb.timestamp ), GETDATE()) AS event_date
-        FROM   sys.dm_os_ring_buffers AS dorb
-            CROSS JOIN ( 
-                SELECT 
-                    dosi.ms_ticks 
-                FROM sys.dm_os_sys_info AS dosi ) AS ts
-                WHERE   dorb.ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'
-                        AND record LIKE '%%' ) AS rb
-            CROSS APPLY rb.record.nodes('/Record/SchedulerMonitorEvent/SystemHealth/SystemIdle') AS ca(c)
-        )
-    SELECT @CPU_Usage_Percentage = (select 
-        TOP 1 y.system_idle
-    FROM y 
-    ORDER BY y.event_date DESC)
 
 
 -- memory
@@ -350,8 +327,18 @@ select
     (SELECT  sqlserver_start_time FROM sys.dm_os_sys_info) as sqlserver_start_time,
     (SELECT  cpu_count   FROM sys.dm_os_sys_info) as cpu_count,
     (SELECT hyperthread_ratio  FROM sys.dm_os_sys_info) as hyperthread_ratio,
-    @CPU_Usage_Percentage           [CPU_Usage_Percentage], 
-    @Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
+  --  @CPU_Usage_Percentage           [CPU_Usage_Percentage], 
+	(SELECT    100 - x.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle/text())[1]', 'TINYINT')FROM (SELECT TOP(1) [timestamp], x = CONVERT(XML, record) 
+		FROM sys.dm_os_ring_buffers 
+	WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR' AND record LIKE '%%') t) as cpu_total,
+
+	cast((SELECT (MAX(CASE WHEN counter_name = 'CPU usage %' THEN t.cntr_value * 1. END) / MAX(CASE WHEN counter_name = 'CPU usage % base' THEN t.cntr_value END) ) * 100 
+		FROM (SELECT TOP(2) cntr_value, counter_name
+		FROM sys.dm_os_performance_counters
+	WHERE counter_name IN ('CPU usage %', 'CPU usage % base') AND instance_name = 'default' ) t) as decimal(18,2)) CPU_SQL,
+
+
+	@Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
 -- (SELECT physical_memory_in_use_kb/1024 FROM sys.dm_os_process_memory) AS 'SQL Server Memory RAM Usage (MB)',
    (SELECT value_in_use FROM sys.configurations WHERE name like '%max server memory%') AS 'Max Server Memory RAM',
    (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Total Memory Ram OS (MB)',
@@ -360,7 +347,6 @@ select
    (SELECT system_memory_state_desc FROM sys.dm_os_sys_memory) AS 'System Memory State',
    (SELECT [cntr_value] FROM sys.dm_os_performance_counters WHERE [object_name] LIKE '%Manager%' AND [counter_name] = 'Page life expectancy') AS 'Page Life Expectancy',
    GETDATE() AS 'Data Sample Timestamp'
-
 
 
 
@@ -391,8 +377,27 @@ WHERE
 ---  status = 'running' -- Filtra las conexiones activas
 ```
 
-### info extra
+### Ver si la base de datos le estan insertando o consultando 
 ```
+SELECT   
+
+  	SUBSTRING(volume_mount_point, 1, 1) AS Disco_OS
+	,total_bytes/1024/1024/1024 AS total_GB_OS
+    ,total_bytes/1024/1024/1024 - available_bytes/1024/1024/1024 AS Usado_GB_OS
+    ,available_bytes/1024/1024/1024 AS Disponible_GB_OS
+	,DB_NAME() dba ,num_of_reads ,num_of_writes ,type_desc ,name ,physical_name ,state_desc
+    ,size * 8 / 1024 AS 'Tamaño total del archivo (MB)'
+    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS 'Crecimiento (MB)'
+	,CASE WHEN max_size = -1 THEN 'Unlimited' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + ' MB' END AS MaxSize
+    ,FILEPROPERTY(name, 'SpaceUsed') * 8 / 1024 AS 'Espacio utilizado (MB)' 
+	  FROM sys.dm_io_virtual_file_stats(NULL, NULL) as a
+CROSS APPLY  sys.dm_os_volume_stats(a.database_id, a.file_id)
+left join  sys.master_files b on a.database_id=b.database_id and a.file_id = b.file_id
+where a.database_id = DB_ID()
+```
+
+### info extra
+```sql
  
 
 SELECT 
@@ -415,8 +420,36 @@ FROM sys.dm_os_sys_memory
 	SELECT * FROM  sys.dm_os_tasks  where task_state = 'RUNNING'
 	SELECT * FROM  sys.dm_os_threads
 	 
+ 
+
+*********************  Validar log  ***************
+ 
+SELECT 
+    top 100  tl.[Begin Time],[End Time], tl.[Transaction name],*
+FROM 
+    fn_dblog(NULL, NULL) AS TL
+	--where  [Transaction name] = 'BULK INSERT' 
+order by [Begin Time] desc
+
+
+********************* VERIFICAR LOS PORCENTAJES DEL PROCESADOR/ ESTADISTICAS DEL OS *********************
+
+
+SELECT 
+    cntr_value AS 'Uso_CPU',*
+FROM 
+    sys.dm_os_performance_counters
+WHERE 
+    object_name = N'SQLServer:Resource Pool Stats'
+    AND counter_name like N'%CPU%'
+    order by cntr_type 
+
 
 ```
+
+
+
+
 
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
