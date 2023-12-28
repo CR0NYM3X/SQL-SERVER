@@ -35,3 +35,5 @@ https://www.sqlskills.com/blogs/glenn/sql-server-diagnostic-information-queries-
 https://www.devart.com/dbforge/sql/
 https://www.red-gate.com/products/sql-monitor/resources/articles/monitor-sql-server-io
 https://www.red-gate.com/hub/product-learning
+
+https://dbadixit.com/
