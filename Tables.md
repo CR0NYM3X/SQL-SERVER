@@ -1,3 +1,17 @@
+
+### Realizar lecturas sin bloqueo en una tabla 
+
+- Ventajas:  <br>
+se realiza una lectura sin esperar que los recursos bloqueados por otras transacciones se liberen. Esto puede proporcionar una respuesta más rápida a la consulta, ya que no espera la finalización de las transacciones 
+
+- Desventajas <br>
+1.-  los datos podrían cambiar mientras se está realizando la lectura, lo que puede llevar a inconsistencias o a leer datos que ya no son válidos.<br>
+2.- Posibles datos incorrectos<br>
+3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción. 
+```
+SELECT  * from mitabla_test(NOLOCK)  where columna1 = 'hola';
+```
+
 ### Reiniciar el incrementable IDENTITY
 ```
  DBCC CHECKIDENT ('Credito.dbo.CatCiudad', RESEED, 0)
