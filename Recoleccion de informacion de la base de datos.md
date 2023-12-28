@@ -74,7 +74,7 @@ CROSS APPLY
  sys.dm_os_volume_stats(f.database_id, f.file_id)
  INNER JOIN sys.sysaltfiles af ON f.database_id = af.dbid
  where
-f.database_id not in (2) and f.physical_name not like '%.LDF%'
+f.database_id not in (2) -- and f.physical_name not like '%.LDF%'
 --and available_bytes > 75161927680
 order by Porcentaje_Usado desc
 ```
