@@ -474,7 +474,43 @@ drop index idx_Combinado  ON DESCRIPCION_ARTICULO
 
 ```
 
+### Bloques en  tablas DE SQL Server debido a varias situaciones:
+**`Bloqueo explícito:`** Cuando se ejecuta una transacción que modifica datos y se utiliza un bloqueo explícito como BEGIN TRANSACTION y COMMIT TRANSACTION, otras transacciones pueden ser bloqueadas para acceder a esos datos hasta que se complete la transacción actual.
 
+**`Bloqueo implícito:`** Las operaciones de escritura como UPDATE, DELETE o INSERT pueden bloquear una tabla o filas dentro de ella mientras se realizan, impidiendo que otras transacciones modifiquen esos mismos datos simultáneamente.
+
+**`Bloqueo de lectura:`** Las transacciones de lectura (SELECT) también pueden bloquear recursos en ciertas condiciones, como cuando se utilizan ciertos niveles de aislamiento de transacciones.
+
+```SQL
+
+/* 
+SIRVE PARA VER LOS BLOQUEAS QUE HAY ACTUALMENTE 
+*/
+ 
+ SELECT
+ TL.resource_associated_entity_id,
+    TL.resource_type,
+	TL.request_type,
+    DB_name(TL.resource_database_id) db,
+    TL.resource_associated_entity_id,
+    TL.request_mode,
+    TL.request_session_id,
+    ER.blocking_session_id,
+    ES.login_name,
+    ES.host_name,
+    ES.program_name,
+    ER.command,
+    ER.status,
+    ER.wait_type,
+	OBJ.name AS object_name,
+    SCHEMA_NAME(OBJ.schema_id) AS schema_name
+FROM sys.dm_tran_locks TL
+JOIN sys.dm_exec_requests ER ON TL.request_session_id = ER.session_id
+JOIN sys.dm_exec_sessions ES ON ER.session_id = ES.session_id
+LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
+ 
+
+```
 
 ### Bibliografia :
 ```
