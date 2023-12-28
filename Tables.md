@@ -418,11 +418,10 @@ de las columnas en el índice para optimizar las consultas.
 */
  
 ---- es lo mismo 
-CREATE INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2) INCLUDE (Detalles);
+CREATE INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2 desc ) INCLUDE (Detalles desc );
 CREATE INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
 
- 
-
+CREATE INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO ( ID_Articulo_2 desc);
 
 
 INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (1, 1, 'Camisa de algodón en varios colores.');
@@ -439,10 +438,10 @@ INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (4, 'Sombrero', 19.99
 INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (5, 'Bufanda', 14.99);
 
 /*
-Consultar la informacion  y forzar una consulta que utilice un index
+Consultar la informacion  y forzar una consulta que utilice un index, lo cual te mostrada los datos como tu lo guardaste
 */
 
-SELECT * FROM DESCRIPCION_ARTICULO WITH (INDEX = idx_DosColumnas) 
+SELECT * FROM DESCRIPCION_ARTICULO WITH (INDEX = idx_DosColumnas2) 
 SELECT * FROM ARTICULOS
 
 
