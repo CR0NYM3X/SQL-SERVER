@@ -439,11 +439,12 @@ INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (4, 'Sombrero', 19.99
 INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (5, 'Bufanda', 14.99);
 
 /*
-Consultar la informacion 
+Consultar la informacion  y forzar una consulta que utilice un index
 */
 
+SELECT * FROM DESCRIPCION_ARTICULO WITH (INDEX = idx_DosColumnas) 
 SELECT * FROM ARTICULOS
-SELECT * FROM DESCRIPCION_ARTICULO
+
 
 /* ---------------- DESCRIPCION ----------------
 Si intentas hacer un drop o truncate  la tabla que hace referencia el foring key en este ejemplo es "DESCRIPCION_ARTICULO"   te va aparecer los sigueintes errores
