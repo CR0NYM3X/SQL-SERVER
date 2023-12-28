@@ -389,7 +389,7 @@ CREATE TABLE ARTICULOS (
 );
 
 
-/* ---------------- DESCRIPCION ----------------
+/* ---------------- DESCRIPCION índice compuesto ----------------
 --->  Las restricciones para crear index
 1.- Tipo de datos y longitud: no se pueden crear índices en columnas de tipo text, ntext , image o varchar(max) ya que saldra el
 error "Column 'Detalles' in table 'DESCRIPCION_ARTICULO' is of a type that is invalid for use as a key column in an index."
@@ -402,8 +402,11 @@ puede afectar el rendimiento y el almacenamiento.
 de las columnas en el índice para optimizar las consultas.
 */
  
-CREATE INDEX idx_DosColumnas ON DESCRIPCION_ARTICULO ( Detalles desc); 
-CREATE INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO ( ID_Articulo_2);
+---- es lo mismo 
+CREATE INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2) INCLUDE (Detalles);
+CREATE INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
+
+ 
 
 
 
@@ -428,17 +431,25 @@ SELECT * FROM ARTICULOS
 SELECT * FROM DESCRIPCION_ARTICULO
 
 /* ---------------- DESCRIPCION ----------------
-Si intentas hacer un drop o truncate  la tablas que tienen un foring key te va aparecer los sigueintes errores
+Si intentas hacer un drop o truncate  la tabla que hace referencia el foring key en este ejemplo es "DESCRIPCION_ARTICULO"   te va aparecer los sigueintes errores
 "Could not drop object 'DESCRIPCION_ARTICULO' because it is referenced by a FOREIGN KEY constraint.
 Cannot truncate table 'DESCRIPCION_ARTICULO' because it is being referenced by a FOREIGN KEY constraint."
 
-La solucion es quitar el foring key y despues agregarlo y ya te permitira hacerlo
 */
 
-DROP TABLE ARTICULOS
+--- La solucion es  Eliminar el foring key, despues realizar el drop o truncate y despues agregarlo el foring key:
+ALTER TABLE ARTICULOS DROP CONSTRAINT FK_Articulo_Descripcion;  
+
+truncate table DESCRIPCION_ARTICULO
 DROP TABLE DESCRIPCION_ARTICULO 
-drop index idx_Detalles  ON DESCRIPCION_ARTICULO 
-drop index idx_Detalles2  ON DESCRIPCION_ARTICULO
+
+ ALTER TABLE ARTICULOS
+ADD  CONSTRAINT FK_Articulo_Descripcion FOREIGN KEY (ID_Articulo) REFERENCES   DESCRIPCION_ARTICULO(ID_Articulo_2)
+
+
+DROP TABLE ARTICULOS
+drop index idx_Combinado  ON DESCRIPCION_ARTICULO 
+ 
  
 
  --- Guía de diseño y de arquitectura de índices de SQL Server y Azure SQL --- 
