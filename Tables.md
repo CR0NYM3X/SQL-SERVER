@@ -345,6 +345,111 @@ GRANT unmask   TO test2;
 revoke unmask   TO test2;
 ```
 
+
+
+### Crear tablas con foring key, primary key  y su index
+
+
+
+
+```SQL
+
+
+/* ---------------- DESCRIPCION ----------------
+--->  Las restricciones para una clave primaria (primary key) en SQL son las siguientes:
+
+1.- No se permiten registros nulos en los primary key
+2.- Son valores únicos y no se pueden duplicar y por lo que funciona como un identificador y estos se
+pueden colocar auto  incrementar 
+*/
+
+-- Crear tabla DESCRIPCION_ARTICULO
+CREATE TABLE DESCRIPCION_ARTICULO (
+    ID_Articulo_2 INT PRIMARY KEY,
+    ID_Descripcion INT,
+    Detalles NVARCHAR(50)
+) ;
+
+
+/* ---------------- DESCRIPCION ----------------
+--->  Las restricciones para una  clave foránea (foreign key)
+1.- Las tablas que tengan claves foraneas se crean al final, ya que primero tiene que crearse la tabla a la que hará referencia 
+2.- no se permiten registros nulos
+
+
+[Nota] si intentas crear primero la tabla ARTICULOS sin antes crear la tabla DESCRIPCION_ARTICULO te saldra el siguiente error 
+"Foreign key 'FK_Articulo_Descripcion' references invalid table 'DESCRIPCION_ARTICULO'."
+*/
+
+CREATE TABLE ARTICULOS (
+    ID_Articulo INT PRIMARY KEY,
+    Nombre NVARCHAR(100),
+    Precio  INT,  --DECIMAL(10, 2),
+    CONSTRAINT FK_Articulo_Descripcion FOREIGN KEY (ID_Articulo) REFERENCES   DESCRIPCION_ARTICULO(ID_Articulo_2)
+);
+
+
+/* ---------------- DESCRIPCION ----------------
+--->  Las restricciones para crear index
+1.- Tipo de datos y longitud: no se pueden crear índices en columnas de tipo text, ntext , image o varchar(max) ya que saldra el
+error "Column 'Detalles' in table 'DESCRIPCION_ARTICULO' is of a type that is invalid for use as a key column in an index."
+
+2.- Número de índices: Existe un límite en la cantidad de índices que se pueden crear por tabla. 
+3.- Uso de memoria y espacio en disco:  consumen recursos como la memoria y el espacio en disco. Crear un gran número de índices
+puede afectar el rendimiento y el almacenamiento.
+4.- Operaciones de mantenimiento:    requieren mantenimiento, lo que implica cierto tiempo adicional durante las operaciones
+5.- Índices compuestos: Al crear un índice compuesto (índice que abarca múltiples columnas), es fundamental considerar el orden
+de las columnas en el índice para optimizar las consultas.
+*/
+ 
+CREATE INDEX idx_DosColumnas ON DESCRIPCION_ARTICULO ( Detalles desc); 
+CREATE INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO ( ID_Articulo_2);
+
+
+
+INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (1, 1, 'Camisa de algodón en varios colores.');
+INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (2, 1, 'Pantalón vaquero con bolsillos.');
+INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (3, 1, 'Zapatos de cuero elegantes.');
+INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (4, 1, 'Sombrero de ala ancha para el sol.');
+INSERT INTO DESCRIPCION_ARTICULO (ID_Articulo_2, ID_Descripcion, Detalles) VALUES (5, 1, 'Bufanda suave y abrigada para el invierno.');
+
+
+INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (1, 'Camisa', 29.99); 
+INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (2, 'Pantalón', 39.99);
+INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (3, 'Zapatos', 59.99);
+INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (4, 'Sombrero', 19.99);
+INSERT INTO ARTICULOS (ID_Articulo, Nombre, Precio) VALUES (5, 'Bufanda', 14.99);
+
+/*
+Consultar la informacion 
+*/
+
+SELECT * FROM ARTICULOS
+SELECT * FROM DESCRIPCION_ARTICULO
+
+/* ---------------- DESCRIPCION ----------------
+Si intentas hacer un drop o truncate  la tablas que tienen un foring key te va aparecer los sigueintes errores
+"Could not drop object 'DESCRIPCION_ARTICULO' because it is referenced by a FOREIGN KEY constraint.
+Cannot truncate table 'DESCRIPCION_ARTICULO' because it is being referenced by a FOREIGN KEY constraint."
+
+La solucion es quitar el foring key y despues agregarlo y ya te permitira hacerlo
+*/
+
+DROP TABLE ARTICULOS
+DROP TABLE DESCRIPCION_ARTICULO 
+drop index idx_Detalles  ON DESCRIPCION_ARTICULO 
+drop index idx_Detalles2  ON DESCRIPCION_ARTICULO
+ 
+
+ --- Guía de diseño y de arquitectura de índices de SQL Server y Azure SQL --- 
+ https://learn.microsoft.com/es-es/sql/relational-databases/sql-server-index-design-guide?view=sql-server-ver16
+
+
+
+```
+
+
+
 ### Bibliografia :
 ```
 
