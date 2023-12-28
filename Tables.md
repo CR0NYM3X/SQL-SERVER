@@ -9,7 +9,8 @@ se realiza una lectura sin esperar que los recursos bloqueados por otras transac
 2.- Posibles datos incorrectos<br>
 3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción. 
 ```
-SELECT  * from mitabla_test(NOLOCK)  where columna1 = 'hola';
+SELECT * FROM ARTICULOS(NOLOCK) where precio=29
+SELECT * FROM ARTICULOS  with(nolock) where precio=29
 ```
 
 ### Reiniciar el incrementable IDENTITY
