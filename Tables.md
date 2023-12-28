@@ -8,9 +8,15 @@ se realiza una lectura sin esperar que los recursos bloqueados por otras transac
 1.-  los datos podrían cambiar mientras se está realizando la lectura, lo que puede llevar a inconsistencias o a leer datos que ya no son válidos.<br>
 2.- Posibles datos incorrectos<br>
 3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción. 
-```
+```SQL
 SELECT * FROM ARTICULOS(NOLOCK) where precio=29
 SELECT * FROM ARTICULOS  with(nolock) where precio=29
+
+**** OTROS PARAMETROS *********
+"NOWAIT " se utiliza para indicar que una consulta debe ejecutarse inmediatamente sin esperar a que los recursos
+necesarios estén disponibles. Si los recursos requeridos están bloqueados por otras operaciones, la consulta generará
+ un error indicando que no pudo adquirir los recursos necesarios en ese momento.
+
 ```
 
 ### Reiniciar el incrementable IDENTITY
