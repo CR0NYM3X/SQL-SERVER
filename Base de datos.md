@@ -136,7 +136,7 @@ FROM sys.master_files
 ORDER BY LEFT(physical_name, 1) asc, database_id ;'
  
 /* CONSULTAMOS LA INFO DE TODAS LAS BASES DE DATOS */
-SELECT * FROM #Temp_DBA_SPACE
+SELECT * FROM #Temp_DBA_SPACE ORDER BY unidad_disco, [Espacio utilizado (MB)] desc, [Nombre de la base de datos] 
 
 /* BORRAMOS LA TABLA */
 DROP TABLE #Temp_DBA_SPACE
