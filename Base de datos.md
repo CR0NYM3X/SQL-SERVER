@@ -105,7 +105,7 @@ ALTER DATABASE MyOptionsTest
 COLLATE French_CI_AS ;  
 ```
 
-### Saber el tamaño utilizado de los archivos MDF, NDF y LDF 
+### Saber el tamaño utilizado de los archivos MDF, NDF y LDF de todas las base de datos
 ```SQL
 -- ******* OPCION #1 *******
 /* CREAMOS LA TABLA TEMPORAL DONDE SE INSERTARAN LOS REGISTROS DE TODAS LAS BASES DE DATOS */
@@ -229,7 +229,7 @@ select  @@MAX_CONNECTIONS -- maximo conexiones
 SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections;
 ```
 
-### Ver el tamaño de la base de datos:
+### saber el tamaño total/completo de la base de datos:
 ```SQL
 --- Procedimiento almacenado 
 sp_helpdb
