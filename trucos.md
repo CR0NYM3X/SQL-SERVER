@@ -6,7 +6,7 @@ WAITFOR DELAY '00:00:05';
 
 ### Ejecutar una consulta en todas las base de datos  
 ```
-execute SYS.sp_MSforeachdb 'select @@version'
+execute SYS.sp_MSforeachdb 'use [?];  select @@version;'
 ```
 
 ### Hacer casting o conversióin de datos
