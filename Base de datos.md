@@ -1,8 +1,9 @@
 
 
 ### Consutar las base de datos que existen:
-    select name,is_read_only,state_desc, recovery_model_desc FROM sys.databases
-
+```SQL
+select name,is_read_only,state_desc, recovery_model_desc FROM sys.databases
+```
 
 # saber todos los objetos que hay 
 ```SQL
