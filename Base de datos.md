@@ -176,10 +176,20 @@ MODIFY FILE (
 
 ```SQL
 *********** PARA BUSCAR EL NOMBRE DEL ARCHIVO A REDUCIR ***********
-select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
+select name,physical_name from  sys.master_files where database_id =  DB_ID()
 
-******  reducir el tamaño de archivos de datos individuales  ******
+******  Reduce el tamaño de archivos  LDF,NDF,MDF especifico ******
+1.- Valida el tipo de recovery que tiene la dba 
+SELECT name, recovery_model_desc FROM sys.databases where database_id = DB_ID()
+
+2.- si esta en modo full cambiar a modo simple
+ALTER DATABASE [my_dba_test] SET RECOVERY SIMPLE;
+
+3.- Reducir el tamaño 
 DBCC SHRINKFILE ('MibaseDeDatos_log', 1024); -- 1024 es el nuevo tamaño en MB
+
+4.- Regresar al modo recovery como estaba
+ALTER DATABASE [my_dba_test] SET RECOVERY full;
 
 ******  se utiliza para reducir el tamaño de todos los archivos de datos de una base de datos. *****
 DBCC SHRINKDATABASE (NombreDeTuBaseDeDatos, 5000);
