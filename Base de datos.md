@@ -1,5 +1,9 @@
 
 
+### Consutar las base de datos que existen:
+    select name,is_read_only,state_desc, recovery_model_desc FROM sys.databases
+
+
 # saber todos los objetos que hay 
 ```SQL
 select * from  sys.all_objects
@@ -53,8 +57,6 @@ OFFLINE_SECONDARY: Se utiliza en grupos de disponibilidad Always On para deshabi
 ### tener descripcion generica de la base de datos 
     sp_helpfile
 
-### Consutar las base de datos que existen:
-    select name,is_read_only,state_desc FROM sys.databases
 
 ### Crear una base de datos:
 ******* **CONCEPTOS** ******* <BR>
