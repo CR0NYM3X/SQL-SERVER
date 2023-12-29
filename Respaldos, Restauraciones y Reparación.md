@@ -214,6 +214,35 @@ ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
 ```
 
 
+
+# Modificar el tipo de respaldo 
+
+```SQL
+/* CONSULTA COMO ESTAN LAS BASE DE DATOS */
+SELECT name, recovery_model_desc FROM sys.databases
+
+/* ---------- DESCRIPCIÓN MODO SIMPLE ----------
+determina cómo se registran y almacenan las transacciones. El modo "Simple" es útil en situaciones donde
+no se necesita un registro detallado de las transacciones y se prioriza el espacio en disco y el rendimiento
+*/
+
+ALTER DATABASE [my_dba_test] SET RECOVERY SIMPLE;
+
+/* ----------  DESCRIPCIÓN MODO FULL  ----------
+ se registran todas las operaciones de la base de datos en el archivo de registro de transacciones.
+ Esto permite realizar copias de seguridad de registros de transacciones (log backups)
+*/
+
+ALTER DATABASE [my_dba_test] SET RECOVERY FULL;
+
+/* ----------  DESCRIPCIÓN MODO BULK_LOGGED  ----------
+es similar al modo completo, pero reduce el registro de ciertas operaciones masivas,
+como las operaciones de carga masiva (bulk operations)
+*/
+ALTER DATABASE [my_dba_test] SET RECOVERY BULK_LOGGED 
+
+```
+
 # Mejorar el rendimiento de consulta de tablas pesadas
 ```
 ******* activar la información de estadísticas de E/S y tiempo de ejecución *********
