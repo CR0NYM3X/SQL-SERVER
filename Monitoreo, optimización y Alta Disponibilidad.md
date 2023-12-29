@@ -48,6 +48,15 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 SELECT * FROM sys.dm_tran_active_transactions;
 SELECT * FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL) AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert 
 
+### Habilita las estadisticas al momento de realizar consultas, para ver los tiempos de ejecucion y consumo 
+```sql
+  SET STATISTICS TIME ON; -- Muestra las estadísticas de tiempo
+  SET STATISTICS IO ON; -- Muestra las estadísticas de E/S
+  set statistics profile on
+  SET SHOWPLAN_XML on; -- Muestra el plan de ejecución en formato XML - 
+  SET SHOWPLAN_TEXT on; -- Muestra el plan de ejecución en formato de texto
+ ```
+
 
 # ingresar el proc sp_who2  a una tabla temporal
 ```
