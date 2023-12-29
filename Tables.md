@@ -44,12 +44,11 @@ sp_help 'mytabla'
 ### Saber la cantidad de filas/tuplas de una tabla
 ```
 ****** Opcion #1 ******
-SELECT
-    t.name AS tabla,
-    p.rows AS cnt_tuplas
-FROM sys.tables t
-INNER JOIN sys.partitions p ON t.object_id = p.object_id
-WHERE t.name IN ('my_tabla');
+select   OBJECT_NAME(object_id) as name_Tabla
+		,row_count
+		,SUM(used_page_count) * 8 / 1024 AS 'Tamaño en MB'    from sys.dm_db_partition_stats    
+where OBJECT_NAME(object_id)  IN('mytable1')
+group by  object_id,row_count,used_page_count order by row_count desc
 
 ****** Opcion #2 ******
 select   OBJECT_NAME(object_id),row_count from sys.dm_db_partition_stats    where OBJECT_NAME(object_id)  
