@@ -37,3 +37,5 @@ https://www.red-gate.com/products/sql-monitor/resources/articles/monitor-sql-ser
 https://www.red-gate.com/hub/product-learning
 
 https://dbadixit.com/
+
+https://soportesql.wordpress.com/
