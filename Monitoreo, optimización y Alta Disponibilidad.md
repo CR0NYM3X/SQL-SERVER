@@ -43,10 +43,12 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sys.dm_server_services:`** Detalles sobre los servicios de SQL Server en la máquina. <br>
 **`sys.dm_os_schedulers:`** Información sobre los programadores (schedulers) del sistema. <br>
 **`sys.dm_os_performance_counters:`** Ofrece información sobre contadores de rendimiento de SQL Server que pueden ser cruciales para monitorear el rendimiento general del servidor.  <br>
-**`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado
-**`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.
-SELECT * FROM sys.dm_tran_active_transactions;
-SELECT * FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL) AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert 
+**`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado<br>
+**`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.<br>
+SELECT * FROM sys.dm_tran_active_transactions; <br>
+select * from sys.dm_tran_session_transactions    <br>
+SELECT * FROM  sys.dm_tran_database_transactions <br>
+SELECT * FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL) AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert <br>
 
 ### Habilita las estadisticas al momento de realizar consultas, para ver los tiempos de ejecucion y consumo 
 ```sql
@@ -405,6 +407,85 @@ CROSS APPLY  sys.dm_os_volume_stats(a.database_id, a.file_id)
 left join  sys.master_files b on a.database_id=b.database_id and a.file_id = b.file_id
 where a.database_id = DB_ID()
 ```
+
+
+
+
+
+
+ 
+### Ver objetos bloqueados 
+Recordemos que los objetos se bloquean por seguridad, cuando se realizan algun movimiento por ejemplo :  bulk insert,  bulk copy, insert , update, delete , etc.. etc <br>
+Con esta query te va mostar los objetos que estan bloqueados  y ver quien lo esta bloqueando y que ip y la duracion del bloqueo 
+```SQL 
+ SELECT
+	z.transaction_begin_time,
+	Duration = CAST(GETDATE() - z.transaction_begin_time AS TIME),
+	OBJ.name AS object_name,
+    TL.resource_type,
+	TL.request_type,
+    DB_name(TL.resource_database_id) db,
+	SCHEMA_NAME(OBJ.schema_id) AS schema_name,
+-- TL.resource_associated_entity_id,
+    TL.request_mode,
+	ES.session_id,
+--  TL.request_session_id,
+	TL.request_owner_type,
+--  ER.blocking_session_id,
+    ES.login_name,
+	b.client_net_address,
+    ES.host_name,
+--  ES.program_name,
+    ER.command,
+    ER.status,
+    ER.wait_type,
+    qt.text Query_Ejecutada
+	 ,case z.transaction_type   
+      when 1 then 'Read/Write'   
+      when 2 then 'Read-Only'    
+      when 3 then 'System'   
+      when 4 then 'Distributed'  
+      else 'Unknown - ' + convert(varchar(20), transaction_type)     
+ end as tranType,    
+ case z.transaction_state 
+    when 0 then '0 = The transaction has not been completely initialized yet'
+    when 1 then '1 = The transaction has been initialized but has not started'
+    when 2 then '2 = The transaction is active'
+    when 3 then '3 = The transaction has ended. This is used for read-only transactions'
+    when 4 then '4 = The commit process has been initiated on the distributed transaction'
+    when 5 then '5 = The transaction is in a prepared state and waiting resolution'
+    when 6 then '6 = The transaction has been committed'
+    when 7 then '7 = The transaction is being rolled back'
+    when 8 then '8 = The transaction has been rolled back'
+      else 'Unknown - ' + convert(varchar(20), transaction_state) 
+ end as tranState, 
+ case z.dtc_state 
+      when 0 then NULL 
+      when 1 then 'Active' 
+      when 2 then 'Prepared' 
+      when 3 then 'Committed' 
+      when 4 then 'Aborted' 
+      when 5 then 'Recovered' 
+      else 'Unknown - ' + convert(varchar(20), dtc_state) 
+ end as dtcState 
+FROM sys.dm_tran_locks TL
+JOIN sys.dm_exec_requests ER ON TL.request_session_id = ER.session_id
+JOIN sys.dm_exec_sessions ES ON ER.session_id = ES.session_id
+LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
+LEFT JOIN  sys.dm_exec_connections b on ES.session_id=b.session_id  
+LEFT JOIN sys.dm_tran_active_transactions  z on z.transaction_id= TL.request_owner_id
+CROSS APPLY sys.dm_exec_sql_text(ER.sql_handle) as qt 
+where OBJ.name is not null
+```
+
+
+
+
+
+
+
+
+
 
 ### info extra
 ```sql
