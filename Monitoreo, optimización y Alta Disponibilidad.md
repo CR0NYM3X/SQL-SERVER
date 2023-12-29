@@ -9,6 +9,7 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 **`sp_who2:`** Proporciona información sobre usuarios activos, conexiones y bloqueos. <br>
 **`sp_Who3`** <br>
 **`sp_whoisactive:`** Ofrece una visión detallada de la actividad actual, incluyendo detalles de bloqueos, consultas en ejecución,  Provee detalles sobre sesiones activas, bloqueos y recursos utilizados por las consultas. <br>
+**`sp_lock`**
 
 
 - Monitoreo de Espacio en Disco:<br>
