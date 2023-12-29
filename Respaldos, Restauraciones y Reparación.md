@@ -219,7 +219,7 @@ ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
 
 ```SQL
 /* CONSULTA COMO ESTAN LAS BASE DE DATOS */
-SELECT name, recovery_model_desc FROM sys.databases
+ SELECT name, recovery_model_desc FROM sys.databases where database_id = DB_ID()
 
 /* ---------- DESCRIPCIÓN MODO SIMPLE ----------
 determina cómo se registran y almacenan las transacciones. El modo "Simple" es útil en situaciones donde
