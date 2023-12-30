@@ -21,35 +21,50 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 
 
 # tablas y vistas útiles para monitorear
-**`sys.sysindexes`** 
+<br><br>-------- `CONEXIONES Y SESIONES` --------<br><br>
 **`sys.dm_exec_connections:`** Detalles de las conexiones activas al servidor. <br>
 **`sys.dm_exec_requests:`** Proporciona información sobre las solicitudes actuales en ejecución en el servidor. <br>
 **`sys.dm_exec_sessions:`** Contiene información sobre las sesiones actuales en el servidor, lo que puede ser útil para rastrear quién está conectado y qué están haciendo. <br>
 **`sys.sysprocesses`**  detalles sobre las sesiones que estaban conectadas al servidor en un momento dado, incluyendo información sobre ID de sesión, estado de la sesión, tiempo de CPU utilizado, ID de usuario<br>
 **`sys.dm_exec_query_stats:`** Estadísticas de ejecución de consultas. <br>
-**`sys.dm_os_wait_stats:`** Ofrece estadísticas sobre los tipos de espera que están afectando el rendimiento del servidor. <br>
+
+<br><br>-------- `OS` --------<br><br>
 **`sys.stats:`** almacena información sobre las estadísticas de las columnas de las tablas de la base de datos<br>
 **`sys.dm_db_partition_stats`** almacenamiento y la distribución de las filas y páginas de datos de una tabla o índice en una base de datos.<br>
-**`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.<br>
+
+
+
+<br><br>-------- `OS` --------<br><br>
 **`sys.dm_io_virtual_file_stats:`** Proporciona estadísticas de E/S a nivel de archivo, lo que es esencial para monitorear la actividad de E/S en el servidor. <br>
-**`sys.dm_db_index_physical_stats:`** Ofrece información detallada sobre el estado físico de los índices, lo que puede ser útil para identificar problemas de rendimiento relacionados con los índices. y ver si necesita una desfragmentacion <br>
+**`sys.dm_os_wait_stats:`** Ofrece estadísticas sobre los tipos de espera que están afectando el rendimiento del servidor. <br>
 **`sys.dm_os_sys_info:`** Contiene información sobre la configuración del sistema y los recursos del servidor. <br>
 **`sys.dm_os_buffer_descriptors:`** Proporciona información sobre los bloques de memoria que se están utilizando actualmente en la memoria caché del búfer. <br>
 **`sys.dm_os_ring_buffers:`** Registros de eventos del sistema. <br>
 **`sys.dm_os_tasks:`** Detalles de las tareas en el sistema operativo. <br>
 **`sys.dm_os_memory_clerks:`** Detalles sobre la asignación de memoria. <br>
-**`sys.dm_db_missing_index_details:`** Información sobre índices faltantes. <br>
 **`sys.dm_os_loaded_modules:`** Módulos cargados en SQL Server. <br>
-**`sys.dm_tran_locks:`** Información sobre bloqueos actuales. <br>
-**`sys.dm_server_services:`** Detalles sobre los servicios de SQL Server en la máquina. <br>
 **`sys.dm_os_schedulers:`** Información sobre los programadores (schedulers) del sistema. <br>
-**`sys.dm_os_performance_counters:`** Ofrece información sobre contadores de rendimiento de SQL Server que pueden ser cruciales para monitorear el rendimiento general del servidor.  <br>
-**`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado<br>
 **`sys.dm_os_waiting_tasks`** Esta vista es fundamental para identificar cuellos de botella, bloqueos y problemas de rendimiento en el servidor SQL Server.<br>
-SELECT * FROM sys.dm_tran_active_transactions; <br>
-select * from sys.dm_tran_session_transactions    <br>
-SELECT * FROM  sys.dm_tran_database_transactions <br>
-SELECT * FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL) AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert <br>
+**`sys.dm_os_performance_counters:`** Ofrece información sobre contadores de rendimiento de SQL Server que pueden ser cruciales para monitorear el rendimiento general del servidor.  <br>
+**`sys.dm_server_services:`** Detalles sobre los servicios de SQL Server en la máquina. <br>
+
+<br><br>-------- `INDEX` --------<br><br>
+**`sys.sysindexes`** 
+SELECT * FROM **`sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL)`** AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert <br>
+**`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.<br>
+**`sys.dm_db_index_physical_stats:`** Ofrece información detallada sobre el estado físico de los índices, lo que puede ser útil para identificar problemas de rendimiento relacionados con los índices. y ver si necesita una desfragmentacion <br>
+**`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado<br>
+**`sys.dm_db_missing_index_details:`** Información sobre índices faltantes. <br
+										    
+
+
+<br><br>-------- `TRANSACIONES` --------<br><br>
+**`sys.dm_tran_locks:`** Información sobre bloqueos actuales. <br>
+SELECT * FROM **`sys.dm_tran_active_transactions`**; <br>
+select * from **`sys.dm_tran_session_transactions`**    <br>
+SELECT * FROM  **`sys.dm_tran_database_transactions`** <br>
+
+
 
 ### Habilita las estadisticas al momento de realizar consultas, para ver los tiempos de ejecucion y consumo 
 ```sql
