@@ -7,7 +7,8 @@ se realiza una lectura sin esperar que los recursos bloqueados por otras transac
 - Desventajas <br>
 1.-  los datos podrían cambiar mientras se está realizando la lectura, lo que puede llevar a inconsistencias o a leer datos que ya no son válidos.<br>
 2.- Posibles datos incorrectos<br>
-3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción. 
+3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción.
+
 ```SQL
 SELECT * FROM ARTICULOS(NOLOCK) where precio=29
 SELECT * FROM ARTICULOS  with(nolock) where precio=29
