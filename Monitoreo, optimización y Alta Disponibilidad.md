@@ -544,6 +544,56 @@ CROSS APPLY sys.dm_exec_sql_text( /*ER.sql_handle*/ b.most_recent_sql_handle ) a
 
 
 
+### Query para ver que transaccion tiene mas de 2 min ejecutandose
+
+```sql
+select	transaction_begin_time  
+	--  ,r.session_id  
+		,CAST(GETDATE() - transaction_begin_time AS TIME) duracion 
+		,db_name(TL.resource_database_id) db
+		,OBJ.name AS object_name
+		,TL.resource_associated_entity_id  OBject_id_
+		,CASE WHEN z.name = 'user_transaction' THEN 'BEGIN TRANSACTION' ELSE z.name END AS Tipo_Transaccion
+		,qt.text Query_Ejecutada
+		,case z.transaction_type   
+			when 1 then 'Read/Write'   
+			when 2 then 'Read-Only'    
+			when 3 then 'System'   
+			when 4 then 'Distributed'  
+			else 'Unknown - ' + convert(varchar(20), transaction_type)     
+		 end as tranType
+		,CASE  TL.request_mode
+			WHEN 'Sch-S' THEN 'Schema Stability'
+			WHEN 'S' THEN '(S)Shared'
+			WHEN 'U' THEN '(U)Update'
+	        WHEN 'X' THEN '(X)Exclusive'
+			WHEN 'IS' THEN '(IS)Intent Shared'
+		    WHEN 'IU' THEN '(IU)Intent Update'
+			WHEN 'IX' THEN '(IX)Intent Exclusive'
+			ELSE 'Otros modos de bloqueo'
+		END AS modo_de_bloqueo
+		 , r.status
+		 ,r.host_name 
+		 ,r.login_name
+		 ,b.client_net_address
+		 ,r.reads
+		 ,r.writes
+		--,*
+from sys.dm_tran_active_transactions z
+LEFT JOIN (select resource_type, resource_database_id, request_owner_id, request_session_id, resource_associated_entity_id ,request_mode
+				from  sys.dm_tran_locks 
+				where resource_type= 'OBJECT' 
+		   group by  resource_type, resource_database_id, request_owner_id, request_session_id, resource_associated_entity_id,request_mode)  TL on z.transaction_id= TL.request_owner_id 
+LEFT JOIN sys.dm_exec_connections b on  TL.request_session_id=b.session_id  
+LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
+LEFT JOIN sys.dm_exec_sessions r on  TL.request_session_id=r.session_id  
+CROSS APPLY sys.dm_exec_sql_text( /*ER.sql_handle*/ b.most_recent_sql_handle ) as qt 
+where not z.name  = 'worktable' and TL.resource_type= 'OBJECT' and DATEDIFF(/*HOUR SECOND*/ MINUTE , transaction_begin_time, GETDATE()) >= 2
+```
+
+
+
+
 
 
 ### info extra
