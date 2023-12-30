@@ -1,3 +1,15 @@
+### Hacer un begin y un rollback
+
+```sql
+BEGIN TRANSACTION; -- empieza la transaccion 
+
+select top 10   * from MY_TABLA1(nolock) WHERE ID=6
+UPDATE MY_TABLA1 SET NOMBRE = '------JOEL ANTONIO888' WHERE ID=7
+delete  MY_TABLA1  WHERE ID=7
+
+COMMIT TRANSACTION; -- esto si esta todo bien y realizara los cambios hechos  
+ROLLBACK TRANSACTION;  -- esto si no queremos que realice los cambios realizados 
+```
 
 ### Colocar tiempo para que se ejecute una consulta 
 ```
