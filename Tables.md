@@ -9,6 +9,9 @@ se realiza una lectura sin esperar que los recursos bloqueados por otras transac
 2.- Posibles datos incorrectos<br>
 3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción.
 
+- Test de funcionamiento :<br>
+puedes generar un BEGIN TRANSACTION; despues realizar un update de un registro y despues intentar consultarlo con nolock veras que te va traer la infomación como se modifico en el update y eso que no han finalizado el begin con un commit, despues validamos el mismo registro pero sin el lock y te aparecera bloqueado y no de va dejar consultarlo
+
 ```SQL
 SELECT * FROM ARTICULOS(NOLOCK) where precio=29
 SELECT * FROM ARTICULOS  with(nolock) where precio=29
