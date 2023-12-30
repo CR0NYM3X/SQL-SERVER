@@ -1,11 +1,19 @@
 ### Hacer un begin y un rollback
 
+**`[NOTA]`** Es importante saber que cuando se realiza una modificacion dentro del begin este bloquea la tabla de diferentes formas: <br>
+`truncate, drop, alter :`  este bloquea toda la tabla hasta que se finalice el begin con algun commit o un rollback  <br>
+`update, delete, insert: ` este bloquea solo el registro modificado<br>
+
+
+
 ```sql
 BEGIN TRANSACTION; -- empieza la transaccion 
 
 select top 10   * from MY_TABLA1(nolock) WHERE ID=6
-UPDATE MY_TABLA1 SET NOMBRE = '------JOEL ANTONIO888' WHERE ID=7
+UPDATE MY_TABLA1 SET NOMBRE = 'joel' WHERE ID=7
 delete  MY_TABLA1  WHERE ID=7
+truncate table MY_TABLA1
+alter table MY_TABLA1 add id_cli  int
 
 COMMIT TRANSACTION; -- esto si esta todo bien y realizara los cambios hechos  
 ROLLBACK TRANSACTION;  -- esto si no queremos que realice los cambios realizados 
