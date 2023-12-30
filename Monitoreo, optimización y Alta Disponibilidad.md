@@ -419,6 +419,34 @@ where a.database_id = DB_ID()
 Recordemos que los objetos se bloquean por seguridad, cuando se realizan algun movimiento por ejemplo :  bulk insert,  bulk copy, insert , update, delete , etc.. etc <br>
 Con esta query te va mostar los objetos que estan bloqueados  y ver quien lo esta bloqueando y que ip y la duracion del bloqueo 
 ```SQL 
+/* ---------- DESCRIPCIÓN DEL LA COLUMNA request_mode ----------
+
+Sch-S (Schema Stability): Este modo de bloqueo se utiliza cuando una transacción intenta adquirir un bloqueo de esquema (Schema Lock)
+ para un objeto. Este tipo de bloqueo permite que otros procesos puedan realizar consultas pero evita que realicen modificaciones
+ que puedan interferir con la estructura del esquema del objeto.
+
+S (Shared): El bloqueo compartido permite que múltiples transacciones puedan leer datos simultáneamente, pero ninguna de ellas puede
+realizar modificaciones mientras el bloqueo está activo. Este tipo de bloqueo es compatible con otros bloqueos compartidos pero no
+con bloqueos exclusivos.
+
+U (Update): Indica un bloqueo de actualización. Este bloqueo se adquiere cuando una transacción necesita realizar una modificación
+en un recurso y no quiere permitir que otros procesos realicen cambios simultáneos.
+
+X (Exclusive): El bloqueo exclusivo es el tipo más restrictivo de bloqueo. Se adquiere cuando una transacción necesita realizar
+ una modificación en un recurso y no permite que otros procesos realicen ninguna operación (lectura o escritura) en ese recurso
+hasta que se libere el bloqueo.
+
+IS (Intent Shared): Este tipo de bloqueo indica la intención de adquirir un bloqueo compartido en un recurso más específico dentro
+de una jerarquía. Ayuda a evitar bloqueos incoherentes en la jerarquía de bloqueos.
+
+IU (Intent Update): Similar al IS, indica la intención de adquirir un bloqueo de actualización en un recurso más específico dentro
+ de una jerarquía de bloqueos.
+
+IX (Intent Exclusive): Indica la intención de adquirir un bloqueo exclusivo en un recurso más específico dentro de una jerarquía
+de bloqueos.
+
+*/
+
  SELECT
 	z.transaction_begin_time,
 	Duration = CAST(GETDATE() - z.transaction_begin_time AS TIME),
@@ -428,7 +456,17 @@ Con esta query te va mostar los objetos que estan bloqueados  y ver quien lo est
     DB_name(TL.resource_database_id) db,
 	SCHEMA_NAME(OBJ.schema_id) AS schema_name,
 -- TL.resource_associated_entity_id,
-    TL.request_mode,
+-- TL.request_mode,
+	    CASE  TL.request_mode
+        WHEN 'Sch-S' THEN 'Schema Stability'
+        WHEN 'S' THEN '(S)Shared'
+        WHEN 'U' THEN '(U)Update'
+        WHEN 'X' THEN '(X)Exclusive'
+        WHEN 'IS' THEN '(IS)Intent Shared'
+        WHEN 'IU' THEN '(IU)Intent Update'
+        WHEN 'IX' THEN '(IX)Intent Exclusive'
+        ELSE 'Otros modos de bloqueo'
+    END AS modo_de_bloqueo,
 	ES.session_id,
 --  TL.request_session_id,
 	TL.request_owner_type,
@@ -476,7 +514,7 @@ LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
 LEFT JOIN  sys.dm_exec_connections b on ES.session_id=b.session_id  
 LEFT JOIN sys.dm_tran_active_transactions  z on z.transaction_id= TL.request_owner_id
 CROSS APPLY sys.dm_exec_sql_text(ER.sql_handle) as qt 
-where OBJ.name is not null
+ where OBJ.name is not null
 ```
 
 
