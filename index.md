@@ -39,7 +39,14 @@ CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
 
 CREATE CLUSTERED INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO ( ID_Articulo_2 desc);
 
+CREATE NONCLUSTERED COLUMNSTORE INDEX IX_ColumnStore_Ventas
+ON Ventas (Fecha, ProductoID, Monto);
+
 ```
+https://soportesql.wordpress.com/2016/07/29/columnstore-indexes-en-sql-server/ <br>
+https://learn.microsoft.com/es-es/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver16<br>
+https://learn.microsoft.com/es-es/sql/t-sql/statements/create-columnstore-index-transact-sql?view=sql-server-ver16<br>
+
 
 # tipos de indices 
 
