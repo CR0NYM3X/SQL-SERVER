@@ -435,6 +435,7 @@ Recordemos que los objetos se bloquean por seguridad, cuando se realizan algun m
 Con esta query te va mostar los objetos que estan bloqueados  y ver quien lo esta bloqueando y que ip y la duracion del bloqueo 
 ```SQL 
 /* ---------- DESCRIPCIÓN DEL LA COLUMNA request_mode ----------
+[NOTA] todos los que tengan columna  request_mode in('X','IX') y  tranType = read/write --> son transacciones que bloquan la tabla y no van a permitir que realice otro movimiento 
 
 Sch-S (Schema Stability): Este modo de bloqueo se utiliza cuando una transacción intenta adquirir un bloqueo de esquema (Schema Lock)
  para un objeto. Este tipo de bloqueo permite que otros procesos puedan realizar consultas pero evita que realicen modificaciones
@@ -462,7 +463,7 @@ de bloqueos.
 
 */
 
- SELECT
+  SELECT
 	z.transaction_begin_time,
 	Duration = CAST(GETDATE() - z.transaction_begin_time AS TIME),
 	OBJ.name AS object_name,
@@ -492,8 +493,8 @@ de bloqueos.
 --  ES.program_name,
     ER.command,
     ER.status,
-    ER.wait_type,
-    qt.text Query_Ejecutada
+    ER.wait_type
+    ,qt.text Query_Ejecutada
 	 ,case z.transaction_type   
       when 1 then 'Read/Write'   
       when 2 then 'Read-Only'    
@@ -523,13 +524,13 @@ de bloqueos.
       else 'Unknown - ' + convert(varchar(20), dtc_state) 
  end as dtcState 
 FROM sys.dm_tran_locks TL
-JOIN sys.dm_exec_requests ER ON TL.request_session_id = ER.session_id
-JOIN sys.dm_exec_sessions ES ON ER.session_id = ES.session_id
+LEFT JOIN sys.dm_exec_requests ER ON TL.request_session_id = ER.session_id
+LEFT JOIN sys.dm_exec_sessions ES ON TL.request_session_id = ES.session_id
 LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
-LEFT JOIN  sys.dm_exec_connections b on ES.session_id=b.session_id  
+LEFT JOIN  sys.dm_exec_connections b on  TL.request_session_id=b.session_id  
 LEFT JOIN sys.dm_tran_active_transactions  z on z.transaction_id= TL.request_owner_id
-CROSS APPLY sys.dm_exec_sql_text(ER.sql_handle) as qt 
- where OBJ.name is not null
+CROSS APPLY sys.dm_exec_sql_text( /*ER.sql_handle*/ b.most_recent_sql_handle ) as qt 
+  where OBJ.name is not null and  TL.request_mode in('X','IX')
 ```
 
 
