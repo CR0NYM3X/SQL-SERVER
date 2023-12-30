@@ -243,7 +243,7 @@ EXEC sp_rename 'clientes.nombre', 'nombre2', 'COLUMN';
 
 ### Agregar una columna 
 ```
-alter table banprefijos add id_cli int NOT NUL
+alter table banprefijos add id_cli int -- no permite poner el not null eso se hace modificando la columna 
 ```
 
 ### cambiar el tipo de una columna 
