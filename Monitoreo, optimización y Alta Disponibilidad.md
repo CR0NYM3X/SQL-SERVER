@@ -466,6 +466,10 @@ de bloqueos.
   SELECT
 	z.transaction_begin_time,
 	Duration = CAST(GETDATE() - z.transaction_begin_time AS TIME),
+	CASE 
+        WHEN z.name = 'user_transaction' THEN 'BEGIN TRANSACTION' 
+        ELSE z.name
+    END AS Tipo_Transaccion,
 	OBJ.name AS object_name,
     TL.resource_type,
 	TL.request_type,
