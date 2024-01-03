@@ -31,38 +31,45 @@ INNER JOIN
 
 ```
 
-### Crear indices 
-
-```sql
-CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2 desc ) INCLUDE (Detalles desc );
-CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
-
-CREATE CLUSTERED INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO ( ID_Articulo_2 desc);
-
-CREATE NONCLUSTERED COLUMNSTORE INDEX IX_ColumnStore_Ventas
-ON Ventas (Fecha, ProductoID, Monto);
-
-```
-https://soportesql.wordpress.com/2016/07/29/columnstore-indexes-en-sql-server/ <br>
-https://learn.microsoft.com/es-es/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver16<br>
-https://learn.microsoft.com/es-es/sql/t-sql/statements/create-columnstore-index-transact-sql?view=sql-server-ver16<br>
 
 
 # tipos de indices 
 
-```
-1.- Indices Agrupados : Cada tabla puede tener solo un índice agrupado y se recomiendo que la columna sea un id auto incremental, es importante
+```SQL
+/* 1.- Indices Agrupados : Cada tabla puede tener solo un índice agrupado y se recomiendo que la columna sea un id auto incremental, es importante
 indicar que cuando en una tabla se asigna un primary key esto genera en automatico un indice agrupado, por lo que ya no se puede generar otro, si quieres  intentar  tendras este error:
-"Cannot create more than one clustered index on table 'DESCRIPCION_ARTICULO'. Drop the existing clustered index 'PK__DESCRIPC__38BC645844CA3770' before creating another."
+"Cannot create more than one clustered index on table 'DESCRIPCION_ARTICULO'. Drop the existing clustered index 'PK__DESCRIPC__38BC645844CA3770' before creating another." */
 
 CREATE CLUSTERED INDEX IX_IndiceAgrupado ON EjemploTabla(ID);
 
 
-2.- Indices filtrados: 
-
+/* 2.- Indices filtrados: */
 CREATE  INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO(ID_Descripcion) where id_articulo_2 = 1 ;
 
+
+/* 3.- Indices no agrupados */ 
+CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2 desc ) INCLUDE (Detalles desc );
+SELECT Detalles FROM DESCRIPCION_ARTICULO WHERE ID_Articulo_2 = 'valor_buscado';
+
+CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
+SELECT * FROM DESCRIPCION_ARTICULO WHERE ID_Articulo_2 = 'valor_1' AND Detalles = 'detalle_buscado';
+
+/* 4.-  índice de almacén de columnas no agrupado:
+ organiza los datos por columnas en lugar de por filas
+*/ 
+CREATE NONCLUSTERED COLUMNSTORE INDEX IX_ColumnStore_Ventas ON Ventas (Fecha, ProductoID, Monto);
+
+SELECT ProductoID, SUM(Monto) FROM Ventas WHERE Fecha BETWEEN '2023-01-01' AND '2023-12-31' GROUP BY ProductoID;
+
+
+
+https://learn.microsoft.com/es-es/sql/relational-databases/indexes/indexes?view=sql-server-ver16
+https://javiersql.wordpress.com/2017/12/04/sql-server-tipos-de-indices-en-sql-server/
 ```
+
+https://soportesql.wordpress.com/2016/07/29/columnstore-indexes-en-sql-server/ <br>
+https://learn.microsoft.com/es-es/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver16<br>
+https://learn.microsoft.com/es-es/sql/t-sql/statements/create-columnstore-index-transact-sql?view=sql-server-ver16<br>
 
 # Bibliografías  
 
