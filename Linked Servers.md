@@ -5,6 +5,12 @@ Permíten conectarse a una base de datos externa y realizar consultas en ella, n
 
 # Ejemplos de uso: 
 
+### Ver la configuración de los linked
+
+```SQL
+SELECT * FROM sys.linked_logins WHERE server_id in(SELECT server_id FROM sys.servers WHERE is_linked = 1);
+SELECT  * FROM sys.servers  WHERE is_linked = 1;
+```
 
 ### Ejemplo usando un linkeo
 ```
