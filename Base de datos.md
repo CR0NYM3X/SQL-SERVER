@@ -109,37 +109,45 @@ COLLATE French_CI_AS ;
 ```SQL
 -- ******* OPCION #1 *******
 /* CREAMOS LA TABLA TEMPORAL DONDE SE INSERTARAN LOS REGISTROS DE TODAS LAS BASES DE DATOS */
+
   CREATE TABLE #Temp_DBA_SPACE (
     [Nombre de la base de datos] NVARCHAR(255),
     [Nombre del archivo] NVARCHAR(255),
-    [Tamaño total del archivo (MB)] DECIMAL(18, 2),
-    [Crecimiento (MB)] DECIMAL(18, 2),
+    [Tamaño total del archivo (MB)] DECIMAL(20, 2),
+    [Crecimiento (MB)] DECIMAL(20, 2),
     MaxSize NVARCHAR(20),
-    [Espacio utilizado (MB)] DECIMAL(18, 2),
-    [Espacio disponible (MB)] DECIMAL(18, 2),
+    [Espacio utilizado (MB)] DECIMAL(20, 2),
+	[Porcentaje % Espacio utilizado] DECIMAL(20, 2),
+    [Espacio disponible (MB)] DECIMAL(20, 2),
+	[Porcentaje % Espacio disponible]  DECIMAL(20, 2),
     [Ruta física] NVARCHAR(500),
-    unidad_disco NVARCHAR(1)
+    unidad_disco NVARCHAR(1),
+    [Tipo archivo] NVARCHAR(3)
 );
 
 /* INSERTAMOS LOS REGISTROS DE  TODAS LAS BASES DE DATOS */
-  execute SYS.sp_MSforeachdb 'use [?]; 
-INSERT INTO  #Temp_DBA_SPACE SELECT
+  execute SYS.sp_MSforeachdb 'use [?]; INSERT INTO  #Temp_DBA_SPACE 
+SELECT
      DB_NAME(database_id) AS ''Nombre de la base de datos''
     ,name AS ''Nombre del archivo''
-    ,size * 8 / 1024 AS ''Tamaño total del archivo (MB)''
-    ,CAST(growth / 128.0 AS DECIMAL(18, 2)) AS ''Crecimiento (MB)''
-    ,CASE WHEN max_size = -1 THEN ''Unlimited'' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(18, 2)) as NVARCHAR(20)) + '' MB'' END AS MaxSize
-    ,FILEPROPERTY(name, ''SpaceUsed'') * 8 / 1024 AS ''Espacio utilizado (MB)''
-    ,(size * 8 / 1024) - (FILEPROPERTY(name, ''SpaceUsed'') * 8 / 1024 ) as ''Espacio disponible (MB)''
+    ,CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) AS ''Tamaño total del archivo (MB)''
+    ,CAST(growth / 128.0 AS DECIMAL(20, 2)) AS ''Crecimiento (MB)''
+    ,CASE WHEN max_size = -1 THEN ''Unlimited'' ELSE CAST(CAST(max_size * 8.0 / 1024 AS DECIMAL(20, 2)) as NVARCHAR(20)) + '' MB'' END AS MaxSize
+   ,CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))  AS ''Espacio utilizado (MB)''
+   ,CAST( ( CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))) * 100 / CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))  AS DECIMAL(20, 2))  as ''Porcentaje % Espacio utilizado''
+   ,CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) -  CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))  as ''Espacio disponible (MB)''
+  , CAST((CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) -  CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2)) ) *100 / (CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))) AS decimal(20,2)) as ''Porcentaje % Espacio disponible'' 
     ,physical_name AS ''Ruta física''
     ,LEFT(physical_name, 1) unidad_disco  
+	,UPPER(RIGHT(physical_name, 3)) AS ''Tipo archivo''
    -- INTO ##TMP_DATA3
 FROM sys.master_files
 	  where database_id =  DB_ID()
 ORDER BY LEFT(physical_name, 1) asc, database_id ;'
  
 /* CONSULTAMOS LA INFO DE TODAS LAS BASES DE DATOS */
-SELECT * FROM #Temp_DBA_SPACE ORDER BY   unidad_disco ,   [Espacio disponible (MB)]  desc
+SELECT * FROM #Temp_DBA_SPACE ORDER BY   [porcentaje % espacio utilizado] desc
+
 
 /* BORRAMOS LA TABLA */
 DROP TABLE #Temp_DBA_SPACE
