@@ -10,7 +10,7 @@ se realiza una lectura sin esperar que los recursos bloqueados por otras transac
 3.- Puede leer datos que aún no se han confirmado o que están en proceso de modificación por otra transacción.
 
 - Test de funcionamiento :<br>
-puedes generar un BEGIN TRANSACTION; despues realizar un update de un registro y despues intentar consultarlo con nolock veras que te va traer la infomación como se modifico en el update y eso que no han finalizado el begin con un commit, despues validamos el mismo registro pero sin el lock y te aparecera bloqueado y no de va dejar consultarlo
+puedes generar un [BEGIN TRANSACTION](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/trucos.md#hacer-un-begin-y-un-rollback); despues realizar un update de un registro y despues intentar consultarlo con nolock veras que te va traer la infomación como se modifico en el update y eso que no han finalizado el begin con un commit, despues validamos el mismo registro pero sin el lock y te aparecera bloqueado y no de va dejar consultarlo
 
 ```SQL
 SELECT * FROM ARTICULOS(NOLOCK) where precio=29
@@ -69,6 +69,12 @@ select count(*) from my_tabla
 
 
 ```
+
+
+
+
+
+
 
 
 ### Saber el Tamaño de las tablas :
@@ -135,12 +141,58 @@ WHERE TABLE_NAME = 'my_tabla' order by ORDINAL_POSITION
 select  top 10 * from sys.columns where object_id in(select object_id  from sys.tables where name like '%my_tabla%')  order by column_id  ;
 ```
 
-### Saber que columna es la llave primario
+### Ver las Tablas y sus columna que tienen llave primario/ Prymarykey
 ```
-SELECT COLUMN_NAME
-FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-WHERE OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_NAME), 'IsPrimaryKey') = 1
-AND TABLE_NAME = 'my_tabla';
+/******* VER QUE TABLAS SI TIENEN PK ******/
+SELECT TABLE_NAME, COLUMN_NAME
+	FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+	WHERE OBJECTPROPERTY(OBJECT_ID(CONSTRAINT_NAME), 'IsPrimaryKey') = 1 ORDER BY TABLE_NAME
+/*AND TABLE_NAME = 'my_tabla';*/
+
+/******* VER QUE TABLAS NO TIENEN PK ******/
+
+SELECT 
+  SCHEMA_NAME(schema_id) AS [Schema], 
+  name AS [Table]
+FROM sys.tables
+WHERE OBJECTPROPERTY(object_id, 'TableHasPrimaryKey') = 0
+ORDER BY [Schema], [Table];
+
+
+select  SCHEMA_NAME(schema_id) AS [Schema] , name as table_name from sys.tables 
+left join INFORMATION_SCHEMA.TABLE_CONSTRAINTS on name=table_name
+where CONSTRAINT_NAME is null
+
+
+```
+
+### Ver las tablas y sus columnas con Foring Keys y a que tabla hacen referencia
+```SQL 
+ SELECT 
+    OBJECT_NAME(fk.parent_object_id) AS TableName,
+    COL_NAME(fkc.parent_object_id, fkc.parent_column_id) AS ColumnName,
+    fk.name AS ForeignKeyName,
+    OBJECT_NAME(fk.referenced_object_id) AS ReferencedTableName,
+    COL_NAME(fkc.referenced_object_id, fkc.referenced_column_id) AS ReferencedColumnName
+FROM 
+    sys.foreign_keys AS fk
+INNER JOIN 
+    sys.foreign_key_columns AS fkc 
+    ON fk.object_id = fkc.constraint_object_id
+```
+
+### Ver las tablas y sus columnas que tienen autoincrementables
+```SQL
+SELECT TABLE_NAME, COLUMN_NAME ,*
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE  COLUMNPROPERTY(OBJECT_ID(TABLE_NAME), COLUMN_NAME, 'IsIdentity') = 1  /*and TABLE_NAME = 'MY_tabla_test' AND*/ ;
+```
+
+### Ver las tablas que tienen algun CONSTRAINTS
+ Muestra columnas que están asociadas con llaves primarias, llaves foráneas y otras restricciones de clave en la base de datos.
+```SQL
+	select * from   INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+	SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 ```
 
 
