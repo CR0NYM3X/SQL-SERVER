@@ -109,6 +109,15 @@ EXEC sp_change_users_login 'Update_One', 'nombre_de_usuario', 'nombre_de_login';
 ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
 ```
 
+# Error \#2 : Could not open error log file.
+Al intentar inciar el servicio de sql, aparecia el siguiente error 
+```sql
+****************** ERROR ******************
+ Error : "initerrlog: Could not open error log file 'F:\SQLERRORLOG\ERRORLOG'. Operating system error = 5(Access is denied.)"
+
+****************** SOLUCION ******************
+se dio permiso en el disco F al usuario que levanta el servicio de sql server
+```
 
 # link de apoyo
 ************** The login is from an untrusted ************** <br>
