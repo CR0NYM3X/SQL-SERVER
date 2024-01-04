@@ -73,13 +73,42 @@ Respaldos solo de data <br>
 Pasar tablas de un servidor SQL Server  a otro SQL Server  desde SQL  management studio
 ![ambiente-sql](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/img/ambientaci%C3%B3n.jpg)
 
-### 1.- exportar toda la información de una tabla en un archivo csv y volverla a importar
+
+### Exportar toda la información de una tabla en un archivo csv y volverla a importar
+
+**1.- Hacer CHECKPOINT en la base de datos :** <br> 
+```sql
+/* ******* HACER CHECKPOINT DE MANERA MANUAL ******* */
+use  MY_DDBA_TEST 
+CHECKPOINT
+
+/* ******* HACER CHECKPOINT DE MANERA AUTOMATICA ******* */
+EXEC sp_configure 'recovery interval', '3000' /*Segundos*/;
+RECONFIGURE with override;
+
+```
+ **`"CHECKPOINT"`** Piensa en una base de datos como un gran almacén de información. Cuando guardamos cosas en ese almacén, a veces las dejamos en mesas temporales (la memoria/Buffer cache) para poder trabajar más rápido con ellas. Pero, ¿qué pasa si se corta la luz o pasa algo que haga que perdamos esas cosas temporales.
+ 
+ <br> Aquí es donde entra el "checkpoint". Imagina que cada cierto tiempo, alguien toma lo que está en esas mesas temporales y las coloca en cajas bien guardadas (los discos duros). Eso es el checkpoint, asegurarse de que la información que estaba en mesas temporales se guarde en un lugar seguro.
+
+<br> Ahora, ¿qué es la paginación? Piensa en la paginación como un libro enorme. A veces, cuando leemos, no leemos todo el libro de una vez, sino que vamos página por página. En las bases de datos, cuando almacenamos mucha información, a veces no la guardamos toda al mismo tiempo, sino que la dividimos en "páginas" para poder leer y escribir más rápido.
+
+<br> Cuando se realizan modificaciones en la base de datos, como agregar, modificar o eliminar registros, estas modificaciones se realizan en la memoria en un principio, y no directamente en el disco. SQL Server mantiene estas modificaciones en memoria, en lo que se conoce como caché de páginas, para mejorar el rendimiento y minimizar la escritura constante en el disco, que es más lenta en comparación con la memoria.
+ 
+ ********* **Ventajas** *************
+ 
+ **Respaldos y recuperación:** Antes de realizar un respaldo (backup) completo de una base de datos, ejecutar un CHECKPOINT garantiza que todos los cambios realizados en la memoria se escriban en disco. Esto ayuda a asegurar que el respaldo refleje la última versión consistente de la base de datos.<br>
+ 
+ **Mantenimiento y optimización del rendimiento:** En situaciones en las que hay una gran cantidad de transacciones realizadas en una base de datos, ejecutar CHECKPOINT periódicamente puede liberar recursos y mejorar el rendimiento al reducir la cantidad de datos transitorios en la memoria. <br>
+ 
+ **Recuperación tras un fallo:** Después de un reinicio inesperado del servidor o una interrupción, un CHECKPOINT ayuda a minimizar la cantidad de transacciones no escritas en disco, lo que facilita una recuperación más rápida y reduce la posibilidad de pérdida de datos <br> 
 
 
-**Exportar la informacion con bcp**
+**2.- Exportar la informacion con bcp**
 en estos casos no se puede exportar con el encabezado
 
-**`[NOTA IMPORTANTE] --->`** esta operacion no bloquea las tablas,  Se recomienda utilizar delimitadores diferente a la comilla,  ya que si la tabla que vas exportar tiene campos varchar puede tener comillas dentro de la columna y esto puede entorpecer al momento de importar la información ,por ejemplo yo uso "|"
+> [!CAUTION]
+> **`[NOTA IMPORTANTE] --->`** esta operacion no bloquea las tablas por lo que puedes ir utilizando la tabla mientras realiza la exportacion de la info y  Se recomienda utilizar delimitadores diferente a la comilla,  ya que si la tabla que vas exportar tiene campos varchar puede tener comillas dentro de la columna y esto puede entorpecer al momento de importar la información ,por ejemplo yo uso "|"
 ```
 --- Exportando toda la tabla
 bcp my_dba_test.dbo.my_tabla_test out "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r\n
@@ -93,9 +122,13 @@ bcp "select * from my_tabla_test where nombre='jose' " queryout  "C:\my_tabla_te
 sqlcmd -S servidor -d base_de_datos -Q "SELECT * FROM mi_tabla WHERE condicion_campo = 'valor'" -o salida_temporal.txt -h-1 -s"," -W
 ```
 
-**Importar la información con bcp**
+**3.- Importar la información con bcp**
 
-**`[NOTA IMPORTANTE] --->`** Esto bloqua las tablas por lo que no permite hacer lectura de la tabla que se esta haciendo insertando la info, Cuando se hace un copiado de información con millones de registros , La tabla se bloquea y no se puede consultar y el espacio usado del log transaccional se va llenando y aumenta rapidamente, por lo que si el log transaccional llega a su limite de espacio, puede tener problemas para copiar la información, para ir monitoreando el tamaño utilizado,   [ingresa a este link, para ver la query que  monitorea el espacio usado del log transaccional](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/Base%20de%20datos.md#saber-el-tama%C3%B1o-utilizado-de-los-archivos-mdf-ndf-y-ldf), una vez terminado el copiado, el espacio usado de log empieza a disminur, para validar si se esta copiando la información, lo validamos con el procedimiento sp_who2 en donde el campo status estara en RUNNABLE  y campo command estara en BULK INSERT  
+
+> [!CAUTION]
+> **`[NOTA IMPORTANTE] --->`** Esto bloqua las tablas por lo que no permite hacer lectura de la tabla a la que se esta  haciendo insertando la info, Cuando se hace un bulk insert de información con millones de registros , La tabla se bloquea y no se puede consultar y el espacio usado del log transaccional se va llenando y aumenta rapidamente, por lo que si el log transaccional llega a su limite de espacio, puede tener problemas para copiar la información, para ir monitoreando el tamaño utilizado,   [ingresa a este link, para ver la query que  monitorea el espacio usado del log transaccional](https://github.com/CR0NYM3X/SQL-SERVER/blob/main/Base%20de%20datos.md#saber-el-tama%C3%B1o-utilizado-de-los-archivos-mdf-ndf-y-ldf), una vez terminado el copiado, el espacio usado de log empieza a disminur, para validar si se esta insertando la información, lo validamos con el procedimiento sp_who2 en donde el campo status estara en RUNNABLE  y campo command estara en BULK INSERT 
+
+ 
 
 ```
 bcp  my_dba_test.dbo.my_tabla_test in  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r\n -F 2
