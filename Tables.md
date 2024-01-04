@@ -1,5 +1,5 @@
 
-### Realizar lecturas sin bloqueo en una tabla 
+### Realizar consultas de una tabla bloqueada
 
 - Ventajas:  <br>
 se realiza una lectura sin esperar que los recursos bloqueados por otras transacciones se liberen. Esto puede proporcionar una respuesta más rápida a la consulta, ya que no espera la finalización de las transacciones 
