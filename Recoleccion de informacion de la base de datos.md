@@ -8,7 +8,8 @@ select     (SELECT local_net_address FROM sys.dm_exec_connections where   sessio
 	   (SELECT  local_tcp_port FROM sys.dm_exec_connections where   session_id = @@SPID  ) PORT_SERVER,
             @@SERVERNAME hostname,
 	    @@servicename instancia,
-           (SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version , 
+           (SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version ,
+            SERVERPROPERTY('Edition') AS 'Edición',
 	   (select count(*) from sys.databases where database_id > 4 ) cnt_db
 
 
