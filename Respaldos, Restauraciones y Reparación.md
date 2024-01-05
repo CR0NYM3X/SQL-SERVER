@@ -240,7 +240,13 @@ REPAIR_REBUILD :  Esta opción es la recomendada
 REPAIR_ALLOW_DATA_LOSS : Esta opción puede eliminar algunas páginas de la base de datos. Por lo tanto, Microsoft no recomienda, en caso de ser muy necesario usar esta opción
 ```
 
-**4.- Cambiar a modo Multi_user:** Esto hace que es que ya puedan tener acceso 
+**4.- Ver el Porcentaje de recovery**
+```
+EXEC sp_readerrorlog 0, 1, 'Recovery of database' 
+```
+
+
+**5.- Cambiar a modo Multi_user:** Esto hace que es que ya puedan tener acceso 
 ```
 ALTER DATABASE [NombreDeLaBaseDeDatos] SET READ_WRITE;
 ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
