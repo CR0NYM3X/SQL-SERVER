@@ -109,6 +109,14 @@ EXEC sp_change_users_login 'Update_One', 'nombre_de_usuario', 'nombre_de_login';
 ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
 ```
 
+### solucion 
+se cambio de contraseña el correo 
+
+### link de apoyo
+************** The login is from an untrusted ************** <br>
+https://windowsreport.com/0x8009030c/ <br>
+https://dba.stackexchange.com/questions/191267/sspi-handshake-failed-with-error-code-0x8009030c-state-14
+
 # Error \#2 : Could not open error log file.
 Al intentar inciar el servicio de sql, aparecia el siguiente error 
 ```sql
@@ -119,8 +127,44 @@ Al intentar inciar el servicio de sql, aparecia el siguiente error
 se dio permiso en el disco F al usuario que levanta el servicio de sql server
 ```
 
-# link de apoyo
-************** The login is from an untrusted ************** <br>
-https://windowsreport.com/0x8009030c/ <br>
-https://dba.stackexchange.com/questions/191267/sspi-handshake-failed-with-error-code-0x8009030c-state-14
+
+
+
+
+# Error \#3 : The system cannot find the path specified.
+
+Al intentar levantar el servicio de sql server, me salio el error de ":Open failed: Could not open"
+```sql
+*********** ERROR ***********
+FCB::Open failed: Could not open file O:\SQLSERVDATA\TablasTmp.MDF for file number 1.  OS error: 3(The system cannot find the path specified.). 2024-01-05 10:43:31.19 spid61s     Error: 5120, Severity: 16, State: 101.
+
+
+************* QUERYS UTILIZADAS **********
+# Muestra la rutas los archivos de la base de datos  
+select DB_NAME(database_id),name,physical_name,LEFT(physical_name, 1) unidad_disco from sys.master_files 
+where database_id in(select database_id from sys.databases where state_desc != 'ONLINE')
+order by database_id 
+
+# puedes ver los log del servidor 
+EXEC sp_readerrorlog 0, 1, 'Open failed'
+
+EXEC sp_readerrorlog 0, 1, 'Recovery of database'
+
+
+SELECT STRING_AGG(  physical_name, ',') AS ConcatenadoConComillas
+from sys.master_files 
+where database_id in(select database_id from sys.databases where state_desc != 'ONLINE')
+
+SELECT STUFF((
+    SELECT ',' + physical_name
+    FROM sys.master_files
+   -- WHERE database_id IN (SELECT database_id FROM sys.databases WHERE state_desc != 'ONLINE')
+    FOR XML PATH('')), 1, 1, '') AS ConcatenadoConComillas
+
+************* SOLUCION **********
+Se encontro que los archivos mdf y ldf  se encontraban en otros discos con diferentes letras 
+
+```
+
+
 
