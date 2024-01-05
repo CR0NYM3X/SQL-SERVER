@@ -136,7 +136,8 @@ SELECT
    ,CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))  AS ''Espacio utilizado (MB)''
    ,CAST( ( CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))) * 100 / CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))  AS DECIMAL(20, 2))  as ''Porcentaje % Espacio utilizado''
    ,CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) -  CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))  as ''Espacio disponible (MB)''
-  , CAST((CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) -  CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2)) ) *100 / (CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))) AS decimal(20,2)) as ''Porcentaje % Espacio disponible'' 
+ -- , CAST((CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2)) -  CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2)) ) *100 / (CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))) AS decimal(20,2)) as ''Porcentaje % Espacio disponible''
+    ,100.00 - (CAST( ( CAST(CAST(FILEPROPERTY(name, ''SpaceUsed'') AS DECIMAL(20, 2))  * 8 / 1024 AS DECIMAL(20, 2))) * 100 / CAST(CAST(size AS decimal(20,2)) * 8 / 1024 AS decimal(20,2))  AS DECIMAL(20, 2))) as ''Porcentaje % Espacio disponible'' 
     ,physical_name AS ''Ruta física''
     ,LEFT(physical_name, 1) unidad_disco  
 	,UPPER(RIGHT(physical_name, 3)) AS ''Tipo archivo''
