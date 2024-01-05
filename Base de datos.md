@@ -163,10 +163,13 @@ FROM sys.database_files;
 DBCC SQLPERF(logspace);
 ```
 
-###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS NO PARA DISMINUIR
+###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS
+> [!IMPORTANT]
+> Esta opción no sirve para hacer más pequeño el tamaño de los archivos la base de datos, sólo sirve para hacer más grande el tamaño de los archivos MDF,LDF o NDF
+
 ```sql
 *********** PARA BUSCAR EL NOMBRE DEL ARCHIVO ***********
-select name,physical_name from  sys.master_files where database_id =  DB_ID('MY_dba_TEST')
+select name,physical_name from  sys.master_files where database_id =  DB_ID()
 
 *********** HACER LA MODIFICACIÓN ***********
 ALTER DATABASE [MY_dba_TEST]
