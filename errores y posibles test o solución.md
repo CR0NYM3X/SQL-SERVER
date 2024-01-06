@@ -133,7 +133,7 @@ se dio permiso en el disco F al usuario que levanta el servicio de sql server
 
 # Error \#3 : The system cannot find the path specified.
 
-Al intentar levantar el servicio de sql server, me salio el error de ":Open failed: Could not open"
+Al intentar levantar el servicio de sql server, se levanto el servicio pero casi todas las base de datos estaban con estauts "Recovery Pending"  y validando el log salio el error de ":Open failed: Could not open"
 ```sql
 *********** ERROR ***********
 FCB::Open failed: Could not open file O:\SQLSERVDATA\TablasTmp.MDF for file number 1.  OS error: 3(The system cannot find the path specified.). 2024-01-05 10:43:31.19 spid61s     Error: 5120, Severity: 16, State: 101.
@@ -156,8 +156,13 @@ EXEC sp_readerrorlog 0, 1, 'Recovery of database'
 
 
 ************* SOLUCION **********
-Se utilizo la herramienta validador_de_archivos.bat ruta descarga -> https://github.com/CR0NYM3X/SQL-SERVER/tree/main/script_bat 
-y Se encontro que los archivos mdf y ldf  se encontraban en otros discos con diferentes letras 
+1.- Descargue el bat -> https://github.com/CR0NYM3X/SQL-SERVER/tree/main/script_bat 
+2.- Se paso al servidor la herramienta validador_de_archivos.bat y se creo el archivo "Rutas.txt" en la misma ruta donde coloque el bat,
+y llene el txt con los physical_name de las base de datos, obtenida esta info de la tabla sys.master_files
+3.- Se encontro que los archivos mdf y ldf  se  encontraban en otros discos con diferentes letras
+4.- Se detuvo el servicio de sql server y se apoyo por parte de windows a cambiar las letras
+5.- Se levanto el servicio y las base de datos que tenian el detalle se pusieron en estatus "restoring"
+6.- Finalizo la restauración y ya permitio ingresar a las dbs
 
 ```
 
