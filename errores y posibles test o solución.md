@@ -140,10 +140,13 @@ FCB::Open failed: Could not open file O:\SQLSERVDATA\TablasTmp.MDF for file numb
 
 
 ************* QUERYS UTILIZADAS **********
-# Muestra la rutas los archivos de la base de datos  
+# Muestra la rutas los archivos de la base de datos que no estan online 
 select DB_NAME(database_id),name,physical_name,LEFT(physical_name, 1) unidad_disco from sys.master_files 
 where database_id in(select database_id from sys.databases where state_desc != 'ONLINE')
-order by database_id 
+order by database_id
+
+# Muestra las rutas de todos los archivos de la base de datos 
+SELECT  physical_name from sys.master_files
 
 # puedes ver los log del servidor 
 EXEC sp_readerrorlog 0, 1, 'Open failed'
@@ -151,8 +154,6 @@ EXEC sp_readerrorlog 0, 1, 'Open failed'
 EXEC sp_readerrorlog 0, 1, 'Recovery of database'
 
 
-# tener las rutas de los archivos de la base de datos 
-SELECT  physical_name from sys.master_files
 
 ************* SOLUCION **********
 Se utilizo la herramienta validador_de_archivos.bat ruta descarga -> https://github.com/CR0NYM3X/SQL-SERVER/tree/main/script_bat 
