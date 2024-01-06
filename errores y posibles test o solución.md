@@ -162,7 +162,8 @@ SELECT STUFF((
     FOR XML PATH('')), 1, 1, '') AS ConcatenadoConComillas
 
 ************* SOLUCION **********
-Se encontro que los archivos mdf y ldf  se encontraban en otros discos con diferentes letras 
+Se utilizo la herramienta validador_de_archivos.bat ruta descarga -> https://github.com/CR0NYM3X/SQL-SERVER/tree/main/script_bat 
+y Se encontro que los archivos mdf y ldf  se encontraban en otros discos con diferentes letras 
 
 ```
 
