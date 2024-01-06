@@ -1,0 +1,5 @@
+Z:\SQLDATA\tempdb.mdf
+Z:\SQLLOG\tempdb.ldf
+P:\locksx.max
+Z:\SQLLOG\tvempdb.ldf
+P:\locksv.max
