@@ -151,15 +151,8 @@ EXEC sp_readerrorlog 0, 1, 'Open failed'
 EXEC sp_readerrorlog 0, 1, 'Recovery of database'
 
 
-SELECT STRING_AGG(  physical_name, ',') AS ConcatenadoConComillas
-from sys.master_files 
-where database_id in(select database_id from sys.databases where state_desc != 'ONLINE')
-
-SELECT STUFF((
-    SELECT ',' + physical_name
-    FROM sys.master_files
-   -- WHERE database_id IN (SELECT database_id FROM sys.databases WHERE state_desc != 'ONLINE')
-    FOR XML PATH('')), 1, 1, '') AS ConcatenadoConComillas
+# tener las rutas de los archivos de la base de datos 
+SELECT  physical_name from sys.master_files
 
 ************* SOLUCION **********
 Se utilizo la herramienta validador_de_archivos.bat ruta descarga -> https://github.com/CR0NYM3X/SQL-SERVER/tree/main/script_bat 
