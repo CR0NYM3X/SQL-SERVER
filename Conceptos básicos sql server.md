@@ -87,7 +87,7 @@ En SQL Server, las bases de datos del sistema son bases de datos que se utilizan
 
 **`model:`** La base de datos "model" se utiliza como plantilla para crear nuevas bases de datos. Cualquier cambio que realices en "model" se aplicará a las bases de datos recién creadas.<br>
 
-**`msdb:`** La base de datos "msdb" almacena información sobre la programación de tareas, mantenimiento, copias de seguridad y otras tareas administrativas.<br>
+**`msdb:`** La base de datos "msdb" almacena información sobre la programación de tareas, mantenimiento, respaldos, jobs y otras tareas administrativas.<br>
 
 **`tempdb:`** La base de datos "tempdb" es una base de datos temporal que se utiliza para almacenar datos temporales y variables de sesión, así como para ayudar en la clasificación y unión de datos.
 
