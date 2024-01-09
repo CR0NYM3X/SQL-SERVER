@@ -32,7 +32,7 @@ if not exist %archivo% (
 )
 
 echo.
-echo verificando si las rutas existen ......
+echo verificando si las rutas existen y si no genera el txt RUTAS_NO_EXISTEN......
 echo.
 
 for /f "tokens=* delims=" %%a in (%archivo%) do (
@@ -50,7 +50,7 @@ rem	       echo "!ruta!" >> RUTAS_SI_EXISTEN.TXT   )
 set "archivo_NOEXISTENTES=RUTAS_NO_EXISTEN.TXT"
 
 echo.
-echo "Buscando si existen las rutas en otras unidades de discos duro ....."
+echo "Buscando si existen las rutas en otras unidades de discos duro y genera el txt  RUTAS_ENCONTRADAS ....."
 echo.
 set "ttt="
 
