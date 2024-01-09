@@ -20,7 +20,7 @@ set drives=%drives:~1%
 set "letras=%drives%"
 
 echo.
-echo "Letras de unidad de disco duro conectados"
+echo "Letras de unidad de disco duro conectados al S.O"
 echo.
 
 echo %letras%
@@ -50,47 +50,33 @@ rem	       echo "!ruta!" >> RUTAS_SI_EXISTEN.TXT   )
 set "archivo_NOEXISTENTES=RUTAS_NO_EXISTEN.TXT"
 
 echo.
-echo "Aplicando metodos de busqueda en las rutas no encontradas ....."
+echo "Buscando si existen las rutas en otras unidades de discos duro ....."
 echo.
 set "ttt="
+
 for /f "tokens=* delims=" %%j in (%archivo_NOEXISTENTES%) do (
-rem    echo "aaaa --- !%%j:~2!"
+rem   echo "aaaa --- !%%j:~2!"
+	
 	
 	for %%l in ("%letras:,=" "%") do (
 		set "nueva_ruta=%%j"
 		set ttt=!nueva_ruta:~1,1!
+rem		echo "%%~l!nueva_ruta:~2!
 		if not "%%~l"=="!ttt!" (
 			set nueva_ruta="%%~l!nueva_ruta:~2! 
-			echo !nueva_ruta! >> nueva_rutas.txt
+rem			echo !nueva_ruta! >> nueva_rutas.txt
+			 if  exist "!nueva_ruta!" (
+			 echo !nueva_ruta! >> RUTAS_ENCONTRADAS.TXT
+			 )
 		)
-
-	 )		
-	
+	  
+	 )
 )   
 
-set "archivo=nueva_rutas.txt"
-
-echo.
-echo "Buscando posibles rutas....."
-echo.
-
-for /f "tokens=* delims=" %%f in (%archivo%) do (
-    set "ruta2=%%f"
-    if  exist "!ruta2!" (
-	echo !ruta2! >> RUTAS_ENCONTRADAS.TXT
-     ) 
-REM  else (
-REM    	echo !ruta2! >> RUTAS_NO_ENCONTRADAS.TXT
-REM    )
-
-)
-
-
-rem del nueva_rutas.txt
 
 echo.
 echo Validacion completa.
 echo.
 
 
-pause
+pause.
