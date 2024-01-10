@@ -30,6 +30,7 @@ if not exist %archivo% (
     echo.
     echo El archivo %archivo% no existe, favor de crearlo y guardar las rutas en el archivo txt.
     echo.
+    puase.
     exit /b
 )
 
