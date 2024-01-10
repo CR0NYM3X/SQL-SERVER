@@ -133,7 +133,7 @@ se dio permiso en el disco F al usuario que levanta el servicio de sql server
 
 # Error \#3 : The system cannot find the path specified.
 
-Al intentar levantar el servicio de sql server, se levanto el servicio pero casi todas las base de datos estaban con estauts "Recovery Pending"  y validando el log salio el error de ":Open failed: Could not open"
+Al intentar levantar el servicio de sql server, se levanto el servicio pero casi todas las base de datos estaban con estatus "Recovery Pending"  y validando el log salio el error de ":Open failed: Could not open"
 ```sql
 *********** ERROR ***********
 FCB::Open failed: Could not open file O:\SQLSERVDATA\TablasTmp.MDF for file number 1.  OS error: 3(The system cannot find the path specified.). 2024-01-05 10:43:31.19 spid61s     Error: 5120, Severity: 16, State: 101.
