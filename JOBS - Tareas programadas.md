@@ -30,7 +30,7 @@ JOIN dbo.sysjobhistory h ON j.job_id = h.job_id
 ORDER BY h.run_date DESC, h.run_time DESC;
 ```
 
-### Ver que es lo que ejecuta la tarea 
+### Ver el comando  que ejecuta el job
 ```SQL
 SELECT j.name AS 'Job Name', s.step_id, s.step_name, s.subsystem, s.command
 FROM dbo.sysjobs j
