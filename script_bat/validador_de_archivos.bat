@@ -27,7 +27,9 @@ echo %letras%
 rem set "letras=A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z"
 
 if not exist %archivo% (
-    echo El archivo %archivo% no existe.
+    echo.
+    echo El archivo %archivo% no existe, favor de crearlo y guardar las rutas en el archivo txt.
+    echo.
     exit /b
 )
 
