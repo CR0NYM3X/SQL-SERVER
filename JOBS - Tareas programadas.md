@@ -1,6 +1,6 @@
 
 > [!IMPORTANT]
-> Las tablas de los `job` se ven solo en la mase de datos **msdb**
+> Las tablas de los `job` se ven solo en la base de datos **msdb**
 
 
 
