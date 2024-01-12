@@ -57,7 +57,9 @@ wmic cpu get name, caption, maxclockspeed, numberofcores, numberoflogicalprocess
 ```
 
 ### Saber el tamaños de los discos de windows  con sql server
-```
+```SQL 
+
+/* Te muesta mas detallada la info de los discos */
 select DISTINCT  
  GETDATE()  AS Fecha
 ,CONNECTIONPROPERTY ('local_net_address') AS Ip_servidor
@@ -78,6 +80,11 @@ CROSS APPLY
 f.database_id not in (2) -- and f.physical_name not like '%.LDF%'
 --and available_bytes > 75161927680
 order by Porcentaje_Usado desc
+
+
+/*  nombre del disco, el espacio total, el espacio libre */ 
+xp_fixeddrives
+
 ```
 
 
