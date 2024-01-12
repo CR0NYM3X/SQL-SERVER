@@ -7,7 +7,7 @@ En SQL server existen los permisos
 
 **Nivel servidor:**  Estos permisos están asociados con la administración y control general del servidor, por ejemplo  la creacion de login de  usuarios , la creacion base de datos, la creacion  SQL <br><br>
 **Nivel base de datos :** Estos permisos se aplican a objetos específicos dentro de una base de datos.  por ejemplo la creación, eliminación , la modificación o inserción de los objetos o datos  <br><br>
-- 1  **Permisos especificos:** Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
+- 1  **Permisos especificos/ Granulares:** Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
 - 2  **Permisos globales:**  Con los permisos globales, se usan roles predifinidos como un rol de puro lecutra y esos permisos se heredan a un usuario 
 
 **permisos de administrador :** Estos son permisos que permiten realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
@@ -304,7 +304,7 @@ select CONNECTIONPROPERTY ('local_net_address') as IP_SERVER,* from #userpriv wh
  order by usuario
 ```
 
-**Permisos especificos:**
+**Permisos especificos/ Granulares:**
 Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
 ```SQL
 GRANT CONTROL ON dbo.my_tabla TO [my_user_test]
