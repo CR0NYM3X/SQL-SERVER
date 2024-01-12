@@ -8,7 +8,7 @@ En SQL server existen los permisos
 **Nivel servidor:**  Estos permisos están asociados con la administración y control general del servidor, por ejemplo  la creacion de login de  usuarios , la creacion base de datos, la creacion  SQL <br><br>
 **Nivel base de datos :** Estos permisos se aplican a objetos específicos dentro de una base de datos.  por ejemplo la creación, eliminación , la modificación o inserción de los objetos o datos  <br><br>
 - 1  **Permisos especificos:** Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
-- 2  **Permisos globales:**  con los permisos globales le indicar por ejemplo que quiero permiso de lecturas en todas las tablas
+- 2  **Permisos globales:**  Con los permisos globales, se usan roles predifinidos como un rol de puro lecutra y esos permisos se heredan a un usuario 
 
 **permisos de administrador :** Estos son permisos que permiten realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
 
@@ -26,7 +26,7 @@ En SQL server existen los permisos
 
 # Ejemplos de uso :
 
-```
+```SQL
 select SUSER_SNAME() -- saber el usuario que estas usando actualmente
 select SUSER_ID()	-- saber el id del usuario que estas usando actualmente
 select USER_NAME(grantee_principal_id) -- saber que usuario tiene un id
@@ -42,7 +42,7 @@ OBJECT_NAME(major_id) AS object_name
 **SQL_LOGIN** ->  son aquellos usuarios que cuando se crearon se les epecifico una contraseña 
 **WINDOWS_LOGIN** -> son aquellos usuarios que se autentican con las contraseñas que estan de un active directory
 
-```
+```SQL
 --- Con estas querys puedes ver cuando se crearon y se modificaron los usuarios
 
 --- [Recomendada para buscar] Esta query te muestra a nivel servidor todos  los roles, usuarios sql y windows login y grupos  que existen:
@@ -56,18 +56,18 @@ SELECT name,password_hash,default_database_name, is_expiration_checked, is_polic
 ```
 
 ### ver hash password de todos login sql, no de los windows login, para pasar a otro server
-```
+```SQL
 exec sp_help_revlogin
 ```
 ### Saber quien es owner 
-```
+```SQL
 SELECT suser_sname(owner_sid),name FROM sys.databases
 ```
 
 ### Creacion y eliminar un login :
 Al crear el Login le especificamos de que forma se va conectar el servidor , que es con que nombre y contraseña 
 
-```
+```SQL
 *******  CREAR *******
 CREATE LOGIN [MYDOMINIO\miusuario] FROM WINDOWS WITH DEFAULT_DATABASE=[master]
 CREATE LOGIN [jose-mecanico] WITH PASSWORD=N'123123' MUST_CHANGE, DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
@@ -85,7 +85,7 @@ DROP LOGIN [MYDOMINIO\miusuario]
 El crear un usuario, estas especificando que el usuario, que puede abrir la base de datos en la que creaste el usuario 
 [Doc. Oficial](https://learn.microsoft.com/es-es/sql/t-sql/statements/create-user-transact-sql?view=sql-server-ver16)
 
-```
+```SQL
 use mi_dba_test
 go
 
@@ -113,7 +113,7 @@ DROP SERVER ROLE  testers;
 ```
 
 ### Asignar permisos  Nivel servidor
-```
+```SQL
 EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'bulkadmin'
 EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'dbcreator'
 EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'diskadmin'
@@ -125,7 +125,7 @@ EXEC master..sp_addsrvrolemember @loginame = N'my_user_test', @rolename = N'sysa
 ```
 
 **Crear reporte de permisos  Nivel servidor**
-```
+```SQL
 select   CAST(CONNECTIONPROPERTY('local_net_address') AS VARCHAR(100)) IP_SERVER,UserName,sum(sysadmin) sysadmin ,sum(securityadmin) securityadmin ,sum(serveradmin ) serveradmin ,sum(setupadmin ) setupadmin ,sum(processadmin ) processadmin ,sum(diskadmin ) diskadmin ,sum(dbcreator) dbcreator ,sum(bulkadmin) bulkadmin from
 (SELECT
     p.name AS UserName,
@@ -151,8 +151,8 @@ where p.name NOT LIKE 'NT AUTHORITY%'
 
 
 ### Asignar permisos de administrador 
-Estos son permisos que permiten realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
-```
+Estos son permisos que se asignan en la base de datos **master** y permite realizar actividades muy especificas que un usuario comun no utiliza, por ejemplo respaldos, el copiado de información, la modificacion de un link server o eventos de auditoria 
+```SQL
 GRANT ADMINISTER BULK OPERATIONS TO [my_user_test]
 GRANT ALTER ANY CONNECTION TO [my_user_test]
 GRANT ALTER ANY CREDENTIAL TO [my_user_test]
@@ -182,7 +182,7 @@ GRANT VIEW SERVER STATE TO [my_user_test]
 ```
 
 ### Crear un Reporte para ver quien tiene permisos de administrador
-```
+```SQL
 select CAST(CONNECTIONPROPERTY('local_net_address') AS VARCHAR(100))  IP_SERVER,username,a1 as ADMINISTER_BULK_OPERATIONS ,a2  as ALTER_ANY_SERVER_AUDIT ,a3  as ALTER_ANY_CREDENTIAL ,a4  as ALTER_ANY_CONNECTION ,a5  as ALTER_ANY_DATABASE ,a6  as ALTER_ANY_EVENT_NOTIFICATION ,a7  as ALTER_ANY_ENDPOINT ,a8  as ALTER_ANY_LOGIN ,a9  as ALTER_ANY_LINKED_SERVER ,a10 as ALTER_RESOURCES ,a11 as ALTER_SERVER_STATE ,a12 as ALTER_SETTINGS ,a13 as ALTER_TRACE ,a14 as AUTHENTICATE_SERVER ,a15 as CONTROL_SERVER /*,a16 as CONNECT_SQL*/ ,a17 as CREATE_ANY_DATABASE ,a18 as CREATE_DDL_EVENT_NOTIFICATION ,a19 as CREATE_ENDPOINT ,a20 as CREATE_TRACE_EVENT_NOTIFICATION ,a21 as SHUTDOWN_ ,a22 as EXTERNAL_ACCESS_ASSEMBLY ,a23 as UNSAFE_ASSEMBLY  from  
 (select * from 
 (select username, sum(a1)  a1 , sum(a2)  a2 , sum(a3)  a3 , sum(a4)  a4 , sum(a5)  a5 , sum(a6)  a6 , sum(a7)  a7 , sum(a8)  a8 , sum(a9)  a9 , sum(a10) a10, sum(a11) a11, sum(a12) a12, sum(a13) a13, sum(a14) a14, sum(a15) a15/*, sum(a16) a16*/, sum(a17) a17, sum(a18) a18, sum(a19) a19, sum(a20) a20, sum(a21) a21, sum(a22) a22, sum(a23) a23 from
@@ -229,9 +229,9 @@ permission_name in('ADMINISTER BULK OPERATIONS' ,'ALTER ANY SERVER AUDIT' ,'ALTE
 
 
 ### Asignar permisos  Nivel base de datos  
-**Permisos globales:** Estos permisos se asigna a una base de datos especifica, pero al asignarle un permiso, se agrega de manera global para todos sus objetos, por ejemplo el procedimiento almacenado  sp_addrolemember sólo te da permisos de lectura 
+**Permisos globales:**  Con los permisos globales, se usan roles predifinidos como un rol de puro lecutra, escritura, etc y esos permisos se heredan a un usuario,   Estos permisos se asigna a una base de datos especifica, pero al asignarle un permiso, se agrega de manera global para todos sus objetos, por ejemplo al asignar el rol db_datareader sólo te da permisos de lectura en todos los objetos 
 
-```
+```SQL
 EXEC sp_addrolemember N'db_accessadmin', N'my_user_test'
 EXEC sp_addrolemember N'db_backupoperator', N'my_user_test'
 EXEC sp_addrolemember N'db_datareader', N'my_user_test'
@@ -257,7 +257,7 @@ ALTER ROLE [db_securityadmin] ADD MEMBER [MYDOMINIO\omar.LOPEZ]
 ```
 
 **Crear reporte de Permisos globales de todas las base de datos**
-```
+```SQL
 1.-  creamos una la tabla temporal
 CREATE TABLE #userpriv (
 	db VARCHAR(200),
@@ -306,7 +306,7 @@ select CONNECTIONPROPERTY ('local_net_address') as IP_SERVER,* from #userpriv wh
 
 **Permisos especificos:**
 Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
-```
+```SQL
 GRANT CONTROL ON dbo.my_tabla TO [my_user_test]
 GRANT TAKE OWNERSHIP ON dbo.my_tabla TO [my_user_test]
 GRANT VIEW CHANGE TRACKING ON dbo.my_tabla TO [my_user_tes
@@ -319,8 +319,50 @@ GRANT VIEW ANY COLUMN MASTER KEY DEFINITION TO nombre_usuario;
 
 GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 
---- permisos a todos los procedimientos 
+/* ESTOS PERMISOS SON A NIVEL BASE DE DATOS */
+ALTER
+ALTER ANY DATASPACE
+ALTER ANY ROLE
+ALTER ANY SCHEMA
+ALTER ANY DATABASE DDL TRIGGER
+ALTER ANY USER
+BACKUP DATABASE
+BACKUP LOG
+CONTROL
+CREATE AGGREGATE
+CREATE ASYMMETRIC KEY
+CREATE ASSEMBLY
+CREATE CERTIFICATE
+CREATE DATABASE
+CREATE DEFAULT
+CREATE DATABASE DDL EVENT NOTIFICATION
+CREATE FUNCTION
+CREATE FULLTEXT CATALOG
+CREATE MESSAGE TYPE
+CREATE PROCEDURE
+CREATE QUEUE
+CREATE ROLE
+CREATE ROUTE
+CREATE RULE
+CREATE REMOTE SERVICE BINDING
+CREATE CONTRACT
+CREATE SYMMETRIC KEY
+CREATE SCHEMA
+CREATE SYNONYM
+Applies to: SQL Server 2012 (11.x) and later.  CREATE SEQUENCE
+CREATE SERVICE
+CREATE TABLE
+CREATE TYPE
+CREATE VIEW
+CREATE XML SCHEMA COLLECTION
+DELETE
+INSERT
+TAKE OWNERSHIP
+UPDATE
 
+
+
+--- permisos a todos los procedimientos 
 
 grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows]
 GRANT EXECUTE ON SCHEMA::dbo TO my_user_test_windows; -- permiso de EXECUTE  a todos los objetos
@@ -329,7 +371,7 @@ SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [Tu
 ```
 
 **Ver permisos especificos pero de manera generica**
-```
+```SQL
 ********* OPCION #1 *********
 SELECT
     p.name AS Usuario,
@@ -360,7 +402,7 @@ WHERE  USER_NAME(grantee_principal_id)  = 'my_user1' =  ---- grantee_principal_i
 ```
 
 **Crear un reporte de Permisos especificos de todas las base de datos**
-```
+```SQL
 1.-  creamos una la tabla temporal
 CREATE TABLE #userpriv_grant (
 	db VARCHAR(200),
@@ -413,7 +455,7 @@ select CONNECTIONPROPERTY ('local_net_address') IP_SERVER,* from #userpriv_grant
 
 
 ### Revokar permisos Nivel servidor
-```
+```SQL
 EXEC sp_dropsrvrolemember N'test_permisos', N'bulkadmin';
 EXEC sp_dropsrvrolemember N'test_permisos', N'dbcreator';
 EXEC sp_dropsrvrolemember N'test_permisos', N'diskadmin';
@@ -425,7 +467,7 @@ EXEC sp_dropsrvrolemember N'test_permisos', N'sysadmin';
 ```
 
 ### Revokar permisos nivel administrador
-```
+```SQL
 REVOKE ADMINISTER BULK OPERATIONS TO [my_user_test]
 REVOKE ALTER ANY CONNECTION TO [my_user_test]
 REVOKE ALTER ANY CREDENTIAL TO [my_user_test]
@@ -456,7 +498,7 @@ REVOKE VIEW SERVER STATE TO [my_user_test]
 
  
 ### Revokar permisos nivel base de datos global
-```
+```SQL
 EXEC sp_droprolemember N'db_accessadmin', N'test_permisos'
 EXEC sp_droprolemember N'db_backupoperator', N'test_permisos'
 EXEC sp_droprolemember N'db_datareader', N'test_permisos'
@@ -470,7 +512,7 @@ EXEC sp_droprolemember N'db_securityadmin', N'test_permisos'
 
 
 ### Revokar permisos nivel base de datos especificos
-```
+```SQL
 REVOKE SELECT ON tabla_vista FROM usuario;
 REVOKE INSERT ON tabla FROM usuario;
 REVOKE UPDATE ON tabla FROM usuario;
@@ -484,12 +526,12 @@ REVOKE VIEW DEFINITION FROM usuario;
 ```
 
 # Quitar de un rol a un usuario 
-```
+```SQL
 ALTER ROLE [db_Rol_Lectura] DROP MEMBER [myempresa\omar.lopez]
 ```
 
 #### Ver si un usuario esta en un rol
-```
+```SQL
 SELECT 
     DP.name AS UserName,
     DP.type_desc AS UserType,
@@ -503,7 +545,7 @@ LEFT JOIN sys.database_principals RP ON DRM.role_principal_id = RP.principal_id
 
 ### Bloquear la conexion de un usuario sin eliminarlo 
 
-```
+```SQL
 ***** este solo se puede hacer en la master *****
 GRANT CONNECT SQL TO [test_permisos]
 DENY CONNECT SQL TO [test_permisos]
@@ -522,7 +564,7 @@ el usuario se quedo huérfanos porque ya no esta ligado a un login, y siempre un
 
 
 **sp_change_users_login** es un procedimiento almacenado en SQL Server que solía utilizarse para corregir la desincronización entre un usuario de base de datos y su inicio de sesión correspondiente en el servidor de base de datos.
-```
+```SQL
 ***** Identificar usuarios sin asociar con logins: *****
 
 -- Si no coinciden entonces es un usuario huérfanos
@@ -548,7 +590,7 @@ ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
 
 
 ### Copiar mismo permisos de un usuario o todos los usuarios 
-```
+```SQL
 ******** PASO #1 | CREAR TABLA TEMPORAL ********
 CREATE TABLE #userpriv (
 	db VARCHAR(200),
@@ -604,13 +646,29 @@ DEALLOCATE @dbRoleMembers
 ```
 
 # cambiar owner
-```
+```SQL
+/* ASIGNAR EL OWNER */
 EXEC sp_changedbowner 'NuevoPropietario';
+
+alter AUTHORIZATION ON OBJECT::CatPersona TO [test2]
+ALTER AUTHORIZATION ON DATABASE::AdventureWorks2019 TO [testt];
+Alter AUTHORIZATION ON SCHEMA::MYESQUEMA TO [testt];  
+
+/* saber quien es el owner  */ 
+SELECT name as [DB Name], suser_sname(owner_sid) as [Owner]  FROM sys.databases
+SELECT name as [Table Name],USER_NAME(principal_id) AS [Table_Owner], type_desc FROM sys.objects where principal_id is not null
+SELECT schema_name, schema_owner FROM information_schema.schemata where not SCHEMA_NAME in('db_owner' ,'db_accessadmin' ,'db_securityadmin' ,'db_ddladmin' ,'db_backupoperator' ,'db_datareader' ,'db_datawriter' ,'db_denydatareader' ,'db_denydatawriter')
+
+
+/* *** REFERENCE **
+https://www.mssqltips.com/sqlservertip/6836/sql-alter-authorization-examples/
+*/
+
 ```
 
 ### info extra
 Procedimientos almacenados y funciones que muestran información de usuarios y sus permisos
-```
+```SQL
 EXEC sp_helprotect
 EXEC sp_helpuser
 EXEC sp_helplogins
@@ -624,7 +682,7 @@ SELECT * FROM fn_builtin_permissions(NULL);
 ```
 
 Con esto puedes ver el codigo del procedimiento almacenado 
-```
+```SQL
 EXEC SP_HELPTEXT 'sp_grantdbaccess'
 ```
 
@@ -637,7 +695,7 @@ https://gist.github.com/ryzr/e96e7a20179a0e520fbff094a6d7d8b1
 
 
 #### Pendientes por actualizar este documento :
-```
+```SQL
 1- especificar para que sirve cada permiso
 2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos
 3.- poder hacer que se ejecuten los reportes con sp_executesql
