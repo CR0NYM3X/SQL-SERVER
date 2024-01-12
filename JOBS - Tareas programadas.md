@@ -52,6 +52,22 @@ select * from dbo.sysjobschedules   where job_id= '58DDADCD-74CB-4237-8830-1F671
 select * from dbo.sysjobservers where job_id= '58DDADCD-74CB-4237-8830-1F671C3EE202'  
 ```
 
+### Saber si un job tardo mucho en ejecutarse
+```
+SELECT distinct b.name ,
+        c.command,
+        a.step_id ,
+        a.run_date ,
+        stuff(stuff(replace(str(a.run_time,6,0),' ','0'),3,0,':'),6,0,':') as run_time,
+        stuff(stuff(replace(str(a.run_duration,6,0),' ','0'),3,0,':'),6,0,':') as run_duration
+FROM    msdb.dbo.sysjobhistory a
+INNER JOIN msdb.dbo.sysjobs b ON b.job_id = a.job_id
+INNER JOIN msdb.dbo.sysjobsteps c ON c.job_id = a.job_id and a.step_id=c.step_id
+WHERE   a.run_date = CONVERT(VARCHAR(11), GETDATE()-1, 112) --and command like '%Aqui colocamos la funcion a buscar%'
+ORDER BY b.name ,
+        a.step_id
+```
+
 
 
 ### Crear un JOB de ejemplo
