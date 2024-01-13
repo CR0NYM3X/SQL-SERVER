@@ -102,13 +102,31 @@ EXEC sp_revokedbaccess  'my_user_123','my_user_123';
 
 [Doc. Oficial](https://learn.microsoft.com/en-us/sql/t-sql/statements/create-server-role-transact-sql?view=sql-server-ver16)
 ```
---- crear roles
-CREATE ROLE desarolladores;
-CREATE SERVER ROLE testers [AUTHORIZATION owner_name];
+/* crear roles nivel base de datos  */ 
+CREATE ROLE test_role;
+
+/* crear roles nivel servidor [Nota] no se puede en versiones de 2008 y solo se le da permisos de grant de admin no como los select o update */
+CREATE SERVER ROLE testers 
+
+/* Asignarle permisos basicos al rol*/ 
+GRANT select    TO test_role;
+
+/* Asignar un usuario a un rol  */ 
+EXEC sp_addrolemember 'test_role', 'My_user';
+ALTER ROLE [test_role] ADD MEMBER [My_user]
+ALTER SERVER ROLE test_rol_server  ADD MEMBER TEST1711;
+
+/* Validar los roles nivel servidor  */
+select * from sys.server_principals where type_desc like '%rol%'
+
+/* Validar los roles nivel base de datos */
+select * from sys.database_principals where type_desc like '%rol%'
 
 --- Eliminar roles
 DROP ROLE  desarolladores;
 DROP SERVER ROLE  testers;
+
+
 
 ```
 
