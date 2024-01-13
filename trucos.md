@@ -86,7 +86,19 @@ SELECT
 
 
 ### hacer el linke que no sea sensible a Mayúsculas o Minúsculas 
+```
 select * from sys.server_principals where  name  like '%sysprogsclx%' COLLATE SQL_Latin1_General_CP1_CI_AS
+
+SELECT * FROM 
+(
+    SELECT principal_id , name COLLATE SQL_Latin1_General_CP1_CI_AS as name , type_desc  AS type_desc
+    FROM sys.server_principals
+    UNION ALL
+    SELECT principal_id , name COLLATE SQL_Latin1_General_CP1_CI_AS  as name , type_desc  AS type_desc
+    FROM sys.database_principals
+) a
+ORDER BY principal_id 
+```
 
 ### variables 
 Las variables son temporales y solo se pueden usar en la consulta que se ejecutan por ejemplo en este caso necesitas ejecutar todo junto si primero ejecutas la varibale y despues las segunda linea, no va servir
