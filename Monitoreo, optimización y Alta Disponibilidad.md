@@ -332,8 +332,6 @@ SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n
 
 ```SQL
 
-
-
 ---  SELECT @@cpu_busy AS "CPU Busy"
 
 declare 
@@ -368,13 +366,16 @@ select
 
    (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Total Memory Ram OS (MB)',
    (SELECT (total_physical_memory_kb - available_physical_memory_kb)/1024 FROM sys.dm_os_sys_memory) as Memory_used_OS,
+   (SELECT (total_physical_memory_kb - available_physical_memory_kb)/1024 FROM sys.dm_os_sys_memory) *100 / (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS PERCENTAGE_Memory_used_OS,
    (SELECT available_physical_memory_kb/1024 FROM sys.dm_os_sys_memory) AS 'Available Memory RAM OS (MB)',
+   100 - ((SELECT (total_physical_memory_kb - available_physical_memory_kb)/1024 FROM sys.dm_os_sys_memory) *100 / (SELECT total_physical_memory_kb/1024 FROM sys.dm_os_sys_memory)) as 'PERCENTAGE_Available Memory RAM OS',
    @Total_SQL_Server_Memory_MB     [Total_SQL_Server_Memory_MB],
 -- (SELECT physical_memory_in_use_kb/1024 FROM sys.dm_os_process_memory) AS 'SQL Server Memory RAM Usage RAM (MB)',
    (SELECT value_in_use FROM sys.configurations WHERE name like '%max server memory%') AS 'Max SQL Server Memory RAM (MB)',
    (SELECT system_memory_state_desc FROM sys.dm_os_sys_memory) AS 'System Memory State',
    (SELECT [cntr_value] FROM sys.dm_os_performance_counters WHERE [object_name] LIKE '%Manager%' AND [counter_name] = 'Page life expectancy') AS 'Page Life Expectancy',
    GETDATE() AS 'Data Sample Timestamp'
+
 
 
 
