@@ -1,6 +1,10 @@
 # Objetivo:
 Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar solucionar el detalle que se presente
 
+> [!TIP]
+> **`Las cosas que se validan son:`** Porcentaje % de  procesador y discos, algún tipo de bloqueo a tablas, transacciones o consultas con tiempos elevados
+
+
 # Procedimientos almacenados para monitorear 
 
 
