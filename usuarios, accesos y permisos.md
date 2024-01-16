@@ -24,6 +24,12 @@ En SQL server existen los permisos
 `connect :`  otorga permiso de conexión pero este se crea automaticamente al crear el login y asociar un usuario con una base de datos   <br>
 
 
+> [!CAUTION]
+> **`sa`**   "System Administrator"   Es el usuario predeterminado del sistema y tiene privilegios máximos en el servidor. Este usuario tiene todos los permisos y puede realizar cualquier acción en todas las bases de datos del servidor. Por esta razón, se considera un usuario con derechos elevados y se recomienda usarlo con precaución. Por motivos de seguridad, se recomienda cambiar la contraseña predeterminada del usuario "sa" y evitar su uso cotidiano o buena práctica bloquear el acceso al usuario "sa"  
+
+
+
+
 # Ejemplos de uso :
 
 ```SQL
