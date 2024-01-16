@@ -708,7 +708,12 @@ SELECT * FROM fn_builtin_permissions(NULL);
 Con esto puedes ver el codigo del procedimiento almacenado 
 ```SQL
 EXEC SP_HELPTEXT 'sp_grantdbaccess'
+
+
 ```
+
+public: Aunque técnicamente no es un rol asignable, todos los usuarios son miembros del rol público por defecto. Este rol tiene los permisos básicos necesarios para todos los usuarios de la base de datos.
+
 
 
 
