@@ -567,14 +567,14 @@ LEFT JOIN sys.database_principals RP ON DRM.role_principal_id = RP.principal_id
 ```
 
 
-### Bloquear la conexion de un usuario sin eliminarlo 
+### Habilitar/ Desabilitar/ Bloquear la conexion de un usuario sin eliminarlo 
 
 ```SQL
 ***** este solo se puede hacer en la master *****
 GRANT CONNECT SQL TO [test_permisos]
 DENY CONNECT SQL TO [test_permisos]
 
-***** este se puede realizar en todas las base de datos *****
+***** Este se puede realizar en todas las base de datos no permite hacer login a un usuario *****
 
 ALTER LOGIN [test_permisos] ENABLE
 ALTER LOGIN [test_permisos] DISABLE
