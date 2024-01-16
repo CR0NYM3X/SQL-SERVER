@@ -16,5 +16,9 @@ FROM
     sys.sql_modules
 WHERE 
     object_id = OBJECT_ID('NombreDeTuVista');
+
+
+
+SELECT OBJECT_DEFINITION(OBJECT_ID('master.sys.server_principals')) AS CodigoDeLaVista;
 	
 	```
