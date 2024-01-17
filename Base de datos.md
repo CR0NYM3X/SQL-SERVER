@@ -253,10 +253,24 @@ SELECT COUNT(*) AS 'Cantidad de Conexiones Activas' FROM sys.dm_exec_connections
 
 ### saber el tamaño total/completo de la base de datos:
 ```SQL
---- Procedimiento almacenado 
-sp_helpdb
+/* ** Cuanto pesa total cada  base de datos usando Procedimiento almacenado  ** */
+CREATE TABLE #sp_helpdb_tmp (
+ name   VARCHAR(255),
+db_size  VARCHAR(255), 
+owner  VARCHAR(255) ,
+dbid VARCHAR(255),
+created VARCHAR(255),
+status VARCHAR(max),
+compatibility_leve INT);
 
----- este te dice en general cuanto pesa toda la base de datos 
+INSERT INTO #sp_helpdb_tmp EXEC  sp_helpdb
+
+select name
+,cast(cast(REPLACE(db_size, 'MB', '')  AS DECIMAL(20,2))/1024AS DECIMAL(20,2))  db_size_GB  
+,owner     from #sp_helpdb_tmp order by db_size desc 
+
+
+/* ** Cuanto pesa en total cada  base de datos  ** */
  SELECT 
       database_name = DB_NAME(database_id)
     , LDF_size_mb = CAST((SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 )/1024 AS DECIMAL(20,2)) 
