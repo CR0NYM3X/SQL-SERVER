@@ -259,12 +259,13 @@ sp_helpdb
 ---- este te dice en general cuanto pesa toda la base de datos 
  SELECT 
       database_name = DB_NAME(database_id)
-    , LDF_size_mb = CAST(SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
-    , MDF_size_mb = CAST(SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024 AS DECIMAL(8,2)) 
-    , total_size_mb = CAST(SUM(size) * 8. / 1024 AS DECIMAL(8,2)) 
+    , LDF_size_mb = CAST((SUM(CASE WHEN type_desc = 'LOG' THEN size END) * 8. / 1024 )/1024 AS DECIMAL(20,2)) 
+    , MDF_size_mb = CAST((SUM(CASE WHEN type_desc = 'ROWS' THEN size END) * 8. / 1024)/1024 AS DECIMAL(20,2)) 
+    , total_size_mb = CAST((SUM(size) * 8. / 1024)/1024 AS DECIMAL(20,2)) 
 FROM sys.master_files WITH(NOWAIT)
 where database_id > 4 --- skip system databases 
-GROUP BY database_id
+GROUP BY database_id ORDER BY total_size_mb desc
+
 ```
 
 ### Saber la base de datos, sizedata y sizelog y que unidad estan
