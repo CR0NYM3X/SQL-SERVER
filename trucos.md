@@ -244,5 +244,20 @@ FROM (
 ) AS SubQuery
 ```
 
+# Funciones del sistema 
+```sql
+/*   **  REPLACE **
+SIRVE PARA REMPLAZAR TEXTO */
+ SELECT REPLACE(miColumna, 'viejo', 'nuevo') AS nuevaColumna
+
+/*   **  CHARINDEX **
+SIRVE PARA ENCONTRAR LA POSICION DE UN TEXTO */
+DECLARE @cadena NVARCHAR(50) = 'Hola, mundo';
+DECLARE @subcadena NVARCHAR(10) = 'mundo';
+
+SELECT CHARINDEX(@subcadena, @cadena) AS Posicion;
+```
+
+
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
