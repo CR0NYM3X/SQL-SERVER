@@ -112,7 +112,7 @@ COLLATE French_CI_AS ;
 
   CREATE TABLE #Temp_DBA_SPACE (
     [Nombre de la base de datos] NVARCHAR(255),
-    [Nombre del archivo] NVARCHAR(255),
+    [Nombre logico] NVARCHAR(255),
     [Tamaño total del archivo (MB)] DECIMAL(20, 2),
     [Crecimiento (MB)] DECIMAL(20, 2),
     MaxSize NVARCHAR(20),
