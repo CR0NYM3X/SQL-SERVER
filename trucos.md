@@ -258,6 +258,27 @@ DECLARE @subcadena NVARCHAR(10) = 'mundo';
 SELECT CHARINDEX(@subcadena, @cadena) AS Posicion;
 ```
 
+# Formas de pasar un array de datos a una columna 
+```sql
+/* Opción #1 Usando "STRING_SPLIT"   */ 
+select value from 
+(select  'valor4,valor5,valor6' valor )a
+CROSS APPLY STRING_SPLIT(valor, ',');
+
+
+/* Opción #2 Usando "values"   */ 
+SELECT valor
+FROM (VALUES ('valor4'),('valor5'),('valor6')) AS t(valor);
+
+/* Opción #3 Usando "union all"   */ 
+select * from 
+(select 'valor4' valor union all
+select 'valor5' union all
+select 'valor6' )a
+ ```
+
+
+
 
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
