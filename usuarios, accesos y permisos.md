@@ -392,7 +392,7 @@ UPDATE
 
 --- permisos a todos los procedimientos 
 
-grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows]
+grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows] AS [dbo] /* with grant option -- el "with grant option" sirve para decirle al usuario que puede heredar ese permiso */ 
 GRANT EXECUTE ON SCHEMA::dbo TO my_user_test_windows; -- permiso de EXECUTE  a todos los objetos
 SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13) FROM sys.procedures;
 
