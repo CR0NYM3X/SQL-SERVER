@@ -697,9 +697,11 @@ https://www.mssqltips.com/sqlservertip/6836/sql-alter-authorization-examples/
 ### info extra
 Procedimientos almacenados y funciones que muestran información de usuarios y sus permisos
 ```SQL
+EXEC sp_helprolemember
 EXEC sp_helprotect
 EXEC sp_helpuser
 EXEC sp_helplogins
+
 
 SELECT * FROM master.sys.sysusers WHERE islogin = 1
 
