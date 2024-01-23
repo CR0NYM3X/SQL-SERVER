@@ -621,6 +621,15 @@ ALTER INDEX MY_INDEX_COMPRESO ON DBO.MY_TABLA_TEST REBUILD WITH ( DATA_COMPRESSI
 /* QUITAR LA COMPRESIÓN */
 ALTER TABLE CatPersona REBUILD WITH (DATA_COMPRESSION = NONE);
 
+
+/* EJEMPLOS DE COMPRESIÓN 
+	 TableName	SchemaName		rows	TotalSpaceGB	UsedSpaceGB
+	 my_tabla_test	dbo			52681140	9.67	9.67 --> no compresion  
+	 my_tabla_test	dbo			52681140	6.61	6.61 --> compresion PAGE
+	 my_tabla_test	dbo			52681140	8.18	8.18 --> compresion ROW
+*/
+
+
 /* Referencias 
 
 https://desktop.arcgis.com/es/arcmap/latest/extensions/workflow-manager/using-data-compression-for-the-workflow-manager-workspace-in-sql-server.htm
