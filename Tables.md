@@ -535,7 +535,7 @@ drop index idx_Combinado  ON DESCRIPCION_ARTICULO
 
 ```
 
-### Bloques en  tablas DE SQL Server debido a varias situaciones:
+### Bloqueos en  tablas DE SQL Server debido a varias situaciones:
 **`Bloqueo explícito:`** Cuando se ejecuta una transacción que modifica datos y se utiliza un bloqueo explícito como BEGIN TRANSACTION y COMMIT TRANSACTION, otras transacciones pueden ser bloqueadas para acceder a esos datos hasta que se complete la transacción actual.
 
 **`Bloqueo implícito:`** Las operaciones de escritura como UPDATE, DELETE o INSERT pueden bloquear una tabla o filas dentro de ella mientras se realizan, impidiendo que otras transacciones modifiquen esos mismos datos simultáneamente.
@@ -572,6 +572,64 @@ LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
  
 
 ```
+
+### COMPRESIÓN  
+
+> [!CAUTION]
+> Realizar el proceso de compresion de una tabla bloquea la tabla, por lo que no puedes consultar o realizar movimientos en esa tabla, mientras se comprime  
+
+
+**Ventajas** <br>
+1. Permite reducir el tamaño de los datos almacenados en una base de datos  <br>
+2. Ahorro de Espacio en Disco  <br>
+3. Mejora del Rendimiento de E/S  <br>
+4. Mejora en el Rendimiento de Almacenamiento en Caché  <br>
+5. Menos Requisitos de Ancho de Banda  <br>
+6. Reducción de Copias de Seguridad y Restauraciones  <br>
+
+**Desventajas** <br>
+1. `Overhead de CPU:` La compresión puede aumentar la carga de la CPU durante la descompresión de datos, lo que puede afectar el rendimiento de las consultas.<br>
+2. `Selección de índices:` La compresión puede aplicarse a índices, pero es crucial evaluar si el beneficio de espacio supera el costo adicional de CPU durante las operaciones de lectura y escritura.
+3. Complejidad de Administración  <br>
+4. Posible Impacto en la Velocidad de Escritura  <br>
+5. Limitaciones en la Compresión de Índices  <br>
+6. Requiere Evaluación y Pruebas  <br>
+
+
+```sql
+/*Calcular la compresión*/
+EXEC sp_estimate_data_compression_savings 'dbo', 'MY_TABLA_TEST', NULL, NULL,'ROW';
+
+
+ /* VER LOS OBJETOS NO COMPRIMIDOS  */
+select t.name as tblname, s.name as schemaname, p.data_compression_desc
+    from sys.tables t
+    inner join sys.schemas s on t.schema_id = s.schema_id
+    inner join sys.indexes i on i.object_id = t.object_id
+    inner join sys.partitions p on i.object_id = p.object_id AND i.index_id = p.index_id
+    where  i.type_desc='CLUSTERED'
+    and not p.data_compression_desc in( 'PAGE','ROW')
+
+
+
+/* COMPRESIÓN EN TABLA */
+ALTER TABLE DBO.MY_TABLA_TEST REBUILD WITH (DATA_COMPRESSION = PAGE);  -- TAMBIEN PUEDES HACER COMPRESION POR FILA Y NO POR PAGINA "ROW"
+
+/* COMPRESIÓN EN INDEX */
+ALTER INDEX MY_INDEX_COMPRESO ON DBO.MY_TABLA_TEST REBUILD WITH ( DATA_COMPRESSION = PAGE ) ;
+
+/* QUITAR LA COMPRESIÓN */
+ALTER TABLE CatPersona REBUILD WITH (DATA_COMPRESSION = NONE);
+
+/* Referencias 
+
+https://desktop.arcgis.com/es/arcmap/latest/extensions/workflow-manager/using-data-compression-for-the-workflow-manager-workspace-in-sql-server.htm
+
+https://docs.aws.amazon.com/es_es/prescriptive-guidance/latest/sql-server-optimization-for-enterpriseone/compression.html
+
+*/
+```
+
 
 ### Bibliografia :
 ```
