@@ -111,11 +111,13 @@ EXEC sp_revokedbaccess  'my_user_123','my_user_123';
 ### Crear un role o eliminar
 
 [Doc. Oficial](https://learn.microsoft.com/en-us/sql/t-sql/statements/create-server-role-transact-sql?view=sql-server-ver16)
-```
-/* crear roles nivel base de datos  */ 
+```SQL
+/* crear roles nivel base de datos, a estos roles solo se le pueden dar permisos granulares  */ 
 CREATE ROLE test_role;
 
-/* crear roles nivel servidor [Nota] no se puede en versiones de 2008 y solo se le da permisos de grant de admin no como los select o update */
+/* crear roles nivel servidor [Nota] no se puede en versiones de 2008 y solo se le da permisos de
+grant de administrador, como por ejemplo "ADMINISTER BULK OPERATIONS" ,
+no se puede dar permisos granulares como los select o update */
 CREATE SERVER ROLE testers 
 
 /* Asignarle permisos basicos al rol*/ 
@@ -392,7 +394,9 @@ UPDATE
 
 --- permisos a todos los procedimientos 
 
-grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows] AS [dbo] /* with grant option -- el "with grant option" sirve para decirle al usuario que puede heredar ese permiso */ 
+grant execute on Proc_calcularImpuestos to [MYDOMINIOS\my_user_test_windows] AS [dbo] /* with grant option -- el "with grant option" sirve para
+que el usuario,  tenga la capacidad de asignar ese permiso a otros usuarios */
+
 GRANT EXECUTE ON SCHEMA::dbo TO my_user_test_windows; -- permiso de EXECUTE  a todos los objetos
 SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13) FROM sys.procedures;
 
@@ -718,7 +722,7 @@ EXEC SP_HELPTEXT 'sp_grantdbaccess'
 
 ```
 
-public: Aunque técnicamente no es un rol asignable, todos los usuarios son miembros del rol público por defecto. Este rol tiene los permisos básicos necesarios para todos los usuarios de la base de datos.
+public: Aunque técnicamente no es un rol asignable, todos los usuarios son miembros del rol público por defecto. Este rol tiene los permisos connect básicos necesarios para todos los usuarios de la base de datos.
 
 
 
