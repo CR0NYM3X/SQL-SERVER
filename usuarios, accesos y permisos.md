@@ -400,6 +400,10 @@ que el usuario,  tenga la capacidad de asignar ese permiso a otros usuarios */
 GRANT EXECUTE ON SCHEMA::dbo TO my_user_test_windows; -- permiso de EXECUTE  a todos los objetos
 SELECT  'GRANT EXECUTE ON [' + SCHEMA_NAME(schema_id) + '].[' + name + '] TO [TuRolOUsuario];' + CHAR(13) FROM sys.procedures;
 
+/* Ejemplos de with grant option 
+https://sqlity.net/en/1884/grant-option-delegate-permission-management/
+*/
+
 ```
 
 **Ver permisos especificos pero de manera generica**
