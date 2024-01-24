@@ -573,7 +573,7 @@ LEFT JOIN sys.objects OBJ ON TL.resource_associated_entity_id = OBJ.object_id
 
 ```
 
-### COMPRESIÓN  
+### Comprimir Tablas   
 
 > [!CAUTION]
 > Realizar el proceso de compresion de una tabla bloquea la tabla, por lo que no puedes consultar o realizar movimientos en esa tabla, mientras se comprime  
@@ -638,6 +638,32 @@ https://docs.aws.amazon.com/es_es/prescriptive-guidance/latest/sql-server-optimi
 
 */
 ```
+
+
+### Insertar datos en dos tablas diferentes al mismo tiempo a partir de una tabla de origen
+```SQL
+
+CREATE TABLE A (
+    ID INT PRIMARY KEY,
+    Cliente VARCHAR(50),
+    OtraColumna1 INT,
+    OtraColumna2 VARCHAR(50)
+);
+
+CREATE TABLE B (
+    ID INT PRIMARY KEY,
+    Cliente VARCHAR(50)
+);
+
+-- Insertar datos en la tabla A y al mismo tiempo en la tabla B
+INSERT INTO A (ID, Cliente, OtraColumna1, OtraColumna2)
+OUTPUT inserted.ID, inserted.Cliente INTO B (ID, Cliente)
+VALUES (1, 'Cliente1', 100, 'Valor1'),
+       (2, 'Cliente2', 200, 'Valor2'),
+       (3, 'Cliente3', 300, 'Valor3');
+
+```
+
 
 
 ### Bibliografia :
