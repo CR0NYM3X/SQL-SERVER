@@ -278,6 +278,34 @@ select 'valor6' )a
  ```
 
 
+# validar si se inserto la información
+ ```sql
+
+BEGIN TRY
+    -- Insertar datos en la tabla temporal
+    INSERT INTO #TempFileInfo
+   EXEC('RESTORE FILELISTONLY FROM DISK=''E:\db_respaldo.ba8k''');
+
+    -- Verificar el número de filas insertadas
+    IF @@ROWCOUNT > 0
+    BEGIN
+        -- Mostrar mensaje si se insertaron datos
+        PRINT 'Se insertaron datos en la tabla temporal.';
+    END
+    ELSE
+    BEGIN
+        -- Mostrar mensaje si no se insertaron datos
+        PRINT 'No se insertaron datos en la tabla temporal.';
+    END
+
+    -- Mostrar los datos de la tabla temporal (opcional)
+    SELECT * FROM #TempFileInfo;
+END TRY
+BEGIN CATCH
+    -- Capturar cualquier error y mostrar un mensaje personalizado
+    PRINT 'Ocurrió un error al intentar insertar los datos en la tabla temporal.';
+END CATCH;
+ ```
 
 
 ### Bibliografía 
