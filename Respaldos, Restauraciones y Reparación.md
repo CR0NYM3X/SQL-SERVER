@@ -301,6 +301,50 @@ ORDER BY msdb.dbo.backupset.backup_finish_date desc
 
 ```
 
+# ver la informacion de las tablas 
+```sql
+
+
+CREATE TABLE #TempFileInfo (
+    LogicalName NVARCHAR(max),
+    PhysicalName NVARCHAR(max),
+    [Type] CHAR(1),
+    FileGroupName NVARCHAR(max),
+    [Size] INT,
+    MaxSize BIGINT, -- Cambiado a BIGINT
+    FileId INT,
+    CreateLSN DECIMAL(25,0),
+    DropLSN DECIMAL(25,0),
+    UniqueId UNIQUEIDENTIFIER,
+    ReadOnlyLSN DECIMAL(25,0),
+    ReadWriteLSN DECIMAL(25,0),
+    BackupSizeInBytes BIGINT, -- Cambiado a BIGINT
+    SourceBlockSize INT,
+    FileGroupId INT,
+    LogGroupGUID UNIQUEIDENTIFIER,
+    DifferentialBaseLSN DECIMAL(25,0),
+    DifferentialBaseGUID UNIQUEIDENTIFIER,
+    IsReadOnly BIT,
+    IsPresent BIT,
+    TDEThumbprint VARBINARY(32)
+);
+-- Insertar la información en la tabla temporal
+INSERT INTO #TempFileInfo
+EXEC('RESTORE FILELISTONLY FROM DISK=''0b82922f-421e-4125-be8a-d6249f971e63''');
+
+-- Consulta para verificar los datos en la tabla temporal
+SELECT * FROM #TempFileInfo;
+
+-- Realizar otras operaciones con los datos de la tabla temporal según sea necesario
+
+-- Finalmente, eliminar la tabla temporal
+DROP TABLE #TempFileInfo;
+
+
+
+---	RESTORE HEADERONLY FROM DISK ='0b82922f-421e-4125-be8a-d6249f971e63';
+``` 
+
 # Mejorar el rendimiento de consulta de tablas pesadas
 ```
 ******* activar la información de estadísticas de E/S y tiempo de ejecución *********
