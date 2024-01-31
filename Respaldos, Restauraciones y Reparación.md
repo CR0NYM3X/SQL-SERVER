@@ -301,7 +301,7 @@ ORDER BY msdb.dbo.backupset.backup_finish_date desc
 
 ```
 
-# ver la informacion de las tablas 
+# ver la informacion a detalle de cada physical_device_name
 ```sql
 
 
