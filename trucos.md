@@ -307,6 +307,15 @@ BEGIN CATCH
 END CATCH;
  ```
 
+## Fechas 
+ ```
+/* reducir el dia */ 
+select DATEADD(DAY, -1, GETDATE() )
+select CAST(GETDATE()-1 AS date)
+ ```
 
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
+
+
+
