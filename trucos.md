@@ -312,6 +312,9 @@ END CATCH;
 /* reducir el dia */ 
 select DATEADD(DAY, -1, GETDATE() )
 select CAST(GETDATE()-1 AS date)
+
+ select DATEFROMPARTS(2025, 12, 1)
+
  ```
 
 ### Bibliografía 
