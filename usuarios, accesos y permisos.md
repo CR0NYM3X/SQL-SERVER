@@ -352,7 +352,9 @@ GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 /* ESTOS PERMISOS SON A NIVEL BASE DE DATOS */
 SELECT * FROM fn_my_permissions(NULL, 'DATABASE'); 
 
-CREATE TABLE
+CREATE TABLE --- este permiso tambien te va solicitar el permiso ALTER ya que  si no lo colocas te va salir
+el error de 'dbo' no existe
+
 CREATE VIEW
 CREATE PROCEDURE
 CREATE FUNCTION
