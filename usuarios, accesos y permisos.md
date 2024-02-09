@@ -742,6 +742,12 @@ SELECT * FROM master.sys.sysusers WHERE islogin = 1
 
 
 
+SELECT * FROM sysobjects a
+LEFT JOIN syspermissions b
+ON a.id=b.id
+WHERE a.xtype='P'
+AND b.id IS NULL
+
 ```
 
 Con esto puedes ver el codigo del procedimiento almacenado 
