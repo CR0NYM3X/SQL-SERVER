@@ -337,6 +337,11 @@ select CONNECTIONPROPERTY ('local_net_address') as IP_SERVER,* from #userpriv wh
 **Permisos especificos/ Granulares:**
 Este le especificas que permiso quieres para un objeto o varios objetos, como por ejemplos los permisos select, insert, update etc, etc
 ```SQL
+/*podemos usar esto en los grant*/
+OBJECT::MYOBJECT_TEST
+DATABASE::MYDBA_TEST  
+SCHEMA::MYESQUEMA_TEST
+
 GRANT CONTROL ON dbo.my_tabla TO [my_user_test]
 GRANT TAKE OWNERSHIP ON dbo.my_tabla TO [my_user_test]
 GRANT VIEW CHANGE TRACKING ON dbo.my_tabla TO [my_user_tes
