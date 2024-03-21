@@ -5,6 +5,11 @@ Permíten conectarse a una base de datos externa y realizar consultas en ella, n
 
 # Ejemplos de uso: 
 
+### Agregar un usuario al login de linkeo
+```SQL
+EXEC master.dbo.sp_addlinkedsrvlogin @rmtsrvname = N'10.44.4.84', @locallogin = N'test_php', @useself = N'True'
+```
+
 ### Ver la configuración de los linked
 
 ```SQL
