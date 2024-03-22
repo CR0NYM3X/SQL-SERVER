@@ -75,7 +75,8 @@ SELECT * FROM  **`sys.dm_tran_database_transactions`** <br>
   SET STATISTICS TIME ON; -- Muestra las estadísticas de tiempo
   SET STATISTICS IO ON; -- Muestra las estadísticas de E/S
   set statistics profile on
-  SET SHOWPLAN_XML on; -- Muestra el plan de ejecución en formato XML - 
+  SET SHOWPLAN_XML on; -- Muestra el plan de ejecución en formato XML -
+  SET SHOWPLAN_ALL on;
   SET SHOWPLAN_TEXT on; -- Muestra el plan de ejecución en formato de texto
  ```
 
