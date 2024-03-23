@@ -8,6 +8,58 @@
 6.- no usar SET NOCOUNT ON <br>
 7.-  usar Database Tuning Advisor (DETA) 
 
+#### Obtener indices que no se usan 
+```sql
+SELECT   OBJECT_NAME(S.[OBJECT_ID]) AS [OBJECT NAME], 
+         I.[NAME] AS [INDEX NAME], 
+         USER_SEEKS, 
+         USER_SCANS, 
+         USER_LOOKUPS, 
+         USER_UPDATES 
+FROM     SYS.DM_DB_INDEX_USAGE_STATS AS S 
+         INNER JOIN SYS.INDEXES AS I 
+           ON I.[OBJECT_ID] = S.[OBJECT_ID] 
+              AND I.INDEX_ID = S.INDEX_ID 
+WHERE    OBJECTPROPERTY(S.[OBJECT_ID],'IsUserTable') = 1 /*se excluyan las tablas del sistema.*/
+
+
+
+SELECT 
+    OBJECT_NAME(s.[object_id]) AS [Object Name],
+    i.name AS [Index Name],
+    i.index_id AS [Index ID],
+    s.user_seeks,
+    s.user_scans,
+    s.user_lookups,
+    s.user_updates
+FROM 
+    sys.dm_db_index_usage_stats s
+INNER JOIN 
+    sys.indexes i ON i.[object_id] = s.[object_id] AND i.index_id = s.index_id
+WHERE 
+    OBJECTPROPERTY(s.[object_id],'IsUserTable') = 1
+    AND s.database_id = DB_ID()
+    AND (s.user_seeks = 0 or  s.user_scans= 0 or s.user_lookups = 0   ) 
+ORDER BY 
+    s.user_updates DESC;
+
+
+
+Ref: https://www.mssqltips.com/sqlservertip/1239/how-to-get-index-usage-information-in-sql-server/ 
+https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver16
+
+user_scans: el número de escaneos realizados por la consulta del usuario.
+user_seeks: el número de búsquedas realizadas por la consulta del usuario.
+user_lookups: el número de búsquedas de marcadores realizadas por la consulta del usuario.
+user_updates: el número de actualizaciones realizadas por la consulta del usuario. Esto representa la cantidad de inserciones, eliminaciones y actualizaciones en lugar de la cantidad real de filas afectadas. Por ejemplo, si elimina 1000 filas en una declaración, este recuento se incrementa en 1.
+
+
+user_seeks: número de búsquedas de índice
+user_scans: número de escaneos de índice
+user_lookups: número de búsquedas de índice
+user_updates: número de operaciones de inserción, actualización o eliminación
+```
+
 
 
 ### VEr los indices que existen y los primari key
