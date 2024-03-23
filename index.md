@@ -24,18 +24,22 @@ WHERE    OBJECTPROPERTY(S.[OBJECT_ID],'IsUserTable') = 1 /*se excluyan las tabla
 
 
 
+
 SELECT 
     OBJECT_NAME(s.[object_id]) AS [Object Name],
     i.name AS [Index Name],
     i.index_id AS [Index ID],
+	i.type_desc,
     s.user_seeks,
     s.user_scans,
     s.user_lookups,
-    s.user_updates
+    s.user_updates,
+	ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
 FROM 
     sys.dm_db_index_usage_stats s
 INNER JOIN 
     sys.indexes i ON i.[object_id] = s.[object_id] AND i.index_id = s.index_id
+LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = s.[object_id] AND ps.index_id = s.index_id
 WHERE 
     OBJECTPROPERTY(s.[object_id],'IsUserTable') = 1
     AND s.database_id = DB_ID()
@@ -43,6 +47,17 @@ WHERE
 ORDER BY 
     s.user_updates DESC;
 
+
+	SELECT
+    OBJECT_NAME(object_id) AS Nombre_Tabla,
+    SUM(leaf_insert_count) AS Total_Inserts,
+    SUM(leaf_delete_count) AS Total_Updates,
+    SUM(leaf_update_count) AS Total_Deletes
+FROM 
+    sys.dm_db_index_operational_stats(NULL, NULL, NULL, NULL)
+	where OBJECT_NAME(object_id) is not null
+GROUP BY
+    object_id;
 
 
 Ref: https://www.mssqltips.com/sqlservertip/1239/how-to-get-index-usage-information-in-sql-server/ 
