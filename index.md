@@ -53,6 +53,13 @@ Filas (Rows): Además de las páginas, los datos de los índices también se alm
 
 ### Tipos de index 
 ```sql
+El índice HEAP se utiliza cuando no se define ningún índice en la tabla o cuando no hay una clave primaria o clave única definida en la tabla
+, las filas se almacenan en cualquier orden en las páginas de datos de la tabla. desventajas :
+No hay ordenamiento específico:
+endimiento de lectura y escritura: 
+Espacio de almacenamiento
+Fragmenación
+
 Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente las filas de la tabla en función de los valores de la(s) columna(s) clave del índice. Cada tabla puede tener solo un índice de clúster, ya que determina el orden físico de los datos en la tabla misma.
 
 Índice no agrupado (Non-clustered Index): A diferencia del índice de clúster, el índice no agrupado no afecta el orden físico de las filas en la tabla. En cambio, crea una estructura de índice separada que contiene las claves del índice y los punteros a las filas de datos correspondientes.
