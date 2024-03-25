@@ -75,22 +75,8 @@ Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente l
 Índice de columnas incluidas (Included Column Index): Este tipo de índice permite incluir columnas adicionales (no claves) en el índice para cubrir consultas y mejorar el rendimiento sin agregarlas a la clave del índice.
 ```
 
-#### Obtener indices que no se usan 
+####  saber la fragmentacion de los index y el uso de los index  
 ```sql
-SELECT   OBJECT_NAME(S.[OBJECT_ID]) AS [OBJECT NAME], 
-         I.[NAME] AS [INDEX NAME], 
-         USER_SEEKS, 
-         USER_SCANS, 
-         USER_LOOKUPS, 
-         USER_UPDATES 
-FROM     SYS.DM_DB_INDEX_USAGE_STATS AS S 
-         INNER JOIN SYS.INDEXES AS I 
-           ON I.[OBJECT_ID] = S.[OBJECT_ID] 
-              AND I.INDEX_ID = S.INDEX_ID 
-WHERE    OBJECTPROPERTY(S.[OBJECT_ID],'IsUserTable') = 1 /*se excluyan las tablas del sistema.*/
-
-
-
 
 SELECT 
     OBJECT_NAME(s.[object_id]) AS [Object Name],
@@ -110,21 +96,11 @@ LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON
 WHERE 
     OBJECTPROPERTY(s.[object_id],'IsUserTable') = 1
     AND s.database_id = DB_ID()
-    AND (s.user_seeks = 0 or  s.user_scans= 0 or s.user_lookups = 0   ) 
+   -- and i.type_desc not in('CLUSTERED','HEAP') --- estos no se deben de dejar ya que heap es porque la tabla no tiene index y el clustered nunca se elimina 
+   -- AND (s.user_seeks = 0 or  s.user_scans= 0 or s.user_lookups = 0   ) 
 ORDER BY 
     s.user_updates DESC;
 
-
-	SELECT
-    OBJECT_NAME(object_id) AS Nombre_Tabla,
-    SUM(leaf_insert_count) AS Total_Inserts,
-    SUM(leaf_delete_count) AS Total_Updates,
-    SUM(leaf_update_count) AS Total_Deletes
-FROM 
-    sys.dm_db_index_operational_stats(NULL, NULL, NULL, NULL)
-	where OBJECT_NAME(object_id) is not null
-GROUP BY
-    object_id;
 
 
 Ref: https://www.mssqltips.com/sqlservertip/1239/how-to-get-index-usage-information-in-sql-server/ 
@@ -174,6 +150,30 @@ GROUP BY i.OBJECT_ID,i.index_id,i.name, i.is_primary_key
 ORDER BY OBJECT_NAME(i.OBJECT_ID),i.index_id 
 ```
 
+###  saber los update,delete, insert de una tabla 
+```sql
+
+
+
+SELECT
+	db_name (a.database_id),
+    OBJECT_NAME(a.object_id) AS Nombre_Tabla,
+	index_type_desc,
+   leaf_insert_count AS Total_Inserts,
+   leaf_delete_count AS Total_Updates,
+   leaf_update_count AS Total_Deletes
+   ,ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
+ 
+FROM 
+    sys.dm_db_index_operational_stats(DB_id(), NULL, NULL, NULL) a
+LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = a.[object_id] AND ps.index_id = a.index_id
+	where    OBJECT_NAME(a.object_id) = 'ropa'
+group by  a.database_id , a.object_id , leaf_insert_count , leaf_delete_count  , leaf_update_count   ,ps.avg_fragmentation_in_percent ,	index_type_desc
+```
+
+
+
+
 ### VEr los indices que existen y los primari key
 ```sql
 SELECT 
@@ -215,6 +215,8 @@ CREATE  INDEX idx_DosColumnas2 ON DESCRIPCION_ARTICULO(ID_Descripcion) where id_
 CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2 desc ) INCLUDE (Detalles desc );
 SELECT Detalles FROM DESCRIPCION_ARTICULO WHERE ID_Articulo_2 = 'valor_buscado';
 
+/* Este tipo de índice se conoce como un índice combinado o multicolumna,
+lo que significa que se indexarán ambas columnas y se utilizarán para optimizar consultas que involucren esas columnas. */
 CREATE  INDEX idx_Combinado ON DESCRIPCION_ARTICULO (ID_Articulo_2, Detalles);
 SELECT * FROM DESCRIPCION_ARTICULO WHERE ID_Articulo_2 = 'valor_1' AND Detalles = 'detalle_buscado';
 
