@@ -75,6 +75,11 @@ Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente l
 Índice de columnas incluidas (Included Column Index): Este tipo de índice permite incluir columnas adicionales (no claves) en el índice para cubrir consultas y mejorar el rendimiento sin agregarlas a la clave del índice.
 ```
 
+### Borrar indices 
+```sql
+DROP INDEX idx_Combinado ON DESCRIPCION_ARTICULO;
+```
+
 ####  saber la fragmentacion de los index y el uso de los index  
 ```sql
 
