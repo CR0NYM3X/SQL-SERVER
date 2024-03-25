@@ -128,16 +128,20 @@ user_updates: número de operaciones de inserción, actualización o eliminació
 
 ------------ OPCION #1 -----------
 SELECT 
+	s.object_id as  idx_obj_id,
+	db_name() db,
 	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
-	OBJECT_NAME(i.OBJECT_ID) AS TableNam,
-	s.object_id, i.[name] AS IndexName,
+	OBJECT_NAME(i.OBJECT_ID) AS TableName,
+	COL_NAME(ic.object_id, ic.column_id) AS ColumnName,
+	i.[name] AS IndexName,
+	i.type_desc AS IndexType,
 	i.index_id AS IndexID,
 	SUM(s.[used_page_count]) * 8 AS IndexSizeKB
 FROM sys.dm_db_partition_stats AS s
-INNER JOIN sys.indexes AS i ON s.[object_id] = i.[object_id]
-    AND s.[index_id] = i.[index_id]
-where  i.name is not null and i.name = 'idx_iNum_Empleado'
-GROUP BY i.[name],s.object_id,i.OBJECT_ID,i.index_id 
+	INNER JOIN sys.indexes AS i ON s.[object_id] = i.[object_id] AND s.[index_id] = i.[index_id]
+	LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+where  i.name is not null    -- and  OBJECT_NAME(i.OBJECT_ID) = 'clientes'
+GROUP BY i.[name],s.object_id,i.OBJECT_ID,i.index_id , ic.column_id , ic.object_id , i.type_desc   
 
 ------------ OPCION #2 -----------
 SELECT
