@@ -315,6 +315,11 @@ ALTER TABLE banprefijos DROP COLUMN keyx;
 
 ### Eliminar una columna PK (primary key)
 ```sql
+ 
+SELECT name  
+FROM sys.key_constraints  
+WHERE type = 'PK' AND OBJECT_NAME(parent_object_id) = N'clientes';  
+
 ALTER TABLE Clientes
 DROP CONSTRAINT PK__Clientes__3214EC270C50D423;  
 
