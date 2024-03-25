@@ -53,7 +53,7 @@ Filas (Rows): Además de las páginas, los datos de los índices también se alm
 
 ### Tipos de index 
 ```sql
-El índice HEAP se utiliza cuando no se define ningún índice en la tabla o cuando no hay una clave primaria o clave única definida en la tabla
+El índice HEAP, de identifican como indexID = 0  se utiliza cuando no se define ningún índice en la tabla o cuando no hay una clave primaria o clave única definida en la tabla
 , las filas se almacenan en cualquier orden en las páginas de datos de la tabla. desventajas :
 No hay ordenamiento específico:
 endimiento de lectura y escritura: 
