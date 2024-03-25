@@ -1,3 +1,24 @@
+######  ejemplos  de uso
+```
+-- Crear la tabla Clientes
+CREATE TABLE Clientes (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre NVARCHAR(50),
+    Apellido NVARCHAR(50),
+    Email NVARCHAR(100),
+    Telefono NVARCHAR(20)
+);
+
+-- Crear el índice no agrupado en la columna Email
+CREATE INDEX IX_Clientes_Email ON Clientes (Email);
+
+-- Insertar algunos registros en la tabla
+INSERT INTO Clientes (Nombre, Apellido, Email, Telefono) VALUES
+('Juan', 'Pérez', 'juan@example.com', '123-456-7890'),
+('María', 'Gómez', 'maria@example.com', '456-789-0123'),
+('Pedro', 'Martínez', 'pedro@example.com', '789-012-3456');
+```
+
 ### Recomendaciones para el uso de index
 
 1.- Eliminar indices duplicados o Redundantes, indices que usen las mismas columnas  <br>
@@ -7,6 +28,45 @@
 5.- limitar la fragmentacion de indices <br>
 6.- no usar SET NOCOUNT ON <br>
 7.-  usar Database Tuning Advisor (DETA) 
+
+### Forzar a un cliente usar index 
+```sql
+select *from Clientes  
+ WITH (INDEX(IX_Clientes_Email))
+where
+email='juan@example.com';
+```
+
+### Cosas importantes de los Index  
+```sql
+Páginas (Pages): En SQL Server, los datos de la tabla y los índices se organizan en páginas. Una página es una unidad de almacenamiento básica que contiene un número fijo de bytes (normalmente 8 KB).
+
+Filas (Rows): Además de las páginas, los datos de los índices también se almacenan en filas, especialmente en índices de clúster, donde las filas de datos se organizan directamente según el orden del índice.
+
+
+---- estructura de árbol utilizada para almacenar los datos del índice en el disco.
+Árbol B: Un árbol B es una estructura de datos en la que cada nodo puede tener varios hijos y cada hijo está asociado con un rango de valores de índice. En un índice B, las hojas del árbol contienen las claves del índice y los punteros a las ubicaciones físicas de los datos en la tabla. Este tipo de estructura de árbol permite búsquedas eficientes en un rango de valores, lo que es útil para consultas que utilizan operaciones de comparación como mayor que o menor que.
+
+Árbol B+: Un árbol B+ es una variación del árbol B en el que todas las claves del índice se almacenan en las hojas del árbol, mientras que los nodos internos solo contienen punteros a las claves de los hijos. Esto permite un acceso más rápido a las claves del índice, ya que las búsquedas solo necesitan atravesar las hojas del árbol. Además, los árboles B+ suelen estar optimizados para la lectura, lo que los hace ideales para los índices de SQL Server.
+
+```
+
+### Tipos de index 
+```sql
+Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente las filas de la tabla en función de los valores de la(s) columna(s) clave del índice. Cada tabla puede tener solo un índice de clúster, ya que determina el orden físico de los datos en la tabla misma.
+
+Índice no agrupado (Non-clustered Index): A diferencia del índice de clúster, el índice no agrupado no afecta el orden físico de las filas en la tabla. En cambio, crea una estructura de índice separada que contiene las claves del índice y los punteros a las filas de datos correspondientes.
+
+Índice único (Unique Index): Este tipo de índice garantiza que los valores de las columnas incluidas en el índice sean únicos en toda la tabla. Puede ser un índice de clúster o no agrupado.
+
+Índice de texto completo (Full-Text Index): Este tipo de índice se utiliza para buscar texto completo dentro de columnas de caracteres grandes (como VARCHAR o TEXT). Proporciona capacidades de búsqueda avanzadas, incluida la búsqueda de palabras clave, frases y sinónimos.
+
+Índice espacial (Spatial Index): Se utiliza para optimizar consultas que involucran datos espaciales, como coordenadas geográficas o polígonos. Estos índices permiten realizar operaciones espaciales eficientes, como búsquedas por proximidad o análisis de áreas geográficas.
+
+Índice filtrado (Filtered Index): Este tipo de índice se crea con una cláusula WHERE para filtrar las filas que se incluirán en el índice. Pueden mejorar el rendimiento de las consultas al reducir el tamaño del índice y enfocarse en un subconjunto específico de datos.
+
+Índice de columnas incluidas (Included Column Index): Este tipo de índice permite incluir columnas adicionales (no claves) en el índice para cubrir consultas y mejorar el rendimiento sin agregarlas a la clave del índice.
+```
 
 #### Obtener indices que no se usan 
 ```sql
@@ -75,7 +135,37 @@ user_lookups: número de búsquedas de índice
 user_updates: número de operaciones de inserción, actualización o eliminación
 ```
 
+### Ver tamaño de indices 
+```sql
 
+------------ OPCION #1 -----------
+SELECT 
+	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+	OBJECT_NAME(i.OBJECT_ID) AS TableNam,
+	s.object_id, i.[name] AS IndexName,
+	i.index_id AS IndexID,
+	SUM(s.[used_page_count]) * 8 AS IndexSizeKB
+FROM sys.dm_db_partition_stats AS s
+INNER JOIN sys.indexes AS i ON s.[object_id] = i.[object_id]
+    AND s.[index_id] = i.[index_id]
+where  i.name is not null and i.name = 'idx_iNum_Empleado'
+GROUP BY i.[name],s.object_id,i.OBJECT_ID,i.index_id 
+
+------------ OPCION #2 -----------
+SELECT
+OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+OBJECT_NAME(i.OBJECT_ID) AS TableName,
+i.name AS IndexName,
+i.is_primary_key ,
+i.index_id AS IndexID,
+8 * SUM(a.used_pages) AS 'Indexsize(KB)'
+FROM sys.indexes AS i
+JOIN sys.partitions AS p ON p.OBJECT_ID = i.OBJECT_ID AND p.index_id = i.index_id
+JOIN sys.allocation_units AS a ON a.container_id = p.partition_id
+where i.name is not null and i.is_primary_key  = 0 and i.name = 'idx_iNum_Empleado' 
+GROUP BY i.OBJECT_ID,i.index_id,i.name, i.is_primary_key  
+ORDER BY OBJECT_NAME(i.OBJECT_ID),i.index_id 
+```
 
 ### VEr los indices que existen y los primari key
 ```sql
