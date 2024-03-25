@@ -309,8 +309,18 @@ ALTER COLUMN empleado  char(10) not null
 ```
 
 ### Eliminar una columna 
+```sql
 ALTER TABLE banprefijos DROP COLUMN keyx;
+```
 
+### Eliminar una columna PK (primary key)
+```sql
+ALTER TABLE Clientes
+DROP CONSTRAINT PK__Clientes__3214EC270C50D423;  
+
+ALTER TABLE Clientes
+DROP COLUMN ID;
+```
 
 ### Eliminar una tabla
 ```
