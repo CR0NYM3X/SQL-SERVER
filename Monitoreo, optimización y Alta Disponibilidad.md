@@ -681,6 +681,7 @@ Almacenamiento en disco SSD
 Re index 
 Mantenimientos
 
+
 /*
 SABER SI ESTA PARTICIONADA LA TABLA 
 
@@ -707,104 +708,132 @@ WITH allindex AS (
 
 ), index_stat AS (
 
-SELECT 
-	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
-    OBJECT_NAME(s.[object_id]) AS [TableName],
-	COL_NAME(ic.object_id, ic.column_id) AS ColumnName,
-	s.object_id ,
-    i.name AS [Index Name],
-    i.index_id,
-	i.type_desc,
-    s.user_seeks,
-    s.user_scans,
-    s.user_lookups,
-    s.user_updates,
-	ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
-FROM 
-    sys.indexes i 
-LEFT JOIN  sys.dm_db_index_usage_stats s ON i.[object_id] = s.[object_id] AND i.index_id = s.index_id
-LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = s.[object_id] AND ps.index_id = s.index_id
-LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
 
-WHERE 
-     OBJECTPROPERTY(i.[object_id],'IsUserTable') = 1 
-	 and i.type_desc not in('CLUSTERED','HEAP') 
-	 and   i.is_primary_key  = 0 
+	SELECT 
+		OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+		OBJECT_NAME(i.[object_id]) AS [TableName],
+	   --COL_NAME(ic.object_id, ic.column_id) AS ColumnName,
+		i.object_id ,
+		i.name AS [Index Name],
+		i.index_id,
+		i.type_desc,
+		ISNULL(s.user_seeks   ,0) user_seeks,
+		ISNULL(s.user_scans   ,0) user_scans,
+		ISNULL(s.user_lookups ,0) user_lookups,
+		ISNULL(s.user_updates ,0) user_updates,
+		CAST(ISNULL(ps.avg_fragmentation_in_percent,0) AS DECIMAL(20,2)) AS Fragmentacion_Porcentaje
+	FROM 
+		sys.indexes i 
+	LEFT JOIN  sys.dm_db_index_usage_stats s ON i.[object_id] = s.[object_id] AND i.index_id = s.index_id
+	--LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = s.[object_id] AND ps.index_id = s.index_id
+
+	 LEFT JOIN  (select * from (select object_id,index_id,avg_fragmentation_in_percent,   ROW_NUMBER() OVER (PARTITION BY object_id, index_id ORDER BY avg_fragmentation_in_percent DESC) AS RowNum
+      from   sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) 	) a where RowNum = 1  ) as ps  ON ps.[object_id] = s.[object_id] AND ps.index_id = s.index_id
+	--LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+
+	WHERE 
+		 OBJECTPROPERTY(i.[object_id],'IsUserTable') = 1 
+		 and i.type_desc not in('CLUSTERED','HEAP') 
+		 and   i.is_primary_key  = 0 
+		-- and OBJECT_NAME(i.OBJECT_ID)  = 'table' 
+		 --AND i.name =	    'column'
 
 
 
 ), index_size AS (
 	
 	
+	    
 	SELECT
-	i.OBJECT_ID,
-	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
-	OBJECT_NAME(i.OBJECT_ID) AS TableName,
-	i.name AS IndexName,
-	i.is_primary_key ,
-	i.index_id,
-	8 * SUM(a.used_pages) AS 'Indexsize(KB)'
-FROM sys.indexes AS i
-	JOIN sys.partitions AS p ON p.OBJECT_ID = i.OBJECT_ID AND p.index_id = i.index_id
-	JOIN sys.allocation_units AS a ON a.container_id = p.partition_id
-where i.name is not null and i.is_primary_key  = 0 and OBJECTPROPERTY(i.object_id,'IsUserTable') = 1 
-GROUP BY i.OBJECT_ID,i.index_id,i.name, i.is_primary_key  
---ORDER BY OBJECT_NAME(i.OBJECT_ID),i.index_id 
+		i.OBJECT_ID,
+		OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+		OBJECT_NAME(i.OBJECT_ID) AS TableName,
+		i.name AS IndexName,
+		i.is_primary_key ,
+		i.index_id,
+		8 * SUM(a.used_pages) AS 'Indexsize(KB)'
+	FROM sys.indexes AS i
+		left JOIN sys.partitions AS p ON p.OBJECT_ID = i.OBJECT_ID AND p.index_id = i.index_id
+		left JOIN sys.allocation_units AS a ON a.container_id = p.partition_id
+	where i.name is not null and i.is_primary_key  = 0 and OBJECTPROPERTY(i.object_id,'IsUserTable') = 1 
+		and  i.type_desc not in('CLUSTERED','HEAP')
+	GROUP BY i.OBJECT_ID,i.index_id,i.name, i.is_primary_key  
+	 
 
 
 ),alltable AS  (
 
-select  nombreTabla, 
-		esquema,
-		object_id	,
-		sum(rows) rows ,
-		sum(EspacioTotalMB) EspacioTotalMB ,	
-		sum(EspacioUsadoMB) EspacioUsadoMB,
-		sum(EspacioNoUsadoMB) EspacioNoUsadoMB,
-		FilePathDB,	
-		letra  
-from 
-	(SELECT 
-		t.name AS nombreTabla,
-		t.object_id,
-		s.name AS esquema,
-		p.rows,
-		CAST(ROUND(((SUM(a.total_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2))  AS EspacioTotalMB,
-	   CAST(ROUND(((SUM(a.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS EspacioUsadoMB, 
-	   CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS EspacioNoUsadoMB,
+	select  nombreTabla, 
+			esquema,
+			object_id	,
+			sum(rows) rows ,
+			sum(EspacioTotalMB) EspacioTotalMB ,	
+			sum(EspacioUsadoMB) EspacioUsadoMB,
+			sum(EspacioNoUsadoMB) EspacioNoUsadoMB,
+			FilePathDB,	
+			letra  
+	from 
+		(SELECT 
+			t.name AS nombreTabla,
+			t.object_id,
+			s.name AS esquema,
+			p.rows,
+			CAST(ROUND(((SUM(a.total_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2))  AS EspacioTotalMB,
+		   CAST(ROUND(((SUM(a.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS EspacioUsadoMB, 
+		   CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS EspacioNoUsadoMB,
 
-		mf.physical_name AS FilePathDB,
-		LEFT(mf.physical_name, 1) letra 
+			mf.physical_name AS FilePathDB,
+			LEFT(mf.physical_name, 1) letra 
 
-	FROM 
-		sys.tables t
-	INNER JOIN      
-		sys.indexes i ON t.object_id = i.object_id
-	INNER JOIN 
-		sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
-	INNER JOIN 
-		sys.allocation_units a ON p.partition_id = a.container_id
-	LEFT OUTER JOIN 
-		sys.schemas s ON t.schema_id = s.schema_id
-	LEFT OUTER JOIN 
-		sys.master_files mf ON mf.database_id = DB_ID() AND mf.type_desc = 'ROWS'
+		FROM 
+			sys.tables t
+		INNER JOIN      
+			sys.indexes i ON t.object_id = i.object_id
+		INNER JOIN 
+			sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+		INNER JOIN 
+			sys.allocation_units a ON p.partition_id = a.container_id
+		LEFT OUTER JOIN 
+			sys.schemas s ON t.schema_id = s.schema_id
+		LEFT OUTER JOIN 
+			sys.master_files mf ON mf.database_id = DB_ID() AND mf.type_desc = 'ROWS'
 
 
-	WHERE 
-		--t.is_ms_shipped = 0
-		OBJECTPROPERTY(t.object_id,'IsUserTable') = 1
-	--	and p.partition_number = 1 --- solo deja las tabla principal , no agrega las particiones 
-	GROUP BY 
-		t.name, s.name, p.rows , mf.physical_name ,t.object_id
-	)a  group  by nombreTabla,	esquema,	 FilePathDB,	letra , object_id 
+		WHERE 
+			--t.is_ms_shipped = 0
+			OBJECTPROPERTY(t.object_id,'IsUserTable') = 1
+		--	and p.partition_number = 1 --- solo deja las tabla principal , no agrega las particiones 
+		GROUP BY 
+			t.name, s.name, p.rows , mf.physical_name ,t.object_id
+		)a  group  by nombreTabla,	esquema,	 FilePathDB,	letra , object_id 
 
+), tb_cnt_index AS (
+
+	select OBJECT_ID,count(*) cnt_index from 
+		 (select 
+			i.OBJECT_ID, 
+			i.index_id,
+			OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+			OBJECT_NAME(i.OBJECT_ID) tablename,  
+			COL_NAME(ic.object_id, ic.column_id) AS ColumnName  ,
+			i.name AS [Index_Name],
+			i.type_desc  
+	from sys.indexes  i
+		 LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+	where  
+		   i.type_desc not in('CLUSTERED','HEAP')   
+		   and OBJECTPROPERTY(i.object_id,'IsUserTable') = 1 -- /* con esto excluye las tablas del sistema */
+		   and  i.is_primary_key  = 0  ) a
+	group by OBJECT_ID
 )
+
 
 select 
      db_name() db,
 	 a.SchemaName,
 	 a.OBJECT_ID,	
 	 a.tablename,
+	 cnt_index,
 	 b.rows,
 	 b.EspacioTotalMB,
 	 b.EspacioUsadoMB,
@@ -820,10 +849,16 @@ select
 	 D.Fragmentacion_Porcentaje,
  	 C.[Indexsize(KB)]
 from allindex a 
-LEFT JOIN alltable B ON   a.OBJECT_ID =  b.OBJECT_ID
-LEFT JOIN index_size C ON   a.OBJECT_ID =  C.OBJECT_ID AND C.index_id = a.index_id
-LEFT JOIN index_stat D ON   a.OBJECT_ID =  D.OBJECT_ID AND D.index_id = a.index_id
+LEFT JOIN alltable B 		ON   a.OBJECT_ID =  b.OBJECT_ID
+LEFT JOIN tb_cnt_index E	ON   a.OBJECT_ID =  E.OBJECT_ID  
+LEFT JOIN index_size C 		ON   a.OBJECT_ID =  C.OBJECT_ID AND C.index_id = a.index_id
+LEFT JOIN index_stat D 		ON   a.OBJECT_ID =  D.OBJECT_ID AND D.index_id = a.index_id
 
+ORDER BY  D.user_seeks ASC, D.user_scans ASC , D.user_lookups ASC,  D.user_updates  ASC 
+   
+
+   
+   
 
 ```
 
