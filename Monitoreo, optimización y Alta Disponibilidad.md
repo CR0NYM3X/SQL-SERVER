@@ -58,7 +58,8 @@ SELECT * FROM **`sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPerson
 **`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.<br>
 **`sys.dm_db_index_physical_stats:`** Ofrece información detallada sobre el estado físico de los índices, lo que puede ser útil para identificar problemas de rendimiento relacionados con los índices. y ver si necesita una desfragmentacion <br>
 **`sys.dm_db_index_usage_stats`** mantiene estadísticas sobre la actividad de los índices, como cuándo se han utilizado por última vez, cuántas operaciones de lectura y escritura han realizado<br>
-**`sys.dm_db_missing_index_details:`** Información sobre índices faltantes. <br
+**`sys.dm_db_missing_index_details:`** contiene detalles específicos sobre los índices que faltan, como las columnas que deberían incluirse en el índice propuesto
+Son sugerencias generadas por el motor de SQL Server en función de consultas que se ejecutan en la base de datos y que podrían beneficiarse de un índice adicional  <br>
 										    
 
 
@@ -651,6 +652,169 @@ WHERE
     order by cntr_type 
 
 
+```
+
+
+
+
+### Index performance 
+Con esta query vas a saber las tablas, con columnas que tienen indices, que tipo de indices y los tamaños de las tablas y los indices 
+
+```sql
+1.- Validar que todas las tablas tengan PK , [cuando en una tabla se asigna un primary key
+esto genera en automatico un indice agrupado, por lo que ya no se puede generar otro,  no pueden existir 2 pk]
+2.- Índices eficientes:
+	2.1 - Identifica las consultas más comunes y crea índices adecuados para ellas.
+	2.2 - Evita tener demasiados índices innecesarios, ya que pueden ralentizar las operaciones de inserción, actualización y eliminación.
+	2.3 - Mantén actualizadas las estadísticas de índice para que el optimizador de consultas pueda generar planes de ejecución óptimos.
+	2.4 - columnas con mas de 2 index
+	2.5 - Evitar tablas sin indices clustered/agrupados
+	2.6 - No usar mas indices que columnas
+	2.7 - limitar la fragmentacion de indices
+ 
+
+Particionamiento de la tabla
+Estadísticas actualizadas:
+Fragmentación de índices
+Consultas eficientes
+Almacenamiento en disco SSD 
+Re index 
+Mantenimientos
+
+
+
+
+
+
+
+
+
+   
+WITH sizetable AS (
+select nombreTabla,	esquema,object_id	,sum(rows) rows ,	sum(EspacioTotalMB) EspacioTotalMB ,	sum(EspacioUsadoMB) EspacioUsadoMB, sum(EspacioNoUsadoMB) EspacioNoUsadoMB,
+	FilePathDB,	letra  from 
+	(SELECT 
+		t.name AS nombreTabla,
+		t.object_id,
+		s.name AS esquema,
+		p.rows,
+		CAST(ROUND(((SUM(a.total_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2))  AS EspacioTotalMB,
+	   CAST(ROUND(((SUM(a.used_pages) * 8) / 1024.00), 2) AS NUMERIC(36, 2)) AS EspacioUsadoMB, 
+	   CAST(ROUND(((SUM(a.total_pages) - SUM(a.used_pages)) * 8) / 1024.00, 2) AS NUMERIC(36, 2)) AS EspacioNoUsadoMB,
+
+	
+		mf.physical_name AS FilePathDB,
+		LEFT(mf.physical_name, 1) letra 
+
+	FROM 
+		sys.tables t
+	INNER JOIN      
+		sys.indexes i ON t.object_id = i.object_id
+	INNER JOIN 
+		sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+	INNER JOIN 
+		sys.allocation_units a ON p.partition_id = a.container_id
+	LEFT OUTER JOIN 
+		sys.schemas s ON t.schema_id = s.schema_id
+	LEFT OUTER JOIN 
+		sys.master_files mf ON mf.database_id = DB_ID() AND mf.type_desc = 'ROWS'
+
+
+	WHERE 
+		t.name NOT LIKE 'dt%' 
+		AND t.is_ms_shipped = 0
+		AND i.object_id > 255
+		and OBJECTPROPERTY(t.object_id,'IsUserTable') = 1
+	--	and p.partition_number = 1 --- solo deja las tabla principal , no agrega las particiones 
+	GROUP BY 
+		t.name, s.name, p.rows , mf.physical_name ,t.object_id
+	)a  group  by nombreTabla,	esquema,	 FilePathDB,	letra , object_id 
+)
+
+ 
+select 
+		 db,	
+		 SchemaName,	
+		 TableName,   
+		 EspacioTotalMB [TablaEspacioTotal(MB)], 
+		 EspacioUsadoMB [TablaEspacioUsado(MB)],
+		 EspacioNoUsadoMB [TablaEspacioNoUsado(MB)],
+		 ColumnName,	
+		 a.object_id,	
+		 [Index Name],	
+		 [Index ID],	
+		 a.type_desc,
+		 user_seeks	,
+		 user_scans	,
+		 user_lookups	,
+		 user_updates,	
+		 Fragmentacion_Porcentaje
+		,8 * SUM(c.used_pages) AS 'Indexsize(KB)'
+
+from 
+(SELECT 
+	db_name() db,
+	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
+    OBJECT_NAME(s.[object_id]) AS [TableName],
+	COL_NAME(ic.object_id, ic.column_id) AS ColumnName,
+	s.object_id ,
+    i.name AS [Index Name],
+    i.index_id AS [Index ID],
+	i.type_desc,
+    s.user_seeks,
+    s.user_scans,
+    s.user_lookups,
+    s.user_updates,
+	ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
+FROM 
+    sys.indexes i 
+LEFT JOIN 
+    sys.dm_db_index_usage_stats s ON i.[object_id] = s.[object_id] AND i.index_id = s.index_id
+LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = s.[object_id] AND ps.index_id = s.index_id
+LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+
+
+WHERE 
+    --OBJECTPROPERTY(s.[object_id],'IsUserTable') = 1
+     s.database_id = DB_ID()
+	 AND  OBJECT_NAME(s.[object_id]) = 'CatPersona'
+	--and i.type_desc not in('CLUSTERED','HEAP') --- estos no se deben de dejar ya que heap es porque la tabla no tiene index y el clustered nunca se elimina 
+   -- AND (s.user_seeks = 0 or  s.user_scans= 0 or s.user_lookups = 0   ) 
+) as a 
+--LEFT JOIN sys.dm_db_partition_stats as s  ON s.[object_id] = a.[object_id] AND s.[index_id] = [index_id]
+LEFT JOIN sys.partitions AS p ON p.OBJECT_ID = a.OBJECT_ID AND p.index_id = a.[Index ID]
+LEFT JOIN sys.allocation_units AS c ON c.container_id = p.partition_id
+LEFT JOIN sizetable as  sztb on a.[object_id] = sztb.[object_id]
+
+ group by  db,	SchemaName,	TableName,	ColumnName,	a.[object_id],	[Index Name],	
+ [Index ID],	a.type_desc,	user_seeks	,user_scans	,user_lookups	,user_updates,	Fragmentacion_Porcentaje
+ ,   EspacioTotalMB, EspacioUsadoMB, EspacioNoUsadoMB
+
+
+
+```
+
+
+
+###  saber los update,delete, insert de una tabla 
+```sql
+
+
+
+SELECT
+	db_name (a.database_id),
+    OBJECT_NAME(a.object_id) AS Nombre_Tabla,
+	index_type_desc,
+   leaf_insert_count AS Total_Inserts,
+   leaf_delete_count AS Total_Updates,
+   leaf_update_count AS Total_Deletes
+   ,ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
+ 
+FROM 
+    sys.dm_db_index_operational_stats(DB_id(), NULL, NULL, NULL) a
+LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = a.[object_id] AND ps.index_id = a.index_id
+	where    OBJECT_NAME(a.object_id) = 'ropa'
+group by  a.database_id , a.object_id , leaf_insert_count , leaf_delete_count  , leaf_update_count   ,ps.avg_fragmentation_in_percent ,	index_type_desc
 ```
 
 
