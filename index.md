@@ -53,6 +53,9 @@ Filas (Rows): Además de las páginas, los datos de los índices también se alm
 
 ### Tipos de index 
 ```sql
+cuando tienes un index NONCLUSTERED y realizas una consulta usando la columna que tiene el index, en las estadistica sys.dm_db_index_usage_stats la columna user_seeks es la que se va ir llenando 
+cuando tienes un NONCLUSTERED COLUMNSTORE  y realizas una consulta usando  mas de 2 o 3  columna que tiene el index, en las estadistica sys.dm_db_index_usage_stats la columna user_scans es la que se va ir llenando 
+
 El índice HEAP, de identifican como indexID = 0  y no tienen nombre se utiliza cuando no se define ningún índice en la tabla o cuando no hay una clave primaria o clave única definida en la tabla
 , las filas se almacenan en cualquier orden en las páginas de datos de la tabla. desventajas :
 No hay ordenamiento específico:
