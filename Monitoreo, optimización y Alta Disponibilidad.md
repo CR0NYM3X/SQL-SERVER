@@ -687,8 +687,6 @@ Mantenimientos
 
 
 
-
-
    
 WITH sizetable AS (
 select nombreTabla,	esquema,object_id	,sum(rows) rows ,	sum(EspacioTotalMB) EspacioTotalMB ,	sum(EspacioUsadoMB) EspacioUsadoMB, sum(EspacioNoUsadoMB) EspacioNoUsadoMB,
@@ -765,7 +763,7 @@ from
     s.user_scans,
     s.user_lookups,
     s.user_updates,
-	ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
+	cast(ps.avg_fragmentation_in_percent as decimal(20,2)) AS Fragmentacion_Porcentaje
 FROM 
     sys.indexes i 
 LEFT JOIN 
@@ -777,8 +775,8 @@ LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = i
 WHERE 
     --OBJECTPROPERTY(s.[object_id],'IsUserTable') = 1
      s.database_id = DB_ID()
-	 AND  OBJECT_NAME(s.[object_id]) = 'CatPersona'
-	--and i.type_desc not in('CLUSTERED','HEAP') --- estos no se deben de dejar ya que heap es porque la tabla no tiene index y el clustered nunca se elimina 
+--	 AND  OBJECT_NAME(s.[object_id]) = 'CatPersona'
+	and i.type_desc not in('CLUSTERED','HEAP') --- estos no se deben de dejar ya que heap es porque la tabla no tiene index y el clustered nunca se elimina 
    -- AND (s.user_seeks = 0 or  s.user_scans= 0 or s.user_lookups = 0   ) 
 ) as a 
 --LEFT JOIN sys.dm_db_partition_stats as s  ON s.[object_id] = a.[object_id] AND s.[index_id] = [index_id]
@@ -789,6 +787,7 @@ LEFT JOIN sizetable as  sztb on a.[object_id] = sztb.[object_id]
  group by  db,	SchemaName,	TableName,	ColumnName,	a.[object_id],	[Index Name],	
  [Index ID],	a.type_desc,	user_seeks	,user_scans	,user_lookups	,user_updates,	Fragmentacion_Porcentaje
  ,   EspacioTotalMB, EspacioUsadoMB, EspacioNoUsadoMB
+
 
 
 
