@@ -111,39 +111,25 @@ ORDER BY
 Ref: https://www.mssqltips.com/sqlservertip/1239/how-to-get-index-usage-information-in-sql-server/ 
 https://learn.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-db-index-usage-stats-transact-sql?view=sql-server-ver16
 
-user_scans: el número de escaneos realizados por la consulta del usuario.
-user_seeks: el número de búsquedas realizadas por la consulta del usuario.
-user_lookups: el número de búsquedas de marcadores realizadas por la consulta del usuario.
-user_updates: el número de actualizaciones realizadas por la consulta del usuario. Esto representa la cantidad de inserciones, eliminaciones y actualizaciones en lugar de la cantidad real de filas afectadas. Por ejemplo, si elimina 1000 filas en una declaración, este recuento se incrementa en 1.
+user_seeks: Esta columna indica el número de veces que se ha buscado en el índice utilizando una operación de búsqueda específica.
+Una búsqueda ocurre cuando se busca un valor específico en el índice utilizando una cláusula WHERE o una cláusula JOIN.
 
+user_scans: Esta columna indica el número de veces que se ha escaneado el índice completo para recuperar datos. Un escaneo de índice
+ocurre cuando SQL Server lee todo el índice para recuperar los datos necesarios, lo que puede ocurrir, por ejemplo, cuando no se
+puede usar una búsqueda o cuando la cardinalidad de la consulta sugiere que un escaneo sería más eficiente que múltiples búsquedas individuales.
 
-user_seeks: número de búsquedas de índice
-user_scans: número de escaneos de índice
-user_lookups: número de búsquedas de índice
-user_updates: número de operaciones de inserción, actualización o eliminación
+user_lookups: Esta columna indica el número de operaciones de búsqueda realizadas en una tabla después de que se ha realizado una
+ búsqueda en el índice. Ocurre cuando la consulta necesita recuperar columnas adicionales que no están cubiertas por el índice y,
+por lo tanto, necesita buscar en la tabla base.
+
+user_updates: Esta columna indica el número de veces que se ha realizado una operación de actualización (INSERT, UPDATE, DELETE)
+en la tabla y ha afectado al índice. Esto incluye tanto actualizaciones de datos en las columnas indexadas como cambios en las claves de los índices.
 ```
 
 ### Ver tamaño de indices 
 ```sql
 
 ------------ OPCION #1 -----------
-SELECT 
-	s.object_id as  idx_obj_id,
-	db_name() db,
-	OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
-	OBJECT_NAME(i.OBJECT_ID) AS TableName,
-	COL_NAME(ic.object_id, ic.column_id) AS ColumnName,
-	i.[name] AS IndexName,
-	i.type_desc AS IndexType,
-	i.index_id AS IndexID,
-	SUM(s.[used_page_count]) * 8 AS IndexSizeKB
-FROM sys.dm_db_partition_stats AS s
-	INNER JOIN sys.indexes AS i ON s.[object_id] = i.[object_id] AND s.[index_id] = i.[index_id]
-	LEFT JOIN  sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
-where  i.name is not null    -- and  OBJECT_NAME(i.OBJECT_ID) = 'clientes'
-GROUP BY i.[name],s.object_id,i.OBJECT_ID,i.index_id , ic.column_id , ic.object_id , i.type_desc   
-
------------- OPCION #2 -----------
 SELECT
 OBJECT_SCHEMA_NAME(i.OBJECT_ID) AS SchemaName,
 OBJECT_NAME(i.OBJECT_ID) AS TableName,
@@ -157,27 +143,6 @@ JOIN sys.allocation_units AS a ON a.container_id = p.partition_id
 where i.name is not null and i.is_primary_key  = 0 and i.name = 'idx_iNum_Empleado' 
 GROUP BY i.OBJECT_ID,i.index_id,i.name, i.is_primary_key  
 ORDER BY OBJECT_NAME(i.OBJECT_ID),i.index_id 
-```
-
-###  saber los update,delete, insert de una tabla 
-```sql
-
-
-
-SELECT
-	db_name (a.database_id),
-    OBJECT_NAME(a.object_id) AS Nombre_Tabla,
-	index_type_desc,
-   leaf_insert_count AS Total_Inserts,
-   leaf_delete_count AS Total_Updates,
-   leaf_update_count AS Total_Deletes
-   ,ps.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje
- 
-FROM 
-    sys.dm_db_index_operational_stats(DB_id(), NULL, NULL, NULL) a
-LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON ps.[object_id] = a.[object_id] AND ps.index_id = a.index_id
-	where    OBJECT_NAME(a.object_id) = 'ropa'
-group by  a.database_id , a.object_id , leaf_insert_count , leaf_delete_count  , leaf_update_count   ,ps.avg_fragmentation_in_percent ,	index_type_desc
 ```
 
 
