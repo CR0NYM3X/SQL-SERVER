@@ -13,6 +13,7 @@ SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')
 https://aka.ms/ssprsetup
 https://mysignins.microsoft.com/security-info
 https://myaccount.microsoft.com
+https://account.activedirectory.windowsazure.com/ChangePassword.aspx
 ```
 
 **Validar el usuario que esas en windows**
