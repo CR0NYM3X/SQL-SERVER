@@ -21,3 +21,25 @@ LIFE CYCLES ORACLE		https://www.oracle.com/us/assets/lifetime-support-technology
 LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
+
+### GDR VS CU
+```SQL
+
+Actualizaciones GDR (General Distribution Release):
+
+Foco en Correcciones Críticas: Las actualizaciones GDR están diseñadas principalmente para proporcionar correcciones críticas de seguridad y estabilidad para SQL Server.
+Conservadoras en Cambios: Tienden a ser más conservadoras en términos de cambios y nuevas características, centrándose en mantener la estabilidad y la seguridad del producto.
+Menos Frecuentes: Por lo general, se lanzan con menos frecuencia que los CU y se centran en abordar problemas críticos específicos.
+Recomendadas para Entornos de Producción Estables: Son una opción sólida para entornos de producción que valoran la estabilidad y prefieren evitar cambios significativos en el software.
+Prioridad en Seguridad: Son esenciales para mantener la seguridad de la base de datos y mitigar los riesgos asociados con vulnerabilidades conocidas.
+
+
+Cumulative Updates (CU):
+
+Actualizaciones Acumulativas: Incluyen todas las correcciones y mejoras de versiones anteriores, así como nuevas correcciones y mejoras adicionales.
+Amplia Gama de Correcciones y Mejoras: Pueden abordar una amplia variedad de problemas, incluidos errores críticos, mejoras de rendimiento y nuevas características.
+Lanzamientos Periódicos: Se lanzan periódicamente y ofrecen una oportunidad para mantenerse al día con las últimas correcciones y mejoras disponibles.
+Mayor Flexibilidad y Funcionalidad: Ofrecen una mayor flexibilidad y funcionalidad en comparación con las actualizaciones GDR, pero también pueden introducir cambios adicionales en el sistema.
+Requieren Pruebas Rigurosas: Dado su alcance más amplio, es importante realizar pruebas rigurosas en un entorno de desarrollo antes de implementarlos en un entorno de producción.
+
+```
