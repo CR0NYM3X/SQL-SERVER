@@ -108,13 +108,13 @@ RECONFIGURE with override;
 en estos casos no se puede exportar con el encabezado
 
 > [!CAUTION]
-> **`[NOTA IMPORTANTE] --->`** esta operacion no bloquea las tablas por lo que puedes ir utilizando la tabla mientras realiza la exportacion de la info y  Se recomienda utilizar delimitadores diferente a la comilla,  ya que si la tabla que vas exportar tiene campos varchar puede tener comillas dentro de la columna y esto puede entorpecer al momento de importar la información ,por ejemplo yo uso "|"
+> **`[NOTA IMPORTANTE] --->`** esta operacion no bloquea las tablas por lo que puedes ir utilizando la tabla mientras realiza la exportacion de la info y  Se recomienda utilizar delimitadores diferente a la comilla,  ya que si la tabla que vas exportar tiene campos varchar puede tener comillas dentro de la columna y esto puede entorpecer al momento de importar la información ,por ejemplo yo uso "|", el -C RAW  mantiene la codificación de caracteres 
 ```
 --- Exportando toda la tabla
-bcp my_dba_test.dbo.my_tabla_test out "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r\n
+bcp my_dba_test.dbo.my_tabla_test out "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "," -c  -r\n -C RAW
 
 --- Exportando con condicional en la tabla
-bcp "select * from my_tabla_test where nombre='jose' " queryout  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r "\n" -d new_dba_test2
+bcp "select * from my_tabla_test where nombre='jose' " queryout  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r "\n" -C RAW -d new_dba_test2
 ```
 
 **Exportar la informacion con sqlcmd**
