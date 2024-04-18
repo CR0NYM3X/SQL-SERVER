@@ -431,6 +431,19 @@ EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2)
 
 ```
 
+
+
+# Instancias 
+permite que los usuarios que no son administradores creen instancias de base de datos en su propio proceso de SQL Server <br> 
+Seguridad: Es importante tener en cuenta que habilitar la creación de instancias de usuario puede presentar riesgos de seguridad, ya que los usuarios pueden crear y acceder a bases de datos sin el conocimiento o la supervisión del administrador del sistema.
+Se recomienda utilizar las instancias de usuario de manera cuidadosa y solo en entornos donde sea necesario para el desarrollo y la prueba de aplicaciones. 
+
+```SQL
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'user instances enabled', 1
+```
+
 # Bibliografías 
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-1-untrustworthy-databases/
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-2-user-impersonation/
