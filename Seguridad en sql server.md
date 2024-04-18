@@ -110,6 +110,11 @@ SELECT @ProductName AS 'ProductName',
 
 ********** SABER LAS CANTIDADES DE INSTANCIAS QUE HAY EN EL SERVIDOR **********
 EXEC xp_regread 'HKEY_LOCAL_MACHINE', 'SOFTWARE\Microsoft\Microsoft SQL Server', 'InstalledInstances'
+	xp_loginconfig 'login mode';
+	EXEC xp_instance_regwrite N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer', N'LoginMode', REG_DWORD, 2;
+
+********** CAMBIAR EL MODO DE LOGIN DE WINDOWS ATENTICATION A Mixed **********
+
 
 ********** Leer registros Opcion #2 **********
 ---  acceder a configuraciones y parámetros almacenados en el registro de Windows que están asociados con la instancia de SQL Server actual
