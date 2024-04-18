@@ -110,10 +110,10 @@ SELECT @ProductName AS 'ProductName',
 
 ********** SABER LAS CANTIDADES DE INSTANCIAS QUE HAY EN EL SERVIDOR **********
 EXEC xp_regread 'HKEY_LOCAL_MACHINE', 'SOFTWARE\Microsoft\Microsoft SQL Server', 'InstalledInstances'
-	xp_loginconfig 'login mode';
-	EXEC xp_instance_regwrite N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer', N'LoginMode', REG_DWORD, 2;
 
 ********** CAMBIAR EL MODO DE LOGIN DE WINDOWS ATENTICATION A Mixed **********
+	xp_loginconfig 'login mode';
+	EXEC xp_instance_regwrite N'HKEY_LOCAL_MACHINE', N'Software\Microsoft\MSSQLServer\MSSQLServer', N'LoginMode', REG_DWORD, 2;
 
 
 ********** Leer registros Opcion #2 **********
