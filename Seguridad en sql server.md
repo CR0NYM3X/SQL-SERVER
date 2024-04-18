@@ -3,6 +3,9 @@ Devolverá un valor 1 si solo se permite la autenticación integrada de Windows 
 únicamente iniciar sesión usando credenciales de Windows. Si devuelve 0, significa que también se permite la autenticación de SQL Server.
 ```
 SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')
+
+xp_loginconfig 'login mode';
+
 ```
 
 
