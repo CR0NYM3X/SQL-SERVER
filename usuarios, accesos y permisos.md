@@ -28,6 +28,10 @@ En SQL server existen los permisos
 > **`sa`**   "System Administrator"   Es el usuario predeterminado del sistema y tiene privilegios máximos en el servidor. Este usuario tiene todos los permisos y puede realizar cualquier acción en todas las bases de datos del servidor. Por esta razón, se considera un usuario con derechos elevados y se recomienda usarlo con precaución. Por motivos de seguridad, se recomienda cambiar la contraseña predeterminada del usuario "sa" y evitar su uso cotidiano o buena práctica bloquear el acceso al usuario "sa"  
 
 
+ **`REVOKE:`**  elimina el acceso otorgado previamente al objeto de la base de datos.  los usuarios o roles que anteriormente tenían acceso al objeto ya no tendrán ese acceso después de que se ejecute REVOKE
+
+ **`DENY:`**   Cuando se niega un permiso con DENY, se bloquea el acceso al objeto de la base de datos para el usuario o rol especificado, incluso si ese usuario o rol tiene el permiso otorgado a través de otros roles o permisos implícitos
+
 
 
 # Ejemplos de uso :
