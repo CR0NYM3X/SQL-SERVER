@@ -57,11 +57,18 @@ END CATCH;
 ```
 
 # Examinar el log de transacciones
-```
+```SQL
 SELECT [Current LSN], [Transaction ID], [Operation], [Context],
        [AllocUnitName], [Description]
 FROM fn_dblog(NULL, NULL)
 WHERE    ( CAST([Begin Time] AS DATETIME) BETWEEN  '20230810 11:40:00' and  '20230810 11:45:00' )
 or  
 CAST([End Time] AS DATETIME) BETWEEN  '20230810 11:40:00' and  '20230810 11:45:00'
+
+/*
+Operation: 
+LOP_BEGIN_XACT y LOP_COMMIT_XACT = Inicio y final de transacción
+LOP_MODIFY_ROW = indica que se modifico un registro 
+*/
+
 ```
