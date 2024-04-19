@@ -58,17 +58,59 @@ END CATCH;
 
 # Examinar el log de transacciones
 ```SQL
-SELECT [Current LSN], [Transaction ID], [Operation], [Context],
-       [AllocUnitName], [Description]
-FROM fn_dblog(NULL, NULL)
+  select  
+		 [Current LSN]
+       ,[Previous LSN]
+       ,[Operation]
+       ,[Context]
+       ,[Transaction ID]
+       ,[Log Record Length]
+       ,[AllocUnitName]
+       ,[Page ID]
+       ,[SPID]
+       ,[Xact ID]
+       ,[Begin Time]
+       ,[End Time]
+       ,[Transaction Name]
+       ,[Transaction SID]
+       ,[Parent Transaction ID]
+       ,[Transaction Begin]
+       ,[Number of Locks]
+       ,[Lock Information]
+       ,[Description]
+       ,[Log Record]  
+from  fn_dblog(NULL, NULL) 
 WHERE    ( CAST([Begin Time] AS DATETIME) BETWEEN  '20230810 11:40:00' and  '20230810 11:45:00' )
 or  
 CAST([End Time] AS DATETIME) BETWEEN  '20230810 11:40:00' and  '20230810 11:45:00'
+--where   [Transaction ID] =  '0000:000004c4' ---  LOP_MODIFY_ROW  --- '0000:000004c4' LOP_INSERT_ROWS 
 
 /*
 Operation: 
 LOP_BEGIN_XACT y LOP_COMMIT_XACT = Inicio y final de transacción
 LOP_MODIFY_ROW = indica que se modifico un registro 
 */
+
+
+DBCC INPUTBUFFER (629117)  
+
+ SELECT object_name(object_id) AS name, object_id
+ ,index_id ,allocation_unit_id
+ FROM sys.allocation_units AS au
+ INNER JOIN sys.partitions AS p
+ ON au.container_id = p.hobt_id
+ AND (au.type = 1 OR au.type = 3)
+ where allocation_unit_id='72057594047954944'
+  
+DBCC OPENTRAN();
+
+ https://www.gpsos.es/2019/11/fn_dblog-como-analizar-transactional-log-en-sql-server/
+ https://blog.coeo.com/inside-the-transaction-log-file
+
+ DBCC TRACEON(3604)
+ DBCC IND(dba_test, 'Empleados', 1)
+ DBCC PAGE('dba_test', 1, 228, 3)
+
+
 
 ```
