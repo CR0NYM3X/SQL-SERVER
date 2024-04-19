@@ -427,11 +427,36 @@ https://github.com/MicrosoftDocs/sql-docs/blob/live/docs/relational-databases/ex
 
 
 
+
+# Crear codigo HTML mediante consulta
+sp_makewebtask se utilizaba para generar un archivo HTML a partir de una consulta SQL. 
+```sql
+EXEC sp_makewebtask 
+    @outputfile = 'C:\Empleados.html',
+    @query = 'select * from Empleados',
+    @templatefile = 'C:\template.html',
+```
+ 
+**Deshabilitar o Habilitar estas opciones**
+```sql
+sp_configure 'show advanced options', 1;
+
+sp_configure 'Web Assistant Procedures', 1;
+```
+
+
+
+
 # pueden permitir la ejecución de código dinámico
 ```
 EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2) order by ipservidor',N'@1 varchar(50),@2 varchar(50)'
 ,@param1,@param2
 
+  sp_sqlexec N'SELECT @@version'
+  exec ('SELECT @@version')
+  EXECUTE ('SELECT @@version')
+
+  SELECT * FROM OPENQUERY('server_name', 'SELECT @@version')
 ```
 
 
