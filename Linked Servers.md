@@ -48,7 +48,7 @@ remoto y tener permisos apropiados para acceder a las bases de datos o tablas re
 EXEC master.dbo.sp_addlinkedserver 
 	@server = N'MY_LINKEO_TEST1', 
 	@srvproduct=N'', 
-	@provider=N'SQLNCLI', 
+	@provider=N'SQLNCLI',   /* Tambien puedes usar este proveedor --> @provider=N'SQLOLEDB' */
 	@datasrc=N'192.168.1.100'
 
 ************** CREANDO LOGIN PARA EL LINKEO **************
@@ -65,7 +65,7 @@ EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'data acce
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'dist', @optvalue=N'false'
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'pub', @optvalue=N'false'
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'rpc', @optvalue=N'false'
-EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'rpc out', @optvalue=N'false'
+EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'rpc out', @optvalue=N'true' ----> este nos permite ejecutar procedimientos 
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'sub', @optvalue=N'false'
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'connect timeout', @optvalue=N'0'
 EXEC master.dbo.sp_serveroption @server=N'MY_LINKEO_TEST1', @optname=N'collation name', @optvalue=null
@@ -91,8 +91,21 @@ ALTER SERVICE MASTER KEY FORCE REGENERATE;
 
 - Para conectar el linkeo a  POSTGRESQL se coloca en provider
 ```
- @provider=N'MSDASQL', @provstr= N'DRIVER=PostgreSQL Unicode(x64);SERVER=192.168.5.100;DATABASE=bodega;USER =MY_USER_TEST;PASSWORD=MY_PASSWORD_123123;OPTION=3'
- DRIVER=PostgreSQL ANSI(x64);SERVER=192.168.5.100;DATABASE=bodega;USER=MY_USER_TEST;PASSWORD=MY_PASSWORD_123123;OPTION=3
+En Provider:  Microsoft OLE DB Provider for ODBC  Drivers
+Provider String: Driver={PostgreSQL ANSI};Server=IP address;Port=5432;Database=myDataBase;Uid=myUsername;Pwd=myPassword;
+Para consultar : select *from test2.postgres.[public].empleados
+
+
+
+OPTION=3
+link server de mssql a mssql https://www.mssqltips.com/sqlservertip/6083/understanding-sql-server-linked-servers/
+link server de mssql a psql: https://www.mssqltips.com/sqlservertip/3662/sql-server-and-postgresql-linked-server-configuration-part-2/
+PostgreSQL ODBC Driver (psqlODBC) connection strings: https://www.connectionstrings.com/postgresql-odbc-driver-psqlodbc/
+
+
+
+
+
 ```
 
 
