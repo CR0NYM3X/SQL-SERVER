@@ -14,7 +14,8 @@ CATÁLOGO DE PARCHES ORACLE	 	https://support.oracle.com/knowledge/Oracle%20Data
 CATÁLOGO DE PARCHES MYSQL		https://dev.mysql.com/doc/relnotes/													
 
 LIFE CYCLES POSTGRESQL 		https://www.postgresql.org/support/versioning/													
-LIFE CYCLES MSSQL		https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview?view=sql-server-ver16													
+LIFE CYCLES MSSQL		https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview?view=sql-server-ver16
+LIFE CYCLES MSSQL	  https://learn.microsoft.com/es-es/lifecycle/products/?products=sql-server						
 LIFE CYCLES MONGODB		https://www.mongodb.com/support-policy/lifecycles													
 LIFE CYCLES DB2		https://www.ibm.com/support/pages/db2-distributed-end-support-eos-dates													
 LIFE CYCLES MARIADB		https://mariadb.org/about/													
@@ -46,6 +47,13 @@ Lanzamientos Periódicos: Se lanzan periódicamente y ofrecen una oportunidad pa
 Mayor Flexibilidad y Funcionalidad: Ofrecen una mayor flexibilidad y funcionalidad en comparación con las actualizaciones GDR, pero también pueden introducir cambios adicionales en el sistema.
 Requieren Pruebas Rigurosas: Dado su alcance más amplio, es importante realizar pruebas rigurosas en un entorno de desarrollo antes de implementarlos en un entorno de producción.
 
+Correcciones a petición (OD)
+Contiene solicitudes de corrección críticas que cumplen todas estas condiciones:
+
+No puede esperar a la versión de actualización acumulativa programada.
+No hay ninguna solución alternativa o mitigación razonable.
+El problema provoca un impacto significativo en la funcionalidad del producto o de la aplicación.
+
 ```
 
 
@@ -67,6 +75,27 @@ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install
 
 dónde encontrar información sobre las últimas compilaciones de SQL Server:
 https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
+
+Controlador ODBC de Microsoft para SQL Server:
+https://learn.microsoft.com/es-es/sql/connect/odbc/microsoft-odbc-driver-for-sql-server?view=sql-server-ver16
+https://learn.microsoft.com/es-es/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+https://learn.microsoft.com/es-es/sql/connect/odbc/windows/release-notes-odbc-sql-server-windows?view=sql-server-ver16
+
+Modelos de mantenimiento para SQL Server:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
+
+Novedades a la lógica de detección de Microsoft Update para el mantenimiento de SQL Server:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/new-mu-servicing-model
+
+Determinar la versión y edición de Motor de base de datos de SQL Server que se está ejecutando
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/find-my-sql-version
+
+
+Determinación de la información de versión de SQL Server componentes y herramientas de cliente:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-tools-versions
+
+Características de SQL Server Native Client:
+https://learn.microsoft.com/es-es/sql/relational-databases/native-client/features/sql-server-native-client-features?view=sql-server-ver15&viewFallbackFrom=sql-server-ver16
 
 ```
 
