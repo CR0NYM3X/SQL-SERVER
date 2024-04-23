@@ -62,6 +62,12 @@ https://www.microsoft.com/es-mx/sql-server/sql-server-downloads
 Recomendaciones de seguridad
 https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16
 
+Últimas actualizaciones e historial de versiones para SQL Server:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates
+
+dónde encontrar información sobre las últimas compilaciones de SQL Server:
+https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
+
 ```
 
 
