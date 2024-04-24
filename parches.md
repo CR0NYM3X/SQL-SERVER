@@ -27,8 +27,9 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 
 
-### GDR VS CU
+### Tipos de Actualización GDR, CU, OD
 ```SQL
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
 
 Actualizaciones GDR (General Distribution Release):
 
@@ -54,8 +55,87 @@ No puede esperar a la versión de actualización acumulativa programada.
 No hay ninguna solución alternativa o mitigación razonable.
 El problema provoca un impacto significativo en la funcionalidad del producto o de la aplicación.
 
+
+Service Pack (SP)
+Los Service Pack ya no se publican para SQL Server 2017 y versiones posteriores. Cada service Pack nuevo contiene todas las correcciones que se encuentran en service packs anteriores,
+No es necesario instalar un Service Pack anterior antes de instalar el Service Pack más reciente.
+
+
 ```
 
+
+
+# Liciencia de MSSQL: 
+```SQL
+
+Bibliografía : https://licendi.com/es/blog/cal-y-el-sql-server-para-empresas-como-funcionan-cuantas-necesito-y-que-son-licencias-de-2-nucleos/
+ 
+¿Qué significa CAL?  CAL (Client Access Licence)   para saber qué tipo de licencia debes comprar lo más importante es que tengas en cuenta la cantidad de dispositivos y usuarios que tiene la empresa para averiguar el número de licencias CAL necesitaras comprar. 
+
+¿Qué modelo de SQL Server debería elegir para mi empresa?
+para empresas PYME (pequeñas y medianas empresas) el modelo SQL Server CAL suele ser el producto que mejor se ajusta a tus necesidades, es económico y una herramienta que no tendrá problema gestionando la cantidad de datos que tendrás que almacenar y acceder. 
+
+Si tu empresa ya es grande o prevés que vas a crecer de manera exponencial es más barato obtener una licencia por núcleo, debido a que le permite el acceso a tu servidor a un número infinito de usuarios.
+
+
+Tipos de CAL : 
+https://www.microsoft.com/es-xl/licensing/product-licensing/sql-server?activetab=sql-server-pivot%3aprimaryr2
+
+
+CAL de usuario: Esto es una licencia para un usuario que podrá iniciar sesión en una multitud de distintos equipos con esa misma CAL
+ 
+CAL de dispositivo: Esta CAL se une al dispositivo y permitirá a diferentes usuarios hacer uso de ella para acceder a las funcionalidades del SQL Server para empresas
+
+
+2 Core? 
+ Si suponemos que tienes un servidor físico con 6 núcleos y 3 procesadores puedes licenciar un total de 18 núcleos. Para tener todos tus procesadores cubiertos e incluidos en el SQL Server tendrás que comprar en total 9 licencias SQL Server 2cores, debido a que cada una viene con dos núcleos.
+ 
+Si tu empresa es grande y tienes un número elevado de usuarios te recomendamos comprar la licencia SQL Server 2core, con el modelo CAL sería inviable y muy costoso si se tiene un gran número de usuarios.
+
+SQL Server Enterprise
+Es más adecuada para grandes empresas en parte debido a los recursos comerciales y financieros ,  Enterprise Edition no tiene límite en el tamaño de la memoria, de la base de datos ni en el número máximo de núcleos.
+
+SQL Server Standard
+ofrece características más básicas en cuanto a analíticas e informes. Esta versión de SQL Server está limitada en el tamaño de la memoria de la base de datos y el número máximo de núcleos. Esta versión es la más adecuada para pequeñas empresas.
+
+
+Bibliografía : 
+https://blog.revolutionsoft.net/diferencias-entre-licencias-sql-core-o-usuario/
+
+SQL Core:
+
+Ventajas
+Escala horizontalmente: Ideal para organizaciones con grandes bases de datos y muchas transacciones, pues solo te preocuparás por el número de núcleos, no por el número de usuarios o dispositivos que acceden a la base de datos.
+Sin límite de usuarios: Si tienes una aplicación con miles de usuarios, no tendrás que preocuparte por adquirir licencias adicionales a medida que tu base de usuarios crezca.
+Parches y Actualizaciones: Al tener una licencia orientada a la capacidad de procesamiento del hardware, las actualizaciones suelen ser más intensivas en recursos y exigen un mantenimiento más riguroso para garantizar el rendimiento óptimo.
+
+Desventajas
+Coste inicial más alto: A menudo, especialmente para servidores potentes, el costo inicial de la licencia core puede ser considerablemente más alto que una licencia por usuario.
+
+
+
+User CAL: 
+
+Ventajas:
+Costo predecible: Si conoces la cantidad de usuarios que tendrás, puedes calcular fácilmente cuántas licencias necesitarás y cuánto te costarán.
+Ideal para PYMEs: Las empresas más pequeñas con un número fijo de usuarios pueden encontrar este modelo más económico.
+Mantenimiento Simplificado: Al estar ligado al número de usuarios, las actualizaciones y parches suelen ser más sencillos y rápidos de implementar.
+
+Desventajas:
+Limitación de escala: A medida que tu empresa crezca y necesites más usuarios o dispositivos conectados, deberás comprar licencias adicionales.
+Puede ser más caro a largo plazo: Si experimentas un crecimiento considerable en el número de usuarios o dispositivos, podrías terminar pagando más que con una licencia core.
+
+
+Per Core : 
+Por núcleo significa que necesita una licencia para cada núcleo de la máquina donde se ejecuta SQL Server, independientemente de cuántos usuarios acceden a SQL Server.
+
+
+
+
+Bibliografía : https://softtrader.es/explicacion-sql-server-licencias-cal/
+Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-comprehensive-guide/#:~:text=With%20the%20Per%20Core%20model,of%20four%20licenses%20per%20VM.
+
+```
 
 
 ### OTROS Enlaces 
