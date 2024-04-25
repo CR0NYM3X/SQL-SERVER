@@ -760,6 +760,33 @@ AND b.id IS NULL
 
 ```
 
+### usuario guest
+Cuando inicia sesión en SQL Server, primero autentica sus credenciales de login en el servidor. Si tiene éxito, SQL Server comprueba si su inicio de sesión está asociado o asignado a un usuario de la base de datos en la que está intentando acceder. Si es así, SQL Server otorga el acceso de inicio de sesión a la base de datos como usuario de la base de datos.
+<br><br>
+Si no existe tal asignación, SQL Server verifica si existe activado el usuario invitado (guest). Si es así, el usuario conectado tiene acceso a la base de datos como invitado. Si la cuenta de invitado esta desactivada, SQL Server niega el acceso a la base de datos.
+
+```sql
+SELECT name, permission_name, state_desc
+FROM sys.database_principals dp
+INNER JOIN sys.server_permissions sp
+ON dp.principal_id = sp.grantee_principal_id
+WHERE name = ‘guest’ AND permission_name = ‘CONNECT’
+
+Para habilitar al usuario invitado en la base de datos donde se necesita podemos ejecutar la siguiente instrucción:
+
+GRANT CONNECT TO guest
+GO
+
+y para deshabilitarlo usamos las sentencias:
+
+REVOKE CONNECT TO guest
+GO
+
+https://soportesql.wordpress.com/2021/07/11/habilitar-al-usuario-invitado-en-el-sql-server/
+```
+
+
+
 Con esto puedes ver el codigo del procedimiento almacenado 
 ```SQL
 EXEC SP_HELPTEXT 'sp_grantdbaccess'
