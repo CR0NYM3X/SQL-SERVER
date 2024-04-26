@@ -141,6 +141,8 @@ Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-compre
 ### OTROS Enlaces 
 ```SQL
 
+versiones : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions 
+
 Herramientas para SQL Server
 https://www.microsoft.com/es-mx/sql-server/developer-tools
 
