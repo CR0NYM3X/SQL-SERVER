@@ -1,3 +1,15 @@
+
+# Desactivar usuarios peligroso:
+```
+------- Deshabilita - Usuario SA -------
+ALTER LOGIN [sa] DISABLE
+
+------- No se puede borrar el usaurio pero se puede Deshabilitar ------- 
+execute SYS.sp_MSforeachdb 'use [?];  REVOKE CONNECT FROM GUEST;'
+```
+
+
+
 # Validar el tipo de autenticación de sql server 
 Devolverá un valor 1 si solo se permite la autenticación integrada de Windows (también conocida como autenticación de Windows), lo que significa que el servidor está configurado para permitir
 únicamente iniciar sesión usando credenciales de Windows. Si devuelve 0, significa que también se permite la autenticación de SQL Server.
