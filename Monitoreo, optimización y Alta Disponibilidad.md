@@ -331,6 +331,8 @@ GO
 SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'palabra1 OR palabra2');
 SELECT * FROM Documentos WHERE CONTAINS(Contenido, '"frase exacta"');
 SELECT * FROM Documentos WHERE CONTAINS(Contenido, 'NEAR((palabra1, palabra2), n)');
+
+https://www.mssqltips.com/sqlservertutorial/9136/sql-server-full-text-indexes/
 ```
 
 
