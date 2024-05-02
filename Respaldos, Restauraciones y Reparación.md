@@ -134,7 +134,10 @@ sqlcmd -S servidor -d base_de_datos -Q "SELECT * FROM mi_tabla WHERE condicion_c
 bcp  my_dba_test.dbo.my_tabla_test in  "C:\my_tabla_test.csv" -S 192.168.10.50 -T -t "|" -c  -r\n -F 2
 
 -- El parametro -F 2 le indica al programa que inicie desde la linea 2 y no desde la primera linea,
-esto sirve para cuando el documento tiene el encabezado de cada columna, aunque el BCP en automatico puede salta el encabezado 
+esto sirve para cuando el documento tiene el encabezado de cada columna, aunque el BCP en automatico puede salta el encabezado
+
+-c se utilice para que copien los datos en formato de caractere ASCII 
+
 ```
 
 **Importar la información con bulk insert**
