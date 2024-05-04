@@ -471,7 +471,18 @@ EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2)
   SELECT * FROM OPENQUERY('server_name', 'SELECT @@version')
 ```
 
+# Deshabilitar el usuario local
+```
 
+```
+
+# Ingresar con el usuario DAC
+```
+https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/diagnostic-connection-for-database-administrators?view=sql-server-ver16
+https://www.sqlshack.com/sql-server-dedicated-admin-connection-dac-how-to-enable-connect-and-use/
+
+
+```
 
 # Instancias 
 permite que los usuarios que no son administradores creen instancias de base de datos en su propio proceso de SQL Server <br> 
