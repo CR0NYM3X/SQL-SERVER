@@ -173,3 +173,14 @@ GO
 ---- BORRAR TODA LA INFO DE LA TABLA ---- 
 truncate table ARTICULOS
 ```
+
+
+###### Transferir jobs 
+```sql
+--- Jobs Task in SSIS package  
+
+https://learn.microsoft.com/en-us/sql/integration-services/control-flow/transfer-jobs-task?view=sql-server-ver16
+https://www.sqlshack.com/transfer-sql-jobs-between-sql-server-instances-using-ssdt-2017/
+
+```
+
