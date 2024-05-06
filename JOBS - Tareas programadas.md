@@ -2,7 +2,15 @@
 > [!IMPORTANT]
 > Las tablas de los `job` se ven solo en la base de datos **msdb**
 
+### Alerts y Operators SQL Server Agent
+```SQL
+Es importante configurar esto para que lleguen las notificaciones al correo
+```
 
+### Configurar ruta 
+```SQL
+exec msdb.dbo.sp_set_sqlagent_properties @errorlog_file=N'E:\ERRORLOG\SQLAGENT.OUT',@errorloging_level=3
+```
 
 ### Ejecutar un job 
 ```SQL
