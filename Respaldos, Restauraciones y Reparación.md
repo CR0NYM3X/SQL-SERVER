@@ -356,6 +356,22 @@ SET STATISTICS IO, TIME on
 ```
 
 
+### snapshot
+Es una copia de los datos tal como estaban en un punto especifico en el tiempo, se pueden realizar copias de seguridad sin bloqueos 
+```sql
+CREATE DATABASE database_snapshot_name
+ON
+(
+    NAME = logical_file_name
+    , FILENAME = 'os_file_name'
+) [ , ...n ]
+
+AS SNAPSHOT OF source_database_name;
+
+---- links ------
+https://learn.microsoft.com/es-es/sql/relational-databases/databases/create-a-database-snapshot-transact-sql?view=sql-server-ver16
+https://learn.microsoft.com/es-es/sql/relational-databases/databases/database-snapshots-sql-server?view=sql-server-ver16
+```
 
 # Bibliografías :
 Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
