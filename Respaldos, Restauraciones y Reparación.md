@@ -378,4 +378,7 @@ https://learn.microsoft.com/es-es/sql/relational-databases/databases/database-sn
 Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
 
 https://www.dell.com/support/kbdoc/en-us/000200606/microsoft-sql-server-msdb-database-recovery
+
+-- SQL Server Rebuild Transactional Log File
+https://sqltimes.wordpress.com/tag/alter-database-sampledb-rebuild-log/
 ```
