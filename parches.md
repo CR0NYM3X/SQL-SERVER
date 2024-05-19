@@ -183,12 +183,15 @@ https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informac
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates
 
 
-Controlador ODBC de Microsoft para SQL Server:
-https://learn.microsoft.com/es-es/sql/connect/odbc/microsoft-odbc-driver-for-sql-server?view=sql-server-ver16
+-- Descarga de ODBC 
 https://learn.microsoft.com/es-es/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+
+
+---- versión de   ODBC
 https://learn.microsoft.com/es-es/sql/connect/odbc/windows/release-notes-odbc-sql-server-windows?view=sql-server-ver16
 
-
+---- Validar ODBC -> Compatibilidad con versiones de SQL Y Sistemas operativos admitidos
+https://learn.microsoft.com/es-es/sql/connect/odbc/windows/system-requirements-installation-and-driver-files?view=sql-server-ver16
 
 Modelos de mantenimiento para SQL Server:
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
