@@ -496,6 +496,7 @@ EXEC sp_configure 'user instances enabled', 1
 ```
 
 # Bibliografías 
+```
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-1-untrustworthy-databases/
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-2-user-impersonation/
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-3-sqli-and-user-impersonation/
@@ -511,7 +512,8 @@ https://addendanalytics.com/blog/accessing-excel-files-using-openrowset-and-open
 
 https://github.com/Ignitetechnologies/MSSQL-Pentest-Cheatsheet
 
-
-
+medidas de seguridad: 
+https://learn.microsoft.com/es-es/sql/relational-databases/security/security-center-for-sql-server-database-engine-and-azure-sql-database?view=sql-server-ver16
+```
 
 
