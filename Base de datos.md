@@ -464,6 +464,34 @@ En una tabla de registros históricos con datos que se extienden a lo largo de v
 ```
 
 
+###  bases de datos independientes
+Las bases de datos independientes en SQL Server están diseñadas para mejorar la portabilidad y la gestión de la seguridad al permitir que todas las configuraciones de seguridad necesarias se almacenen y gestionen dentro de la propia base de datos. Esto facilita el movimiento de bases de datos entre diferentes instancias de SQL Server, simplifica la gestión de usuarios y permisos y proporciona un mejor aislamiento de seguridad. Este enfoque es especialmente útil en entornos donde las bases de datos necesitan ser movidas o replicadas frecuentemente, como en el desarrollo, pruebas y despliegues de producción.
+<br> 
+
+```
+USE master;
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'contained database authentication', 1;  -- Esto permite a las bases de datos ser autosuficientes en términos de gestión de usuarios y roles, sin depender de los inicios de sesión a nivel de servidor.
+RECONFIGURE;
+
+ALTER DATABASE Test
+SET containment=partial
+
+USE Test;  
+GO 
+
+CREATE USER Carlo  
+WITH PASSWORD='Enterpwdhere*'  
+
+
+--- Bibliografía --
+https://learn.microsoft.com/es-es/sql/relational-databases/security/contained-database-users-making-your-database-portable?view=sql-server-ver16
+
+```
+
+
+
 ### Bibliografía 
 ```
 2) Crear una base de datos:
