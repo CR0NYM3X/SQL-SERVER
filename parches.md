@@ -140,13 +140,16 @@ Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-compre
 
 ### OTROS Enlaces 
 ```SQL
+Determinar la versión y edición de Motor de base de datos de SQL Server que se está ejecutando
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/find-my-sql-version
+
 Ediciones y características admitidas de SQL Server 2019
 https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
 
 Using SQL Server in Windows
 https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
 
-versiones : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions 
+Te indica la información de cada parche   : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions 
 
 Herramientas para SQL Server
 https://www.microsoft.com/es-mx/sql-server/developer-tools
