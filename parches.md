@@ -30,6 +30,13 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 ### Tipos de Actualización GDR, CU, OD
 ```SQL
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
+nomenclatura y descripciones de área de corrección para los paquetes:  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/naming-schema-and-fix-area
+
+lógica de detección de Microsoft Update para el mantenimiento de SQL Server: https://learn.microsoft.com/es-es/troubleshoot/sql/releases/new-mu-servicing-model
+Rama de versión de distribución general (GDR) que solo contiene seguridad y otras correcciones críticas.
+Rama de actualización acumulativa (CU) que contiene seguridad y otras correcciones críticas, además de todas las demás correcciones para la línea base.
+
+
 
 Actualizaciones GDR (General Distribution Release):
 
@@ -134,6 +141,23 @@ Por núcleo significa que necesita una licencia para cada núcleo de la máquina
 
 Bibliografía : https://softtrader.es/explicacion-sql-server-licencias-cal/
 Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-comprehensive-guide/#:~:text=With%20the%20Per%20Core%20model,of%20four%20licenses%20per%20VM.
+Preguntas más frecuentes, términos y acrónimos usados : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/faq-acronyms
+
+
+
+Términos y acrónimos más utilizados
+Actualización acumulativa (CU): una actualización acumulativa que contiene todas las revisiones críticas a petición anteriores disponibles hasta la fecha. Además, una CU contiene correcciones para los problemas que cumplen los criterios de aceptación de la revisión. Entre estos criterios cabe mencionar la disponibilidad de una solución, el efecto sobre el cliente, la reproducibilidad del problema, la complejidad del código que se debe cambiar y otros temas.
+
+Revisión: un único paquete acumulativo que incluye uno o varios archivos que se usan para corregir un problema en un producto y son acumulativos tanto en el nivel binario como en el nivel de archivos. La revisión corrige una situación específica de un cliente y no se puede distribuir fuera de la organización del cliente.
+
+RTM: por lo general significa "versión RTM" (del inglés Release to Manufacturing, entrega a fabricación). En el contexto de un producto como SQL Server, indica que no se han aplicado Service Pack ni revisiones al producto.
+
+RTW: por lo general significa "versión RTW" (del inglés Release to Web, entrega en la Web). Hace referencia a un paquete que se ha publicado en web y se ha puesto a disposición de los clientes para su descarga.
+
+Service pack: un conjunto acumulativo y probado de todas las revisiones, actualizaciones de seguridad, actualizaciones críticas y actualizaciones. Los Service Pack también pueden contener correcciones adicionales para problemas encontrados internamente desde el lanzamiento del producto, así como una cantidad limitada de características o cambios de diseño solicitados por el cliente.
+
+
+
 
 ```
 
@@ -143,42 +167,31 @@ Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-compre
 Determinar la versión y edición de Motor de base de datos de SQL Server que se está ejecutando
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/find-my-sql-version
 
-Ediciones y características admitidas de SQL Server 2019
+Caracteristicas y diferencias entre Ediciones Enterprise,	Estándar,Web, Express:
 https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
 
-Using SQL Server in Windows
+Saber si el sql es compatible con la version de windows:
 https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
 
-Te indica la información de cada parche   : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions 
+Te muestra todas las actualización acumulativa y sus caracteristicas  :
+ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions
 
-Herramientas para SQL Server
-https://www.microsoft.com/es-mx/sql-server/developer-tools
+https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
 
-Descargar SQL server:
-https://www.microsoft.com/es-mx/sql-server/sql-server-downloads
-
-Recomendaciones de seguridad
-https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16
 
 Últimas actualizaciones e historial de versiones para SQL Server:
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates
 
-dónde encontrar información sobre las últimas compilaciones de SQL Server:
-https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
 
 Controlador ODBC de Microsoft para SQL Server:
 https://learn.microsoft.com/es-es/sql/connect/odbc/microsoft-odbc-driver-for-sql-server?view=sql-server-ver16
 https://learn.microsoft.com/es-es/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
 https://learn.microsoft.com/es-es/sql/connect/odbc/windows/release-notes-odbc-sql-server-windows?view=sql-server-ver16
 
+
+
 Modelos de mantenimiento para SQL Server:
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
-
-Novedades a la lógica de detección de Microsoft Update para el mantenimiento de SQL Server:
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/new-mu-servicing-model
-
-Determinar la versión y edición de Motor de base de datos de SQL Server que se está ejecutando
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/find-my-sql-version
 
 
 Determinación de la información de versión de SQL Server componentes y herramientas de cliente:
@@ -186,6 +199,13 @@ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-to
 
 Características de SQL Server Native Client:
 https://learn.microsoft.com/es-es/sql/relational-databases/native-client/features/sql-server-native-client-features?view=sql-server-ver15&viewFallbackFrom=sql-server-ver16
+
+
+Descargar SQL server:
+https://www.microsoft.com/es-mx/sql-server/sql-server-downloads
+
+Herramientas para SQL Server
+https://www.microsoft.com/es-mx/sql-server/developer-tools
 
 ```
 
