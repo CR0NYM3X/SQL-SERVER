@@ -140,6 +140,9 @@ Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-compre
 
 ### OTROS Enlaces 
 ```SQL
+Ediciones y características admitidas de SQL Server 2019
+https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
+
 Using SQL Server in Windows
 https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
 
