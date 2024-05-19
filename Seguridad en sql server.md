@@ -514,6 +514,7 @@ https://github.com/Ignitetechnologies/MSSQL-Pentest-Cheatsheet
 
 medidas de seguridad: 
 https://learn.microsoft.com/es-es/sql/relational-databases/security/security-center-for-sql-server-database-engine-and-azure-sql-database?view=sql-server-ver16
+https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16
 ```
 
 
