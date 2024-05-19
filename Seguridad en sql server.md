@@ -518,3 +518,57 @@ https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-s
 ```
 
 
+
+
+
+### CONFIGURACIONES DE SEGURIDAD
+```SQL
+
+
+Seguridad: 
+https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16
+
+ https://reunir.unir.net/bitstream/handle/123456789/3619/ARMENDARIZ%20PEREZ%2C%20I%C3%91IGO.pdf?sequence=1&isAllowed=y
+ https://www.coursesidekick.com/computer-science/4425647
+ http://bibliotecadigital.econ.uba.ar/download/tpos/1502-0496_TiebasJ.pdf
+ https://www.udb.edu.sv/udb_files/recursos_guias/informatica-ingenieria/base-de-datos-i/2019/i/guia-12.pdf
+ https://www.sothis.tech/seguridad-en-microsoft-sql-server/
+
+
+----------- ecnriptado ------------
+cifrar los datos en reposo 
+Cifrado de datos transparente (TDE)  - https://learn.microsoft.com/es-es/sql/relational-databases/security/encryption/transparent-data-encryption?view=sql-server-ver16#enable-tde
+
+----------- NIVEL COLUMNA ------------
+ Enmascaramiento dinámico de datos (DDM) 
+
+------------ Protección en el nivel de fila ------------
+Seguridad de nivel de fila (RLS)  -  https://learn.microsoft.com/es-es/sql/relational-databases/security/row-level-security?view=sql-server-ver16#Typical
+
+------------ AUDITORIAS ------------
+Informes y auditoría
+https://learn.microsoft.com/es-es/sql/relational-databases/security/auditing/sql-server-audit-database-engine?view=sql-server-ver16
+
+------------ Identidades y autenticación ------------
+el modo de autenticación de Windows y el "modo de autenticación de SQL Server y Windows" (modo mixto).
+
+------------ tablas temporales historicas ------------
+ registros históricos de los cambios de datos a lo largo del tiempo puede ser beneficioso para abordar los cambios accidentales en los datos.
+https://learn.microsoft.com/es-es/sql/relational-databases/tables/temporal-tables?view=sql-server-ver16
+
+------------ Evaluación y herramientas de evaluación de seguridad ------------
+Evaluación de vulnerabilidades de SQL Server 
+habilite solo las características que necesita : https://learn.microsoft.com/es-es/sql/relational-databases/security/surface-area-configuration?view=sql-server-ver16
+
+Clasificacion de datos sensibles : https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-data-discovery-and-classification?view=sql-server-ver16&tabs=t-sql
+
+------------ Amenazas de SQL comunes ------------
+Inyección de código SQL:   https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-injection?view=sql-server-ver16
+Inyección de código SQL:  Los desarrolladores y administradores de seguridad deben revisar todo el código que llama a EXECUTE, EXEC o sp_executesql, xp_: Procedimientos almacenados extendidos del catálogo, como xp_cmdshell 
+Acceso por fuerza bruta: https://learn.microsoft.com/es-es/defender-for-identity/credential-access-alerts
+Riesgos de contraseña :  contraseñas seguras complejas para todas sus cuentas.
+Proteger SQL Server: https://learn.microsoft.com/es-es/sql/relational-databases/security/securing-sql-server?view=sql-server-ver16
+
+
+
+```
