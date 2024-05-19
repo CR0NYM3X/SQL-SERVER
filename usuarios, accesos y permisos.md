@@ -359,7 +359,9 @@ GRANT VIEW ANY COLUMN MASTER KEY DEFINITION TO nombre_usuario;
 GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 GRANT SHOWPLAN TO user1;
 
-/* ESTOS PERMISOS SON A NIVEL BASE DE DATOS */
+/* ESTOS PERMISOS GRANULARES SON A NIVEL BASE DE DATOS */
+
+https://learn.microsoft.com/es-es/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver16
 SELECT * FROM fn_my_permissions(NULL, 'DATABASE'); 
 
 CREATE TABLE --- este permiso tambien te va solicitar el permiso ALTER ya que  si no lo colocas te va salir
@@ -528,6 +530,7 @@ select CONNECTIONPROPERTY ('local_net_address') IP_SERVER,* from #userpriv_grant
 
 
 ### Revokar permisos Nivel servidor
+https://learn.microsoft.com/es-es/sql/relational-databases/security/authentication-access/create-a-login?view=sql-server-ver16
 ```SQL
 EXEC sp_dropsrvrolemember N'test_permisos', N'bulkadmin';
 EXEC sp_dropsrvrolemember N'test_permisos', N'dbcreator';
