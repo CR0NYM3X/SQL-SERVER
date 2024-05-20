@@ -211,6 +211,9 @@ https://www.microsoft.com/es-mx/sql-server/sql-server-downloads
 Herramientas para SQL Server
 https://www.microsoft.com/es-mx/sql-server/developer-tools
 
+connection modules or drivers para los  lenguajes de programacion :
+https://learn.microsoft.com/en-us/sql/connect/sql-connection-libraries?view=sql-server-ver15
+
 ```
 
 
