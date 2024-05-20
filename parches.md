@@ -5,7 +5,7 @@
 
 
 CATÁLOGO DE PARCHES POSTGRESQL		https://www.postgresql.org/													
-CATÁLOGO DE PARCHES MSSQL	 	https://www.catalog.update.microsoft.com/search.aspx?q=sql+server													
+CATÁLOGO DE PARCHES MSSQL	 	https://www.catalog.update.microsoft.com/search.aspx?q=sql+server |  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates 
 CATÁLOGO DE PARCHES MONGODB	 	https://www.mongodb.com/docs/upcoming/release-notes/6.0/													
 CATÁLOGO DE PARCHES DB2	 	https://www.ibm.com/support/pages/download-db2-fix-packs-version-db2-linux-unix-and-windows													
 CATÁLOGO DE PARCHES MARIADB		https://mariadb.com/kb/en/release-notes/													
@@ -35,6 +35,8 @@ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql
 
 nomenclatura y descripciones de área de corrección para los paquetes:
  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/naming-schema-and-fix-area
+
+ 
 
 -- aparecen todas las versiones:
 https://sqlserverbuilds.blogspot.com/
@@ -196,8 +198,6 @@ Te muestra todas las actualización acumulativa y sus caracteristicas  :
 https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
 
 
-Últimas actualizaciones e historial de versiones para SQL Server:
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates
 
 
 -- Descarga de ODBC 
@@ -209,9 +209,7 @@ https://learn.microsoft.com/es-es/sql/connect/odbc/windows/release-notes-odbc-sq
 
 ---- Validar ODBC -> Compatibilidad con versiones de SQL Y Sistemas operativos admitidos
 https://learn.microsoft.com/es-es/sql/connect/odbc/windows/system-requirements-installation-and-driver-files?view=sql-server-ver16
-
-Modelos de mantenimiento para SQL Server:
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
+ 
 
 
 
