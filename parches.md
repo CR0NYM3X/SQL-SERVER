@@ -25,17 +25,29 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
 
+### La nomenclatura de las versiones de SQL Serve
+```
+Saber las licencias 
+https://learn.microsoft.com/es-es/answers/questions/1458687/consulta-licencia-sql-server2019
+
+Modelos de mantenimiento para SQL Server:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
+
+nomenclatura y descripciones de área de corrección para los paquetes:
+ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/naming-schema-and-fix-area
+
+-- aparecen todas las versiones:
+https://sqlserverbuilds.blogspot.com/
+
+
+versión del producto	   nivel del producto	       edición
+14.0.2027.2             	RTM	                  Developer Edition (64 bits)
+
+```
 
 
 ### Tipos de Actualización GDR, CU, OD
 ```SQL
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
-nomenclatura y descripciones de área de corrección para los paquetes:  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/naming-schema-and-fix-area
-
-lógica de detección de Microsoft Update para el mantenimiento de SQL Server: https://learn.microsoft.com/es-es/troubleshoot/sql/releases/new-mu-servicing-model
-Rama de versión de distribución general (GDR) que solo contiene seguridad y otras correcciones críticas.
-Rama de actualización acumulativa (CU) que contiene seguridad y otras correcciones críticas, además de todas las demás correcciones para la línea base.
-
 
 
 Actualizaciones GDR (General Distribution Release):
@@ -86,7 +98,7 @@ para empresas PYME (pequeñas y medianas empresas) el modelo SQL Server CAL suel
 Si tu empresa ya es grande o prevés que vas a crecer de manera exponencial es más barato obtener una licencia por núcleo, debido a que le permite el acceso a tu servidor a un número infinito de usuarios.
 
 
-Tipos de CAL : 
+Tipos de licencias : 
 https://www.microsoft.com/es-xl/licensing/product-licensing/sql-server?activetab=sql-server-pivot%3aprimaryr2
 
 
@@ -168,6 +180,10 @@ Service pack: un conjunto acumulativo y probado de todas las revisiones, actuali
 Determinar la versión y edición de Motor de base de datos de SQL Server que se está ejecutando
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/find-my-sql-version
 
+Determinación de la información de versión de SQL Server componentes y herramientas de cliente:
+https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-tools-versions
+
+
 Caracteristicas y diferencias entre Ediciones Enterprise,	Estándar,Web, Express:
 https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
 
@@ -198,8 +214,6 @@ Modelos de mantenimiento para SQL Server:
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql-server
 
 
-Determinación de la información de versión de SQL Server componentes y herramientas de cliente:
-https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-tools-versions
 
 Características de SQL Server Native Client:
 https://learn.microsoft.com/es-es/sql/relational-databases/native-client/features/sql-server-native-client-features?view=sql-server-ver15&viewFallbackFrom=sql-server-ver16
@@ -214,6 +228,31 @@ https://www.microsoft.com/es-mx/sql-server/developer-tools
 connection modules or drivers para los  lenguajes de programacion :
 https://learn.microsoft.com/en-us/sql/connect/sql-connection-libraries?view=sql-server-ver15
 
+
+OLE DB :  permite el acceso a una variedad de fuentes de datos, no solo bases de datos relacionales, sino también a datos no relacionales como hojas de cálculo, archivos de texto y servicios web. 
+
+Notas de versiones de OLE DBDescargar
+
+https://learn.microsoft.com/es-es/sql/connect/oledb/release-notes-for-oledb-driver-for-sql-server?view=sql-server-ver15
+
+Validar OLE DB -> Compatibilidad con versiones de SQL Y Sistemas operativos admitidos
+https://learn.microsoft.com/es-es/sql/connect/oledb/applications/support-policies-for-oledb-driver-for-sql-server?view=sql-server-ver15
+
+SQL Server Native Client:   ya no se actualiza ni se recomienda
+está diseñado específicamente para SQL Server,  optimizado,  mejor rendimiento específicamente para SQL Server
+combina tanto el proveedor Genericos como OLE DB y ODBC 
+Permite acceder a características avanzadas específicas de SQL Server como la recuperación optimizada, tipos de datos específicos (por ejemplo, geometry, geography), soporte para XML y JSON
+y SQL Native Client 11.0 que se instala en SQL Server 2012 a 2019 hasta que el SQL Server ciclo de vida de fin de soporte técnico respectivo
+ 
+ Versiones de sistema operativo compatibles SQL Server Native Client
+ https://learn.microsoft.com/es-es/sql/relational-databases/native-client/applications/support-policies-for-sql-server-native-client?view=sql-server-ver15#support-lifecycle-exception
+
+Características de SQL Server Native Client
+https://learn.microsoft.com/es-es/sql/relational-databases/native-client/features/sql-server-native-client-features?view=sql-server-ver15&viewFallbackFrom=sql-server-ver16
+
+
+EXTRASSSSSS:
+https://es.wikipedia.org/wiki/Microsoft_SQL_Server
 ```
 
 
