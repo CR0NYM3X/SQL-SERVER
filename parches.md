@@ -36,16 +36,19 @@ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/servicing-models-sql
 nomenclatura y descripciones de área de corrección para los paquetes:
  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/naming-schema-and-fix-area
 
- 
-
--- aparecen todas las versiones:
-https://sqlserverbuilds.blogspot.com/
 
 
 versión del producto	   nivel del producto	       edición
 14.0.2027.2             	RTM	                  Developer Edition (64 bits)
 
+[NOTA]: En versiones 2016 inferiores se instala el SP, GDR y despues el CU mas actualizado,
+todos estos remplazan las versiones anteriores 
+
 ```
+
+
+
+
 
 
 ### Tipos de Actualización GDR, CU, OD
@@ -165,6 +168,9 @@ Actualización acumulativa (CU): una actualización acumulativa que contiene tod
 
 Revisión: un único paquete acumulativo que incluye uno o varios archivos que se usan para corregir un problema en un producto y son acumulativos tanto en el nivel binario como en el nivel de archivos. La revisión corrige una situación específica de un cliente y no se puede distribuir fuera de la organización del cliente.
 
+RTM:  significa que es la versión inicial y completa del software que ha pasado por todas las etapas de desarrollo y pruebas y está lista para su lanzamiento al público para su compra y uso general.
+
+
 RTM: por lo general significa "versión RTM" (del inglés Release to Manufacturing, entrega a fabricación). En el contexto de un producto como SQL Server, indica que no se han aplicado Service Pack ni revisiones al producto.
 
 RTW: por lo general significa "versión RTW" (del inglés Release to Web, entrega en la Web). Hace referencia a un paquete que se ha publicado en web y se ha puesto a disposición de los clientes para su descarga.
@@ -248,6 +254,9 @@ y SQL Native Client 11.0 que se instala en SQL Server 2012 a 2019 hasta que el S
 Características de SQL Server Native Client
 https://learn.microsoft.com/es-es/sql/relational-databases/native-client/features/sql-server-native-client-features?view=sql-server-ver15&viewFallbackFrom=sql-server-ver16
 
+
+Requisitos de hardware y de software:
+https://learn.microsoft.com/es-es/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server?view=sql-server-ver16
 
 EXTRASSSSSS:
 https://es.wikipedia.org/wiki/Microsoft_SQL_Server
