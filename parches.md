@@ -59,10 +59,10 @@ Si necesitas aplicar una GDR pero ya tienes una CU instalada, la mejor opción e
 
 **Definición y Propósito:**
 
-GDR (General Distribution Release): Son lanzamientos de seguridad que solo incluyen parches críticos de seguridad y correcciones muy necesarias. Están diseñados para entornos que no pueden aceptar cambios que no sean estrictamente necesarios.
-CU (Cumulative Update): Incluyen todas las actualizaciones de seguridad, correcciones, y nuevas características lanzadas hasta la fecha.
+- GDR (General Distribution Release): Son lanzamientos de seguridad que solo incluyen parches críticos de seguridad y correcciones muy necesarias. Están diseñados para entornos que no pueden aceptar cambios que no sean estrictamente necesarios. que solo contiene seguridad y otras correcciones críticas. <br>
+- CU (Cumulative Update): Incluyen todas las actualizaciones de seguridad, correcciones, y nuevas características lanzadas hasta la fecha.que contiene seguridad y otras correcciones críticas, además de todas las demás correcciones para la línea base.
 
-
+ 
 **Compatibilidad:**
 
 En general, se recomienda no mezclar GDR y CU. Una vez que aplicas una CU, el sistema se mantiene en esa línea de mantenimiento, y debes seguir aplicando CUs posteriores.
@@ -71,7 +71,7 @@ Las GDR están pensadas para entornos donde se busca estabilidad máxima y solo 
 
 **Actualización de un Sistema:**
 
-Si un sistema ha sido actualizado con una CU, aplicar una GDR posterior que no contenga todas las correcciones de la CU podría potencialmente sobrescribir correcciones no incluidas en la GDR, resultando en un sistema en un estado inconsistente.
+Si un sistema ha sido actualizado con una CU, aplicar una GDR posterior que no contenga todas las correcciones de la CU podría potencialmente sobrescribir correcciones no incluidas en la GDR, resultando en un sistema en un estado inconsistente.<br>
 Microsoft recomienda mantener consistencia en el tipo de actualización aplicada: si empiezas con CU, continúa con CU; si empiezas con GDR, sigue con GDR a menos que decidas cambiar la política de actualización completamente.
 
 ```SQL
@@ -281,6 +281,9 @@ https://learn.microsoft.com/es-es/sql/relational-databases/native-client/feature
 
 Requisitos de hardware y de software:
 https://learn.microsoft.com/es-es/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server?view=sql-server-ver16
+
+Microsoft Visual C++:
+https://learn.microsoft.com/es-es/cpp/windows/latest-supported-vc-redist?view=msvc-170
 
 EXTRASSSSSS:
 https://es.wikipedia.org/wiki/Microsoft_SQL_Server
