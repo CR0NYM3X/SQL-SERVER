@@ -56,7 +56,27 @@ Si necesitas aplicar una GDR pero ya tienes una CU instalada, la mejor opción e
 
 
 ### Tipos de Actualización GDR, CU, OD
+
+**Definición y Propósito:**
+
+GDR (General Distribution Release): Son lanzamientos de seguridad que solo incluyen parches críticos de seguridad y correcciones muy necesarias. Están diseñados para entornos que no pueden aceptar cambios que no sean estrictamente necesarios.
+CU (Cumulative Update): Incluyen todas las actualizaciones de seguridad, correcciones, y nuevas características lanzadas hasta la fecha.
+
+
+**Compatibilidad:**
+
+En general, se recomienda no mezclar GDR y CU. Una vez que aplicas una CU, el sistema se mantiene en esa línea de mantenimiento, y debes seguir aplicando CUs posteriores.
+Las GDR están pensadas para entornos donde se busca estabilidad máxima y solo se desean aplicar actualizaciones de seguridad críticas sin introducir nuevas características ni otros cambios que podrían afectar la estabilidad.
+
+
+**Actualización de un Sistema:**
+
+Si un sistema ha sido actualizado con una CU, aplicar una GDR posterior que no contenga todas las correcciones de la CU podría potencialmente sobrescribir correcciones no incluidas en la GDR, resultando en un sistema en un estado inconsistente.
+Microsoft recomienda mantener consistencia en el tipo de actualización aplicada: si empiezas con CU, continúa con CU; si empiezas con GDR, sigue con GDR a menos que decidas cambiar la política de actualización completamente.
+
 ```SQL
+
+
 
 
 Actualizaciones GDR (General Distribution Release):
