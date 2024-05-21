@@ -3,7 +3,6 @@
 
 ```SQL
 
-
 CATÁLOGO DE PARCHES POSTGRESQL		https://www.postgresql.org/													
 CATÁLOGO DE PARCHES MSSQL	 	https://www.catalog.update.microsoft.com/search.aspx?q=sql+server |  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates 
 CATÁLOGO DE PARCHES MONGODB	 	https://www.mongodb.com/docs/upcoming/release-notes/6.0/													
@@ -25,8 +24,11 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
 
+
 ### La nomenclatura de las versiones de SQL Serve
 ```
+
+
 Saber las licencias 
 https://learn.microsoft.com/es-es/answers/questions/1458687/consulta-licencia-sql-server2019
 
@@ -38,11 +40,13 @@ nomenclatura y descripciones de área de corrección para los paquetes:
 
 
 
-versión del producto	   nivel del producto	       edición
+xx.x versión del producto	   nivel del producto	       edición
 14.0.2027.2             	RTM	                  Developer Edition (64 bits)
 
 [NOTA]: En versiones 2016 inferiores se instala el SP, GDR y despues el CU mas actualizado,
 todos estos remplazan las versiones anteriores 
+
+Si necesitas aplicar una GDR pero ya tienes una CU instalada, la mejor opción es esperar la próxima CU que incluya la corrección de seguridad que necesitas. Si tienes dudas específicas sobre la administración de parches y actualizaciones en tu entorno
 
 ```
 
@@ -157,8 +161,8 @@ Por núcleo significa que necesita una licencia para cada núcleo de la máquina
 
 
 
-Bibliografía : https://softtrader.es/explicacion-sql-server-licencias-cal/
-Bibliografía : https://redresscompliance.com/sql-server-2022-licensing-a-comprehensive-guide/#:~:text=With%20the%20Per%20Core%20model,of%20four%20licenses%20per%20VM.
+licencias explicacion : https://softtrader.es/explicacion-sql-server-licencias-cal/
+licencias explicacion : https://redresscompliance.com/sql-server-2022-licensing-a-comprehensive-guide/#:~:text=With%20the%20Per%20Core%20model,of%20four%20licenses%20per%20VM.
 Preguntas más frecuentes, términos y acrónimos usados : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/faq-acronyms
 
 
@@ -168,10 +172,10 @@ Actualización acumulativa (CU): una actualización acumulativa que contiene tod
 
 Revisión: un único paquete acumulativo que incluye uno o varios archivos que se usan para corregir un problema en un producto y son acumulativos tanto en el nivel binario como en el nivel de archivos. La revisión corrige una situación específica de un cliente y no se puede distribuir fuera de la organización del cliente.
 
-RTM:  significa que es la versión inicial y completa del software que ha pasado por todas las etapas de desarrollo y pruebas y está lista para su lanzamiento al público para su compra y uso general.
+
+RTM (Release to Manufacturing):  significa que es la versión inicial y completa del software que ha pasado por todas las etapas de desarrollo y pruebas y está lista para su lanzamiento al público para su compra y uso general.
 
 
-RTM: por lo general significa "versión RTM" (del inglés Release to Manufacturing, entrega a fabricación). En el contexto de un producto como SQL Server, indica que no se han aplicado Service Pack ni revisiones al producto.
 
 RTW: por lo general significa "versión RTW" (del inglés Release to Web, entrega en la Web). Hace referencia a un paquete que se ha publicado en web y se ha puesto a disposición de los clientes para su descarga.
 
