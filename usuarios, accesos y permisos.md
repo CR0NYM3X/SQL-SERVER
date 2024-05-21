@@ -810,6 +810,16 @@ https://learn.microsoft.com/en-us/sql/relational-databases/security/authenticati
 https://gist.github.com/ryzr/e96e7a20179a0e520fbff094a6d7d8b1
 
 
+### Cambiar nombre de usuario 
+```SQL
+
+EXEC sp_rename 'antiguo_login', 'nuevo_login';
+EXEC sp_rename 'oldUser', 'newUser';
+
+ALTER USER antiguo_usuario WITH NAME = nuevo_usuario;
+
+```
+
 #### Pendientes por actualizar este documento :
 ```SQL
 1- especificar para que sirve cada permiso
