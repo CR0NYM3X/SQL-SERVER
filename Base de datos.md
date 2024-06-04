@@ -164,6 +164,16 @@ FROM sys.database_files;
 DBCC SQLPERF(logspace);
 ```
 
+
+###  cambiar el name del mdf o ldf 
+```sql
+ALTER DATABASE [MY_dba_TEST]
+MODIFY FILE (
+    NAME = 'NOMBRE_MDF',
+    NEWNAME= 'NUEVO_NOMBRE_MDF'
+);
+```sql
+
 ###  AUMENTAR EL TAMAÑO DE LA BASE DE DATOS
 > [!IMPORTANT]
 > Esta opción no sirve para hacer más pequeño el tamaño de los archivos la base de datos, sólo sirve para hacer más grande el tamaño de los archivos MDF,LDF o NDF
