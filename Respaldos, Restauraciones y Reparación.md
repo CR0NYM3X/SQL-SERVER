@@ -304,7 +304,9 @@ ORDER BY msdb.dbo.backupset.backup_finish_date desc
 
 ```
 
-# ver la informacion a detalle de cada physical_device_name
+
+
+# ver la informacion a detalle de cada physical_device_name  
 ```sql
 
 
@@ -346,7 +348,67 @@ DROP TABLE #TempFileInfo;
 
 
 ---	RESTORE HEADERONLY FROM DISK ='0b82922f-421e-4125-be8a-d6249f971e63';
-``` 
+```
+
+
+### VER LA VERSION DE SQL SERVER LOS ARCHIVOS .MDF O .BAK
+```SQL
+
+--------- PARA VER LA VERSION DE ARCHIVO UN .BAK -----
+RESTORE HEADERONLY FROM DISK = 'C:\ruta_al_respaldo\respaldo.bak'; 
+
+---- PARA VER LA VERSION DE UN ARCHIVO  .MDF ------
+DBCC CHECKPRIMARYFILE('D:\SQLData\AdventureWorksDW2012_Data.mdf',0) WITH NO_INFOMSGS
+
+ --------- 	COLUMNAS QUE TE PUEDEN AYUDAR A SABER QUE VERSION ES  ----
+SoftwareVersionMajor = 15
+CompatibilityLevel = 150
+DatabaseVersion  = 904
+
+SQL Server 2005: 9
+SQL Server 2008/R2: 10
+SQL Server 2012: 11
+SQL Server 2014: 12
+SQL Server 2016: 13
+SQL Server 2017: 14
+SQL Server 2019: 15
+SQL Server 2022: 16
+
+ 
+Saber Número de compilación : https://learn.microsoft.com/es-es/troubleshoot/sql/releases/download-and-install-latest-updates
+
+Versiones de sql server: 
+https://sqlserverbuilds.blogspot.com/2014/01/sql-server-internal-database-versions.html
+
+
+https://www.enmimaquinafunciona.com/pregunta/3544/hay-alguna-manera-de-determinar-la-version-de-sql-server-que-se-utilizo-para-crear-un-archivo-mdf-o-bak
+
+
+CHECKPRIMARYFILE: 
+https://www.mssqltips.com/sqlservertip/3342/how-to-us
+```
+
+### USAR ATTACH PARA AGREGAR ARCHIVOS .MDF Y LDF  O NDF A UNA INSTANCIA 
+En SQL Server, el comando ATTACH (adjuntar) se utiliza para agregar una base de datos existente a una instancia de SQL Server. Este proceso es conocido como "adjuntar una base de datos". Al adjuntar una base de datos, puedes usar archivos de datos (.mdf, .ndf) y archivos de registro de transacciones (.ldf) existentes para montar la base de datos en el servidor SQL.
+
+```SQL
+
+CREATE DATABASE NombreDeTuBaseDeDatos
+ON (FILENAME = 'ruta_completa_del_archivo_mdf'),
+   (FILENAME = 'ruta_completa_del_archivo_ldf')
+FOR ATTACH;
+
+
+/*
+Si solo tienes el archivo .mdf y no el archivo .ldf:
+Este comando intenta adjuntar la base de datos y reconstruir el archivo de registro de transacciones.
+
+*/
+CREATE DATABASE MyDatabase
+ON (FILENAME = 'C:\Databases\MyDatabase.mdf')
+FOR ATTACH_REBUILD_LOG;
+
+```
 
 # Mejorar el rendimiento de consulta de tablas pesadas
 ```
