@@ -253,9 +253,13 @@ EXEC sp_readerrorlog 0, 1, 'Recovery of database'
 ```
 ALTER DATABASE [NombreDeLaBaseDeDatos] SET READ_WRITE;
 ALTER DATABASE [NombreDeLaBaseDeDatos] SET MULTI_USER;
+ALTER DATABASE [NombreDeLaBaseDeDatos] SET ONLINE;
 ```
 
-
+**5.- Valida el status de la base de datos :**  
+```
+SELECT name, state_desc FROM sys.databases
+```
 
 # Modificar el tipo de respaldo 
 
