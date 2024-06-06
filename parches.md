@@ -232,7 +232,9 @@ Saber si el sql es compatible con la version de windows:
 https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
 
 Validar la compatibilidad de las aplicaciones sql server en los windows server 
-https://learn.microsoft.com/en-us/windows-server/get-started/application-compatibility-windows-server-2022
+[SQL Serv 2022 ] https://learn.microsoft.com/en-us/windows-server/get-started/application-compatibility-windows-server-2022
+[SQL Serv 2019 ]  https://learn.microsoft.com/en-us/windows-server/get-started/application-compatibility-windows-server-2019
+[SQL Serv 2016 ] https://learn.microsoft.com/en-us/windows-server/get-started/application-compatibility-windows-server-2016
 
 ver los requisitos que ocupa un sql server | puedes saber que net framware necesitas 
 [SQL Serv 2022 ]  https://learn.microsoft.com/en-us/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server-2022?view=sql-server-ver15
