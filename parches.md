@@ -219,15 +219,28 @@ https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-to
 Caracteristicas y diferencias entre Ediciones Enterprise,	Estándar,Web, Express:
 https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
 
-Saber si el sql es compatible con la version de windows:
-https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
 
 Te muestra todas las actualización acumulativa y sus caracteristicas  :
  https://learn.microsoft.com/es-es/troubleshoot/sql/releases/sqlserver-2022/build-versions
-
 https://support.microsoft.com/es-es/topic/kb957826-d%C3%B3nde-encontrar-informaci%C3%B3n-sobre-las-%C3%BAltimas-compilaciones-de-sql-server-43994ba5-9aed-2323-ea7c-d29fe9c4fbe8
 
+------ documentacion deTodas las versiones de sql server  
+https://learn.microsoft.com/en-us/previous-versions/sql/
+https://learn.microsoft.com/es-es/sql/?view=sql-server-ver16
 
+Saber si el sql es compatible con la version de windows:
+https://learn.microsoft.com/en-us/troubleshoot/sql/general/use-sql-server-in-windows
+
+Validar la compatibilidad de las aplicaciones sql server en los windows server 
+https://learn.microsoft.com/en-us/windows-server/get-started/application-compatibility-windows-server-2022
+
+ver los requisitos que ocupa un sql server | puedes saber que net framware necesitas 
+[SQL Serv 2022 ]  https://learn.microsoft.com/en-us/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server-2022?view=sql-server-ver15
+[SQL Serv 2019 ] https://learn.microsoft.com/en-us/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server-2019?view=sql-server-ver15
+[SQL Serv 2016/ 2017 ]  https://learn.microsoft.com/en-us/sql/sql-server/install/hardware-and-software-requirements-for-installing-sql-server?view=sql-server-ver15
+[SQL Serv 2014 ]  https://learn.microsoft.com/en-us/previous-versions/sql/2014/sql-server/install/hardware-and-software-requirements-for-installing-sql-server?view=sql-server-2014
+[SQL Serv 2012 ]  https://learn.microsoft.com/en-us/previous-versions/sql/sql-server-2012/ms143506(v=sql.110)
+[SQL Serv 2008 ]   https://learn.microsoft.com/en-us/previous-versions/sql/sql-server-2008/dd638062(v=sql.100)
 
 
 -- Descarga de ODBC 
