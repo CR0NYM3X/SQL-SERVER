@@ -245,6 +245,9 @@ ver los requisitos que ocupa un sql server | puedes saber que net framware neces
 [SQL Serv 2008 ]   https://learn.microsoft.com/en-us/previous-versions/sql/sql-server-2008/dd638062(v=sql.100)
 
 
+Build de Compilación mas reciente de Windows server 
+https://learn.microsoft.com/es-es/windows-server/get-started/windows-server-release-info
+
 -- Descarga de ODBC 
 https://learn.microsoft.com/es-es/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
 
