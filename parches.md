@@ -23,7 +23,11 @@ LIFE CYCLES ORACLE		https://www.oracle.com/us/assets/lifetime-support-technology
 LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
-
+### LOGS de instalacion
+Si no permite instalar puedes validar los log que guarda 
+```
+%ProgramFiles%\Microsoft SQL Server\110\Setup Bootstrap\Log
+```
 
 ### La nomenclatura de las versiones de SQL Serve
 ```
