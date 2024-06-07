@@ -220,8 +220,25 @@ Determinación de la información de versión de SQL Server componentes y herram
 https://learn.microsoft.com/es-es/troubleshoot/sql/releases/components-client-tools-versions
 
 
+Notas de version
+[SQL Serv 2022 ]  https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2022-release-notes?view=sql-server-ver16&preserve-view=true
+[SQL Serv 2019 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2019-release-notes?view=sql-server-ver15&preserve-view=true
+[SQL Serv 2017 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2017-release-notes?view=sql-server-2017&preserve-view=true
+[SQL Serv 2016 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2016-release-notes?view=sql-server-2016&preserve-view=true
+[SQL Serv 2014 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2014-release-notes?view=sql-server-2016
+[SQL Serv 2012 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2012-sp4-release-notes?view=sql-server-2016
+[SQL Serv 2008 ] https://learn.microsoft.com/es-es/sql/sql-server/sql-server-2008-r2-sp2-release-notes?view=sql-server-2016
+
+
 Caracteristicas y diferencias entre Ediciones Enterprise,	Estándar,Web, Express:
-https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16
+
+[SQL Serv 2022 ]   https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2022?view=sql-server-ver16&preserve-view=true
+[SQL Serv 2019 ]   https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver15&preserve-view=true
+[SQL Serv 2017 ]   https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2017?view=sql-server-2017&preserve-view=true
+[SQL Serv 2016 ]   https://learn.microsoft.com/es-es/sql/sql-server/editions-and-components-of-sql-server-2016?view=sql-server-2016&preserve-view=true
+[SQL Serv 2014 ]  
+[SQL Serv 2012 ]  
+[SQL Serv 2008 ]
 
 
 Te muestra todas las actualización acumulativa y sus caracteristicas  :
