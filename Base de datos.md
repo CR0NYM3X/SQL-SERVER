@@ -81,7 +81,7 @@ FILEGROUP GrupoSecundario1 (
     FILENAME = 'C:\dba\RutaArchivoSecundario1.ndf',
     SIZE = 50MB,   -- Tamaño inicial del archivo del filegroup secundario
     MAXSIZE = UNLIMITED,  -- Tamaño máximo del filegroup secundario
-    FILEGROWTH = 10MB  -- Crecimiento automático del filegroup secundario
+    FILEGROWTH = 10MB  -- Crecimiento automático del filegroup secundario | tambien puedes usar % porcentajes
 ),
 FILEGROUP GrupoSecundario2 (
     NAME = 'GrupoSecundario2',
