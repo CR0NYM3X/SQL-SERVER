@@ -499,7 +499,7 @@ EXEC sp_configure 'user instances enabled', 1
 
 # Recuperar el acceso a sql server
 Para esto entramos en **sql server mode single user mode** en este modo nadie se puede conectar mas que un usuario administrador a nivel windows server  
-para esto puedes desde ingresar al **SQL server configuration manager** después ingresar a SQL server services > SQL server (MSSQLSERVER) -> click derecho -> propiedades -> Startup Parameters  -> Agregamos el parametro **-f** o  **-m** -> add -> OK 
+para esto puedes desde ingresar al **SQL server configuration manager** después ingresar a SQL server services > SQL server (MSSQLSERVER) -> click derecho -> propiedades -> Startup Parameters  -> Agregamos el parametro  **-m** -> add -> OK 
 
 o puedes realizar esto desde el cmd 
  ```SQL
@@ -508,9 +508,9 @@ net start mssqlserver \m
 
 sqlcmd -S 127.0.0.1
 
-create login myuser_test with password = '12345.aA'
+create login [myuser_test] with password = '12345.aA'
 go
-alter server role sysadmin add member myuser_test
+alter server role [sysadmin] add member [myuser_test]
 go
 ```
 
