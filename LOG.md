@@ -114,3 +114,32 @@ DBCC OPENTRAN();
 
 
 ```
+
+
+
+### Validar el log de instalación 
+
+Dentro de esta ruta encontraras carpetas, abre la mas actual ayudate con la fecha de creacion, los archivos importantes son <br>
+**details.txt** aqui te va aparecer el detallado de todo lo que quiso intealar y marco error <br>
+**summary_.txt**   aqui después del "_" apareceneran números, y te sirve el archivo las especificaciones de la instalación y algunos errores  <br>
+C:\Program Files\Microsoft SQL Server\110\Setup Bootstrap\Log
+
+<br>**Palabras Clave Comunes que te ayudan a indentificar el problema**
+```sql
+
+"Error": Esto te ayudará a identificar cualquier mensaje de error general.
+"Failed": Indica operaciones que han fallado.
+"Warning": Señala advertencias que podrían estar relacionadas con el problema.
+"Exception": Para detectar excepciones que puedan haber ocurrido durante la instalación.
+"Return value 3": Específico de los logs de MSI (Microsoft Installer), indica un error en la instalación.
+"Configuration failure": Para identificar fallos en la configuración.
+"Access denied": Problemas de permisos o acceso.
+"Unable to": Seguido por la acción que no se pudo completar.
+"Missing": Para detectar componentes o archivos faltantes.
+"Fatal": Para identificar errores críticos que impiden la instalación.
+"Timeout": Problemas relacionados con tiempos de espera agotados.
+"Rollback": Indica que se ha revertido una acción debido a un fallo.
+"Path not found": Problemas relacionados con rutas de archivos o directorios no encontrados.
+
+
+```
