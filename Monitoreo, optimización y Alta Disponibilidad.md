@@ -68,7 +68,7 @@ Son sugerencias generadas por el motor de SQL Server en función de consultas qu
 SELECT * FROM **`sys.dm_tran_active_transactions`**; <br>
 select * from **`sys.dm_tran_session_transactions`**    <br>
 SELECT * FROM  **`sys.dm_tran_database_transactions`** <br>
-
+SELECT * FROM   **`dm_db_log_space_usage`** proporciona información sobre el uso del espacio en el archivo de registro de transacciones <br>
 
 
 ### Habilita las estadisticas al momento de realizar consultas, para ver los tiempos de ejecucion y consumo 
@@ -887,6 +887,50 @@ LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON
 group by  a.database_id , a.object_id , leaf_insert_count , leaf_delete_count  , leaf_update_count   ,ps.avg_fragmentation_in_percent ,	index_type_desc
 ```
 
+# ver espacio de log de transacciones 
+```
+SELECT 
+    DB_NAME(database_id) AS database_name,
+    total_log_size_in_bytes / 1024.0 / 1024.0 AS total_log_size_in_mb,
+    used_log_space_in_bytes / 1024.0 / 1024.0 AS used_log_space_in_mb,
+    used_log_space_in_percent,
+    reserved_log_space_for_internal_use_in_bytes / 1024.0 / 1024.0 AS reserved_log_space_for_internal_use_in_mb,
+    log_space_in_use_since_last_backup_in_bytes / 1024.0 / 1024.0 AS log_space_in_use_since_last_backup_in_mb
+FROM sys.dm_db_log_space_usage;
+```
+
+
+# waiting tasks
+Cuando una tarea está en espera, significa que está esperando algún recurso para poder continuar su ejecución. Estas esperas pueden ser causadas por varios factores, como bloqueos, falta de memoria, E/S en disco, y otros recursos del sistema.
+
+```sql
+
+LOCK_XX: Esperas relacionadas con bloqueos (locks). Ocurren cuando una transacción está esperando para obtener un bloqueo en un recurso que ya está bloqueado por otra transacción.
+
+LATCH_XX: Esperas relacionadas con los pestillos (latches). Ocurren cuando una tarea está esperando a que se libere un pestillo en la memoria.
+
+PAGEIOLATCH_XX: Esperas relacionadas con la E/S de páginas. Ocurren cuando una tarea está esperando que una página sea leída desde el disco a la memoria.
+
+NETWORK_IO: Esperas relacionadas con la red. Ocurren cuando una tarea está esperando para enviar o recibir datos a través de la red.
+
+ASYNC_NETWORK_IO: Esperas asíncronas relacionadas con la red. Ocurren cuando el servidor está esperando a que el cliente lea los datos enviados.
+
+
+SELECT wait_type, SUM(wait_time_ms) AS total_wait_time_ms,
+       SUM(waiting_tasks_count) AS total_waiting_tasks,
+       SUM(wait_time_ms) / SUM(waiting_tasks_count) AS avg_wait_time_ms
+FROM sys.dm_os_wait_stats
+GROUP BY wait_type
+ORDER BY total_wait_time_ms DESC;
+
+
+
+SELECT wait_type, wait_time_ms, wait_time_ms / waiting_tasks_count AS avg_wait_time_ms, waiting_tasks_count
+FROM sys.dm_os_wait_stats
+ORDER BY wait_time_ms DESC;
+
+```
+
 # hacer pruebas de performance  : 
 
 ```sql
@@ -906,6 +950,10 @@ stress -S servidor_sql -d base_de_datos -Q "SELECT * FROM tabla" -n 10 -r 5
 
 bibliogafía : https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
 ```
+
+
+
+
 
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
