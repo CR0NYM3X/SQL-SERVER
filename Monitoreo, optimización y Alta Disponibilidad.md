@@ -997,6 +997,16 @@ bibliogafía : https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-temp
 ```
 
 
+#  Optimización TEMPDB
+https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
+
+```sql
+/********* PARA HABILITAR LA OPTIMIZACION DE TMP DB ************/
+ALTER SERVER CONFIGURATION SET MEMORY_OPTIMIZED TEMPDB_METADATA=ON;
+
+SELECT SERVERPROPERTY('IsTempDBMetadataMemoryOptimized') AS IsTempDBMetadataMemoryOptimized;
+```
+
 
 
 
