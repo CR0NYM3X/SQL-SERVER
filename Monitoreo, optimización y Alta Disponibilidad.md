@@ -887,9 +887,25 @@ LEFT JOIN  sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, NULL) ps ON
 group by  a.database_id , a.object_id , leaf_insert_count , leaf_delete_count  , leaf_update_count   ,ps.avg_fragmentation_in_percent ,	index_type_desc
 ```
 
+# hacer pruebas de performance  : 
+
+```sql
+Descarga : https://learn.microsoft.com/es-es/troubleshoot/sql/tools/replay-markup-language-utility 
+
+OStress: Es una herramienta proporcionada por Microsoft para realizar pruebas de estrés en SQL Server. Esta herramienta permite ejecutar múltiples sesiones y simular una carga alta en el servidor de bases de datos, lo que es útil para pruebas de rendimiento y estabilidad.
 
 
+stress -S servidor_sql -d base_de_datos -Q "SELECT * FROM tabla" -n 10 -r 5
 
+-S servidor_sql especifica el nombre del servidor SQL.
+-d base_de_datos especifica la base de datos a la que te estás conectando.
+-Q "SELECT * FROM tabla" es la consulta SQL que quieres ejecutar.
+-n 10 especifica el número de conexiones concurrentes.
+-r 5 especifica el número de repeticiones para cada consulta.
+
+
+bibliogafía : https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
+```
 
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
