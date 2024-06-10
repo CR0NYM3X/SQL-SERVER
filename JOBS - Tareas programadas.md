@@ -9,7 +9,12 @@ Es importante configurar esto para que lleguen las notificaciones al correo
 
 ### Configurar ruta 
 ```SQL
+
+/********** camibiar la ruta  ****/
 exec msdb.dbo.sp_set_sqlagent_properties @errorlog_file=N'E:\ERRORLOG\SQLAGENT.OUT',@errorloging_level=3
+
+/******** para ver si se cambio la información ************/
+exec msdb.dbo.sp_get_sqlagent_properties
 ```
 
 ### Ejecutar un job 
