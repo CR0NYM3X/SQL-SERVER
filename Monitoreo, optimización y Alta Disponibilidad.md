@@ -1008,6 +1008,22 @@ SELECT SERVERPROPERTY('IsTempDBMetadataMemoryOptimized') AS IsTempDBMetadataMemo
 ```
 
 
+ # comandos DBCC
+```sql
+DBCC DROPCLEANBUFFERS;
+Este comando se utiliza para eliminar los buffers limpios del caché de la base de datos. Los buffers limpios son aquellos que han sido leídos desde el disco pero no han sido modificados. Utilizar este comando es útil para pruebas de rendimiento, ya que garantiza que los datos se leerán desde el disco en lugar del caché.
+
+DBCC FREESYSTEMCACHE ('ALL');
+Este comando libera toda la memoria del caché del sistema. El caché del sistema incluye caché de planes de consulta, caché de procedimientos almacenados, caché de objetos de usuario y otras estructuras de caché del sistema. Es útil para liberar memoria y resolver problemas de rendimiento relacionados con el uso excesivo de caché del sistema.
+
+
+DBCC FREEPROCCACHE;
+Este comando elimina todos los planes de ejecución almacenados en la caché de procedimientos. Esto puede ser útil si se han realizado cambios significativos en las bases de datos o en el esquema y se desea forzar la recompilación de todos los procedimientos y consultas la próxima vez que se ejecuten. Es útil para problemas de rendimiento relacionados con planes de consulta obsoletos.
+
+
+DBCC FREESESSIONCACHE;
+Este comando libera el caché de sesión, que almacena información sobre las sesiones actuales y sus contextos. Al liberar este caché, se pueden resolver problemas relacionados con sesiones persistentes que ocupan demasiada memoria.
+```
 
 
 # Bibliografías : 
