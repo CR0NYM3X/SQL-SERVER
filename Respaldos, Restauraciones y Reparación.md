@@ -196,6 +196,7 @@ COMPRESSION --- comprimir el backup
 USE [master]
 RESTORE DATABASE [MY_DBA_TEST] FROM  
 DISK =  N'C:\respaldo_nuevo_completo.bak'
+, move N'nombre_logical_file' to N'E:\SQLDATA\mi_file.ldf'
 WITH  FILE = 1,  NOUNLOAD,  STATS = 5, REPLACE -- REPLACE SE USA PARA CUANDO LA BASE DE DATOS YA EXISTE ENTONCES LA REMPLAZA
 GO
 
