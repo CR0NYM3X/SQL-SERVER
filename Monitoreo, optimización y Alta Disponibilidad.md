@@ -931,6 +931,51 @@ ORDER BY wait_time_ms DESC;
 
 ```
 
+# Crecimiento de espacio del LDF 
+información crucial sobre por qué el espacio en el archivo de registro de transacciones no se puede reutilizar. identificar y solucionar problemas relacionados con el crecimiento del registro de transacciones. 
+
+Acciones Correctivas
+Dependiendo del valor de log_reuse_wait_desc, aquí hay algunas acciones que podrías tomar:
+
+**`CHECKPOINT:`**  Ejecuta manualmente un CHECKPOINT en la base de datos si es necesario. <br>
+**`LOG_BACKUP:`**  Realiza un backup del registro de transacciones.<br>
+**`ACTIVE_TRANSACTION:`**  Asegúrate de que las transacciones largas se completen lo antes posible.<br>
+**`REPLICATION:`**  Verifica que la replicación esté funcionando correctamente y que no haya problemas de retraso.<br>
+**`AVAILABILITY_REPLICA:`** Revisa el estado de las réplicas de disponibilidad y soluciona cualquier problema de sincronización.<br>
+
+
+```SQL
+
+SELECT 
+    name AS database_name,
+    log_reuse_wait_desc
+FROM sys.databases;
+
+/******** Valores Comunes de log_reuse_wait_desc *************\
+
+NOTHING: No hay nada que impida la reutilización del espacio del registro de transacciones.
+
+CHECKPOINT: El espacio no puede ser reutilizado porque el último punto de control no ha sido escrito. Un punto de control asegura que todas las páginas sucias han sido escritas al disco y que las entradas de registro necesarias están en el disco.
+
+LOG_BACKUP: El espacio no puede ser reutilizado porque no se ha realizado un backup del registro de transacciones. En el modelo de recuperación completa, el registro debe ser respaldado periódicamente para liberar espacio.
+
+ACTIVE_BACKUP_OR_RESTORE: El espacio no puede ser reutilizado porque hay una operación de backup o restauración en progreso.
+
+ACTIVE_TRANSACTION: El espacio no puede ser reutilizado porque hay transacciones activas. Las transacciones deben completarse para que el espacio pueda ser reutilizado.
+
+DATABASE_MIRRORING: El espacio no puede ser reutilizado debido a la replicación de la base de datos. Esto sucede cuando la replicación no está al día.
+
+REPLICATION: El espacio no puede ser reutilizado debido a la replicación transaccional. Esto ocurre cuando los registros no han sido entregados a todos los suscriptores.
+
+AVAILABILITY_REPLICA: El espacio no puede ser reutilizado porque la réplica de disponibilidad en un grupo de disponibilidad AlwaysOn no está sincronizada.
+
+OTHER_TRANSIENT: Otras razones transitorias que no caen en las categorías anteriores.
+
+
+
+```
+
+
 # hacer pruebas de performance  : 
 
 ```sql
