@@ -146,6 +146,10 @@ EXEC xp_instance_regread
   N'Software\Microsoft\MSSQLServer\Setup', N'SQLPath';
   N'Software\Microsoft\MSSQLServer\MSSQLServer\SuperSocketNetLib\Tcp\IPAll', N'TcpPort';
 
+
+---- Cambiar la ruta de error log anget 
+  N'Software\Microsoft\Microsoft SQL Server\MSSQLServer\SQLserverAgent
+
 ---- Para ver el último usuario que ha iniciado sesión en el sistema, puedes ir 
  'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI', 'LastLoggedOnUser'  usuario
  'SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI', 'LastLoggedOnDisplayName' --- saber el nombre completo
@@ -153,7 +157,7 @@ EXEC xp_instance_regread
 --- usuarios registrados en el servidor
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\    ProfileImagePath
 
-
+------ 
 
 ********** escribir en registros **********
 EXEC xp_regwrite 'HKEY_CURRENT_USER', 'Software\MyApp', 'Version', 'REG_SZ', '1.0';
