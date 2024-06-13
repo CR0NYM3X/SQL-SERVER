@@ -103,7 +103,7 @@ link server de mssql a psql: https://www.mssqltips.com/sqlservertip/3662/sql-ser
 PostgreSQL ODBC Driver (psqlODBC) connection strings: https://www.connectionstrings.com/postgresql-odbc-driver-psqlodbc/
 
 
-
+https://www.sqlshack.com/how-to-configure-a-linked-server-using-the-odbc-driver/
 
 
 ```
