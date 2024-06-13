@@ -4,6 +4,8 @@
 
 # Error \#1 : Login failed. The login is from an untrusted domain and cannot be used with Windows authentication.
 
+https://solutions.dbwatch.com/Sqlserver/ <br><br>
+
 **Validar el tipo de autenticación de sql server**
 ```
 SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')
