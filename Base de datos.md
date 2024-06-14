@@ -1,5 +1,21 @@
 
 
+# Modo de Compatibilidad Versión de SQL Server
+```SQL
+60	SQL Server 6.0
+65	SQL Server 6.5
+70	SQL Server 7.0
+80	SQL Server 2000
+90	SQL Server 2005
+100	SQL Server 2008
+110	SQL Server 2012
+120	SQL Server 2014
+130	SQL Server 2016
+140	SQL Server 2017
+150	SQL Server 2019
+160	SQL Server 2022 (a partir de CTP 1.3)
+```
+
 ### Consutar las base de datos que existen:
 ```SQL
 select name,is_read_only,state_desc, recovery_model_desc FROM sys.databases
