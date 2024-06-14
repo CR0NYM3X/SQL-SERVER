@@ -4,6 +4,48 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 > [!TIP]
 > **`Las cosas que se validan son:`** Porcentaje % de  procesador y discos, algún tipo de bloqueo a tablas, transacciones o consultas con tiempos elevados
 
+# Pasos para un performance: 
+
+
+**Paso 1: Validación Inicial del Servidor**  <br>
+**1.1** Verificar Especificaciones del Hardware <br>
+**1.2** Verificar Configuraciones del Sistema Operativo <br> 
+	Actualizaciones, Plan de Energía: Configura el plan de energía en "Alto rendimiento" para evitar que la CPU se reduzca la velocidad. <br><br>
+**1.3** Configuraciones Básicas de SQL Server <br>
+Max Degree of Parallelism (MAXDOP) <br>
+Memory Settings  <br>
+
+**Paso 2: Monitorización del Rendimiento** <br> 
+Activity Monitor: Revisa el monitor de actividad para ver el uso de recursos, bloqueos y consultas más costosas. <br> 
+MONITOREAR WAITS, LOCKS Y ESTADISTICAS DE INDICES PARA DETERMINAR LAS QUERYS MAS USADAS <br>
+
+**2.2** Dynamic Management Views (DMVs)  <br>
+Consultas Lentas:, Bloqueos:  <br> <br>
+
+**Paso 3: Optimización de Consultas** <br>
+OPTIMIZACIÓN EN QUERYS COMO COSTOS O TIEMPOS DE EJECUCIOÓN <br>
+Actualización de Estadísticas<br>
+Índices: Verifica y optimiza los índices BASANDONOS EN LAS COLUMNAS MAS USADAS .<br><br>
+
+**Paso 4: Mantenimiento Regular**<br>
+Tareas de Mantenimiento como INDEX  REORGANIZE y REBUILD <br><br>
+
+**Paso 5: Consideraciones Adicionales** <br>
+la TempDB Configuration ya que es el encargado de realizar estas Operaciones Temporales: <br>
+
+Tablas Temporales <br>
+Variables de Tabla  <br>
+Cursors <br>
+Operaciones de Sort y Join <br> 
+
+configuraciones  importantes : <br>
+Coloca TempDB en almacenamiento rápido (SSD o NVMe)  <br>
+Tamaño Inicial: <br>
+Crecimiento Automático <br>
+Comienza con el mismo número de archivos de datos que el número de núcleos de CPU, hasta un máximo de 8 archivos.
+
+ 
+
 
 # Procedimientos almacenados para monitorear 
 
