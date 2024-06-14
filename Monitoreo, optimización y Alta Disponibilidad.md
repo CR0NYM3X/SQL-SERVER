@@ -1070,7 +1070,9 @@ Este comando libera el caché de sesión, que almacena información sobre las se
 
 
  # Query Store 
-Disponible desde SQL Server 2016 , Recopila y almacena información detallada sobre el rendimiento de las consultas, Planes de ejecución de las consultas, Estadísticas de rendimiento, Historial de consultas proporcionando una visión histórica del comportamiento de las consultas, sus planes de ejecución y sus tiempos de ejecución.   poderosa para el monitoreo, análisis y optimización del rendimiento de las consultas en SQL Server.
+Disponible desde SQL Server 2016 , Recopila y almacena información detallada sobre el rendimiento de las consultas, Planes de ejecución de las consultas, Estadísticas de rendimiento, Historial de consultas proporcionando una visión histórica del comportamiento de las consultas, sus planes de ejecución y sus tiempos de ejecución.   poderosa para el monitoreo, análisis y optimización del rendimiento de las consultas en SQL Server. <br> <br>
+
+Los **"hints"** en SQL Server son indicaciones o forzar  que se le pueden dar al optimizador de consultas para influir en cómo se ejecuta una consulta. por ejemplo le podemos decir que una consulta no utilice paralelismo 
 ```sql
 ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE CREAR;
 ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE = ON;
@@ -1079,11 +1081,31 @@ ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE = (OPERATION_MODE = READ_WRITE
 
 Consultas y Análisis:
 SELECT * FROM sys.query_store_runtime_stats;
-SELECT * FROM sys.query_store_plan;
+SELECT * FROM sys.query_store_plan -- WHERE is_forced_plan = 1;;
 SELECT * FROM sys.query_store_query;
+SELECT * FROM sys.query_store_text;
+
+SELECT query_id, plan_id, runtime_stats_id, last_execution_time
+FROM sys.query_store_query
+JOIN sys.query_store_plan
+ON sys.query_store_query.query_id = sys.query_store_plan.query_id
+ORDER BY last_execution_time DESC;
 
 
 EXEC sp_query_store_force_plan @query_id = [QueryID], @plan_id = [PlanID];
+EXEC sp_query_store_unforce_plan @query_id = 123, @plan_id = 456;
+
+#################################  hints  #################################
+
+Ejemplo optimizar de manera manual:
+SELECT *  FROM MiTabla  OPTION (MAXDOP 1);
+
+EXEC sp_query_store_set_hints 
+    @query_id = 123, 
+    @query_hints = 'OPTION (FORCESEEK)';
+
+EXEC sp_query_store_clear_hints @query_id = 123;
+
 ```
 
 
