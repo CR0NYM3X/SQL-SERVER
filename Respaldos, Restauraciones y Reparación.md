@@ -55,9 +55,19 @@ usage: Sqlcmd            [-U login id]          [-P password]
 
 
 # Tipos de respaldos 
-Respaldos incrementales <br> 
-Respaldos completos <br>
-Respaldo diferencia <br>
+**Backup Completo (Full Backup)** <br>
+``Frecuencia:`` Normalmente se realiza una vez al día o una vez a la semana. <br>
+``Tiempo Estimado:`` Puede tomar desde varias horas hasta una noche completa, <br>
+``Descripción:`` Un backup completo copia todos los datos y objetos de una base de datos en un momento dado. Incluye todos los datos y registros, independientemente de si han cambiado desde el último backup.
+
+
+**Backup Diferencial (Differential Backup)** <br>
+``Frecuencia:`` Se realiza con menos frecuencia que los backups completos, generalmente diariamente o cada pocos días. <br>
+``Descripción:`` Un backup diferencial guarda solo los datos que han cambiado desde el último backup completo. Es decir, contiene solo las modificaciones realizadas desde el último backup completo.
+
+**Backup Incremental (Incremental Backup)**<br>
+``Frecuencia:`` Se realiza con mayor frecuencia que los diferenciales, a menudo varias veces al día. <br>
+``Descripción:`` Un backup incremental guarda solo los datos que han cambiado desde el último backup de cualquier tipo (completo, diferencial o incremental). Captura solo los cambios desde el último backup, independientemente del tipo.
 
 
 
