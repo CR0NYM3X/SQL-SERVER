@@ -2,6 +2,16 @@
 
 # Modo de Compatibilidad Versión de SQL Server
 ```SQL
+/********* Consultar la compatibilidad ************/
+SELECT name, compatibility_level
+FROM sys.databases
+WHERE name = 'NombreDeTuBaseDeDatos';
+
+/********* Cambiar el modo de compatibilidad ************/
+ALTER DATABASE NombreDeTuBaseDeDatos
+SET COMPATIBILITY_LEVEL = 140;
+
+/*********  tipos de compatibilidad  ************/
 60	SQL Server 6.0
 65	SQL Server 6.5
 70	SQL Server 7.0
