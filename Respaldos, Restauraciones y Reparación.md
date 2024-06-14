@@ -57,7 +57,7 @@ usage: Sqlcmd            [-U login id]          [-P password]
 # Tipos de respaldos 
 Respaldos incrementales <br> 
 Respaldos completos <br>
-Respaldos solo de data <br>
+Respaldo diferencia <br>
 
 
 
