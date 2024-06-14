@@ -15,6 +15,11 @@ select     (SELECT local_net_address FROM sys.dm_exec_connections where   sessio
 
 ```
 
+# Validar información del S.O y SQL 
+```SQL
+EXEC xp_msver;
+```
+
 ### Saber cuantas instanacias tiene el servidor 
 ```SQL
 
