@@ -1068,6 +1068,27 @@ Este comando libera el caché de sesión, que almacena información sobre las se
 ```
 
 
+
+ # Query Store 
+Disponible desde SQL Server 2016 , Recopila y almacena información detallada sobre el rendimiento de las consultas, Planes de ejecución de las consultas, Estadísticas de rendimiento, Historial de consultas proporcionando una visión histórica del comportamiento de las consultas, sus planes de ejecución y sus tiempos de ejecución.   poderosa para el monitoreo, análisis y optimización del rendimiento de las consultas en SQL Server.
+```sql
+ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE CREAR;
+ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE = ON;
+ALTER DATABASE [NombreBaseDatos]  SET QUERY_STORE = (OPERATION_MODE = READ_WRITE);
+
+
+Consultas y Análisis:
+SELECT * FROM sys.query_store_runtime_stats;
+SELECT * FROM sys.query_store_plan;
+SELECT * FROM sys.query_store_query;
+
+
+EXEC sp_query_store_force_plan @query_id = [QueryID], @plan_id = [PlanID];
+```
+
+
+
+
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
 monitorear: https://sqlperformance.com/2015/03/io-subsystem/monitoring-read-write-latency
