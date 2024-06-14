@@ -65,8 +65,8 @@ usage: Sqlcmd            [-U login id]          [-P password]
 ``Frecuencia:`` Se realiza con menos frecuencia que los backups completos, generalmente diariamente o cada pocos días. <br>
 ``Descripción:`` Un backup diferencial guarda solo los datos que han cambiado desde el último backup completo. Es decir, contiene solo las modificaciones realizadas desde el último backup completo.
 
-**Backup Incremental (Incremental Backup)**<br>
-``Frecuencia:`` Se realiza con mayor frecuencia que los diferenciales, a menudo varias veces al día. <br>
+**Backup Incremental (Incremental Backup)** <br>
+``Frecuencia:`` Se realiza con mayor frecuencia que los diferenciales, a menudo varias veces al día, como cada hora o 30min. <br>
 ``Descripción:`` Un backup incremental guarda solo los datos que han cambiado desde el último backup de cualquier tipo (completo, diferencial o incremental). Captura solo los cambios desde el último backup, independientemente del tipo.
 
 
