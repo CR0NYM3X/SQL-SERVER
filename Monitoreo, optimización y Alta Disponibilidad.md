@@ -1084,6 +1084,7 @@ SELECT * FROM sys.query_store_runtime_stats;
 SELECT * FROM sys.query_store_plan -- WHERE is_forced_plan = 1;;
 SELECT * FROM sys.query_store_query;
 SELECT * FROM sys.query_store_text;
+SELECT * FROM sys.query_store_hints;
 
 SELECT query_id, plan_id, runtime_stats_id, last_execution_time
 FROM sys.query_store_query
