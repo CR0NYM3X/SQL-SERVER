@@ -1,5 +1,42 @@
-######  index faltantes
+######  index faltantes que se deben de crear 
 https://www.mssqltips.com/sqlservertip/1634/find-sql-server-missing-indexes-with-dmvs/
+
+```sql
+SELECT
+    migs.avg_total_user_cost * migs.avg_user_impact AS ImprovementMeasure,
+    mid.[statement] AS TableName,
+    mid.equality_columns AS EqualityColumns,
+    mid.inequality_columns AS InequalityColumns,
+    mid.included_columns AS IncludedColumns,
+    migs.user_seeks,
+    migs.user_scans,
+    migs.last_user_seek,
+    migs.last_user_scan
+FROM
+    sys.dm_db_missing_index_group_stats AS migs
+    INNER JOIN sys.dm_db_missing_index_groups AS mig
+        ON migs.group_handle = mig.index_group_handle
+    INNER JOIN sys.dm_db_missing_index_details AS mid
+        ON mig.index_handle = mid.index_handle
+WHERE
+    mid.[statement] LIKE '%NombreTuTabla%'
+ORDER BY
+    ImprovementMeasure DESC;
+
+
+ImprovementMeasure: Un valor calculado que te da una idea del impacto que tendría el índice recomendado. Se basa en el costo y el impacto estimado de usuario.
+TableName: El nombre de la tabla para la cual se recomienda el índice.
+EqualityColumns: Columnas que deben estar en la parte de igualdad del índice.
+InequalityColumns: Columnas que deben estar en la parte de desigualdad del índice.
+IncludedColumns: Columnas que deben ser incluidas en el índice.
+user_seeks y user_scans: Número de búsquedas y exploraciones de usuario que podrían beneficiarse del índice.
+last_user_seek y last_user_scan: Las últimas fechas en que se realizó una búsqueda o exploración que podría beneficiarse del índice.
+
+
+
+
+    ```
+    
 
 ######  ejemplos  de uso
 ```
