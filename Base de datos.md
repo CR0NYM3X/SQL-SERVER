@@ -535,11 +535,14 @@ configuración de nivel de aislamiento de transacciones que proporciona Mejorar 
 **Sobrecarga de almacenamiento:** Mantener versiones de fila puede aumentar el uso de espacio en tempdb, ya que es donde se almacenan las versiones anteriores de las filas. <br>
 **Configuración a nivel de base de datos:** Esta opción se habilita o deshabilita a nivel de base de datos y no puede ser configurada a nivel de sesión. <br> 
 
+**[NOTA]** esto desconecta a todos los usuarios por seguridad se tiene que hacer cuando no haya gente en el servidor 
+
 ```
 /***********  HABILITAR *************/
 
 ALTER DATABASE NombreTuBaseDeDatos
-SET READ_COMMITTED_SNAPSHOT ON;
+SET READ_COMMITTED_SNAPSHOT ON
+with rollback inmediate;
 GO
 
 /***********  VER SI SE HABILITO  *************/
