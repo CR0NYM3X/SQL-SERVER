@@ -1,4 +1,11 @@
 
+# ver las configuraciones 
+```
+select * from sys.configurations;
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+```
+
 # Desactivar usuarios peligroso:
 ```
 ------- Deshabilita - Usuario SA -------
