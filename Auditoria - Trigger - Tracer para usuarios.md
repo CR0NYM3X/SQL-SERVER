@@ -144,7 +144,11 @@ left join (select * from (SELECT 'ACCESS'  as action_id_desc  ,     'AS' as acti
 
 # Verificar con tracer cuando se  creó, modificó o eliminó un usuario o login
 
+https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-trace-create-transact-sql?view=sql-server-ver16
+
+
 ```
+SELECT * FROM SYS.TRACES;
 
 /*
  Es una función en SQL Server que se utiliza para obtener información sobre las trazas de seguimiento (traces) que se están ejecutando en el servidor. Esta función proporciona detalles sobre las trazas de eventos que están activas en la instancia actual de SQL Server.
