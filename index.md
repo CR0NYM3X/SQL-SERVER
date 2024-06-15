@@ -1,3 +1,6 @@
+######  index faltantes
+https://www.mssqltips.com/sqlservertip/1634/find-sql-server-missing-indexes-with-dmvs/
+
 ######  ejemplos  de uso
 ```
 -- Crear la tabla Clientes
