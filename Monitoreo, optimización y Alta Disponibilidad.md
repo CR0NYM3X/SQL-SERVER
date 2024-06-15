@@ -1,5 +1,5 @@
 # Objetivo:
-Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar solucionar el detalle que se presente
+Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar solucionar el detalle que se presente, usando Dynamic Management Views
 
 > [!TIP]
 > **`Las cosas que se validan son:`** Porcentaje % de  procesador y discos, algún tipo de bloqueo a tablas, transacciones o consultas con tiempos elevados
@@ -95,7 +95,11 @@ Comienza con el mismo número de archivos de datos que el número de núcleos de
 **`sys.dm_server_services:`** Detalles sobre los servicios de SQL Server en la máquina. <br>
 
 <br><br>-------- `INDEX` --------<br><br>
-**`sys.sysindexes`** 
+**`sys.dm_db_missing_index_details`** - Returns detailed information about a missing index <br>
+**`sys.dm_db_missing_index_group_stats`**  - Returns summary information about missing index groups<br>
+**`sys.dm_db_missing_index_groups`** - Returns information about a specific group of missing indexes<br>
+**`sys.dm_db_missing_index_columns(index_handle)`** - Returns information about the database table columns that are missing for an index. This is a function and requires the index_handle to be passed.<br>
+**`sys.sysindexes`** <br>
 SELECT * FROM **`sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('CatPersona'), NULL, NULL)`** AS S WHERE index_id = 0; ---- saber la cantidad de updates, delete , insert <br>
 **`sys.dm_db_index_physical_stats (DB_ID(), NULL, NULL, NULL, NULL)`**  detallada sobre la fragmentación y la distribución física de los índices de una base de datos.<br>
 **`sys.dm_db_index_physical_stats:`** Ofrece información detallada sobre el estado físico de los índices, lo que puede ser útil para identificar problemas de rendimiento relacionados con los índices. y ver si necesita una desfragmentacion <br>
