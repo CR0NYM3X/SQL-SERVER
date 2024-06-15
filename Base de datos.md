@@ -527,6 +527,33 @@ https://learn.microsoft.com/es-es/sql/relational-databases/security/contained-da
 ```
 
 
+### habilitar READ_COMMITTED_SNAPSHOT   
+configuración de nivel de aislamiento de transacciones que proporciona Mejorar la concurrencia y reducir los bloqueos, utilizando control de versión de fila, esto quiere decir que si una tabla esta bloqueada se guarda como una imagen o un respaldo como estaba antes en la tempdb y esto sirve que cuando intenten consutar una tabla con un bloqueo, el sistema vaya y consulte la tabla en la tempdb y te retorne el resultado, necesitas configurar esta opción a nivel de base de datos.   <br><br>
+
+**READ COMMITTED :** valor predeterminado en SQL Server y garantiza que cualquier dato leído durante una transacción, y se evita la lectura de datos no confirmados, como update , insert, no confirmados  <br><br>
+
+**Sobrecarga de almacenamiento:** Mantener versiones de fila puede aumentar el uso de espacio en tempdb, ya que es donde se almacenan las versiones anteriores de las filas. <br>
+**Configuración a nivel de base de datos:** Esta opción se habilita o deshabilita a nivel de base de datos y no puede ser configurada a nivel de sesión. <br> 
+
+```
+/***********  HABILITAR *************/
+
+ALTER DATABASE NombreTuBaseDeDatos
+SET READ_COMMITTED_SNAPSHOT ON;
+GO
+
+/***********  VER SI SE HABILITO  *************/
+SELECT is_read_committed_snapshot_on
+FROM sys.databases
+WHERE name = 'NombreTuBaseDeDatos';
+
+
+/** 
+YA NO OCUPAS COLOCAR EL NOLOCK EN LA TABLA 
+**/
+SELECT * FROM ARTICULOS(NOLOCK) where precio=29
+```
+
 
 ### Bibliografía 
 ```
