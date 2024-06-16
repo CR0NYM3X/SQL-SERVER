@@ -2,6 +2,10 @@
 Existe un trace que se crea por default y  que captura todo 
 
 
+**las auditorías** están enfocadas en la seguridad y el cumplimiento normativo, registrando eventos para análisis forense y cumplimiento.  <br><br>
+
+**Los trazadores** están diseñados para el diagnóstico y solución de problemas de rendimiento, proporcionando una visión en tiempo real del comportamiento de las transacciones y consultas en el sistema.
+
 ### Deshabilitar el Trace Default 
 ```SQL 
 EXEC sp_configure 'show advanced options', 1;
