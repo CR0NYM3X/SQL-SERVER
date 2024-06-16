@@ -1,7 +1,10 @@
 
 
 # Que es Linked Servers:
-Permíten conectarse a una base de datos externa y realizar consultas en ella, no importa si es postgresql o sql server 
+Permíten conectarse a una base de datos externa y realizar consultas en ella, no importa si es postgresql o sql server
+
+
+**se recomienda usar openquery por temas de rendimiento**
 
 # Ejemplos de uso: 
 
