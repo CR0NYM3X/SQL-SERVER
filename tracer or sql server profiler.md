@@ -17,31 +17,43 @@ RECONFIGURE;
 Aquí estan todos los eventos:
 https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/sp-trace-setevent-transact-sql?view=sql-server-ver16
 
-SELECT  TE.name AS [EventName] ,
-        v.subclass_name ,
-        T.DatabaseName ,
-        t.DatabaseID ,
-        t.NTDomainName ,
-        t.ApplicationName ,
-        t.LoginName ,
-        t.SPID ,
-        t.StartTime ,
-        t.RoleName ,
-        t.TargetUserName ,
-        t.TargetLoginName ,
-        t.SessionLoginName,
-		v.subclass_name
-FROM    sys.fn_trace_gettable(CONVERT(VARCHAR(150), ( SELECT TOP 1
-                                                              f.[value]
-                                                      FROM    sys.fn_trace_getinfo(NULL) f
-                                                      WHERE   f.property = 2
-                                                    )), DEFAULT) T
-        JOIN sys.trace_events TE ON T.EventClass = TE.trace_event_id
-        JOIN sys.trace_subclass_values v ON v.trace_event_id = TE.trace_event_id
-                                            AND v.subclass_value = t.EventSubClass
-WHERE   te.name IN ( 'Audit Addlogin Event', 'Audit Add DB User Event',
-                     'Audit Add Member to DB Role Event' )
-      AND v.subclass_name IN ( 'add', 'create' ,'drop')
+SELECT  
+ --EventClass,
+TE.name AS [EventName] ,
+   v.subclass_name ,       
+   T.DatabaseName ,       
+   t.DatabaseID ,       
+   t.NTDomainName ,        
+   t.ApplicationName ,       
+   t.LoginName ,   
+   
+   CASE 
+        WHEN CHARINDEX('[CLIENT: ', textdata) > 0 AND CHARINDEX(']', textdata) > CHARINDEX('[CLIENT: ', textdata)
+        THEN SUBSTRING(
+            textdata,
+            CHARINDEX('[CLIENT: ', textdata) + LEN('[CLIENT: '),
+            CHARINDEX(']', textdata) - (CHARINDEX('[CLIENT: ', textdata) + LEN('[CLIENT: '))
+        )
+        ELSE null
+    END AS IPAddress,
+
+   t.SPID ,   
+   t.StartTime ,     
+   t.RoleName ,      
+   t.TargetUserName ,   
+   t.TargetLoginName ,       
+   t.SessionLoginName,        
+    textdata
+    
+    
+   FROM   
+
+   sys.fn_trace_gettable( ('I:\SQLERRORLOG\login_user.trc' ), DEFAULT) T    
+   JOIN sys.trace_events TE ON T.EventClass = TE.trace_event_id     
+   JOIN sys.trace_subclass_values v ON v.trace_event_id = TE.trace_event_id     
+   AND v.subclass_value = t.EventSubClass 
+   where  cast(StartTime as date ) = cast(getdate() as date )
+   order by StartTime desc
 
 ```
 
