@@ -680,6 +680,10 @@ VALUES (1, 'Cliente1', 100, 'Valor1'),
 ```
 
 
+###  describir el esquema (metadatos ) de un objeto 
+```
+EXEC sp_describe_first_result_set "select * from mytabla";
+```
 
 ### Bibliografia :
 ```
