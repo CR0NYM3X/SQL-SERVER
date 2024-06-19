@@ -317,6 +317,16 @@ select CAST(GETDATE()-1 AS date)
 
  ```
 
+
+## SYNONYM:  
+es un alias que se utiliza para referirse a otro objeto de base de datos, como una tabla
+
+ ```
+CREATE SYNONYM [esquema.]nombre_sinonimo
+FOR [servidor.[base_datos].[esquema].]nombre_objeto;
+ ```
+
+
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
 
