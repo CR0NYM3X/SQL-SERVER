@@ -1,4 +1,23 @@
 
+### Archivos 
+En esta ruta por default sql server guarda sus log -->  C:/programFiles/Microsoft SQL Server /MSSQL13.MSSQLSERVER/MSSQL/LOG
+
+```
+/******** ARCHIVOS QUE GUARDA Y PROPISITO  ********/
+
+fd.# --- es un archivo que se genera cuando se producen errores relacionados con el servicio Full-Text Search
+FDLAUNCHERRORLOG --  guarda error al intentar cargar o iniciar la funcionalidad Full-Text Search (Búsqueda de texto completo). Este archivo suele contener información detallada sobre los errores específicos relacionados con el motor de búsqueda de texto completo de SQL Server,  Full-Text Search  permite realizar búsquedas eficientes dentro de texto almacenado en columnas de tipo nvarchar, varchar y otros tipos de datos de texto. 
+
+---- Estos son Event Session ------  Te permitirá monitorear de manera efectiva el rendimiento, diagnosticar problemas y mejorar la eficiencia de tus bases de datos SQL Server.
+ManagedBackupEvent_backup_####.xel
+system_health_####.xel
+HKEngineEventFile_####.xel 
+
+ERRORLOG.#  -- Captura error de sql server
+SQLAGENT.OUT -- captura error relacionados con los agentes que son los JOB
+LOG.TRC  --- captura la informacion de tracer
+
+```
 
 
 # Usando el Visor de Eventos:
