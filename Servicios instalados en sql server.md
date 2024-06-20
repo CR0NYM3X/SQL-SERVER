@@ -1,4 +1,74 @@
+
 **SQL server Agent**
+
+¿Para qué sirve?
+Puedes programar tareas para que se ejecuten automáticamente según una programación específica.
+Permite automatizar tareas repetitivas y monitorear su éxito o fallo.
+
+---
+
+**SQL server (MSSQLSERVER)**
+Este es el que levanta el servicio de la base de datos y te puedas conectar a ella 
+
+---
+
+**SQL server Integration Services**
+¿Para qué sirve?
+ SSIS  es una plataforma poderosa para implementar soluciones de Extracción, Transformación y Carga (ETL), como por ejemplo obtener 3 archivos con formatos con csv,xml, excel  y cargaro en una servidor sql server
+
+---
+
+
+
+**SQL server Full-text Filter deamon Laucher**
+¿Para qué sirve?
+Es esencial para usar la búsqueda de texto completo en SQL Server.
+
+``FREETEXT``
+Propósito: Busca palabras relacionadas y no solo coincidencias exactas. Es ideal para búsquedas “estilo Google”.
+
+
+``CONTAINS``
+Propósito: Busca palabras o frases específicas. Permite precisión y búsqueda exacta.
+
+
+
+```
+Permite la búsqueda de texto completo de manera automática. Registra eventos y notifica sobre fallas en tareas críticas.
+ 
+Ejemplos de uso:  
+
+-- Supongamos que deseas buscar todos los productos con un precio de $80.99 que contengan la palabra “Mountain”:
+SELECT Name, ListPrice
+FROM Production.Product
+WHERE ListPrice = 80.99 AND CONTAINS(Name, 'Mountain');
+
+-- Si buscas documentos que contengan palabras relacionadas con “vital safety components”:
+SELECT Title
+FROM Production.Document
+WHERE FREETEXT(Document, 'vital safety components');
+
+-- Para encontrar productos cuya descripción contenga la palabra “aluminum” cerca de “light” o “lightweight”:
+
+SELECT FT_TBL.ProductDescriptionID, FT_TBL.Description, KEY_TBL.RANK
+FROM Production.ProductDescription AS FT_TBL
+INNER JOIN CONTAINSTABLE(Production.ProductDescription, Description,
+    '(light NEAR aluminum) OR (lightweight NEAR aluminum)'
+) AS KEY_TBL
+ON FT_TBL.ProductDescriptionID = KEY_TBL.[KEY]
+WHERE KEY_TBL.RANK > 2
+ORDER BY KEY_TBL.RANK DESC;
+
+-- Para obtener una clasificación superior y agregar la clasificación a la lista de selección
+SELECT Title, KEY_TBL.RANK
+FROM Production.Document
+INNER JOIN FREETEXTTABLE(Production.Document, *, 'vital safety components') AS KEY_TBL
+ON Production.Document.DocumentID = KEY_TBL.[KEY]
+ORDER BY KEY_TBL.RANK DESC;
+
+
+```
+---
 
 **SQL Server Browser - Activado** <br>
 es un servicio que se ejecuta como parte de SQL Server. Su función principal es escuchar las solicitudes entrantes de recursos de Microsoft SQL Server y proporcionar información sobre las instancias de SQL Server instaladas en el equipo. Algunas de sus funciones clave son:
