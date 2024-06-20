@@ -1,4 +1,11 @@
 
+### Mayor seguridad de monitoreo
+```
+Event Sessions: Para monitoreo detallado y flexible de eventos de sistema y rendimiento.
+Trace: Para diagnóstico detallado y análisis de consultas y eventos específicos.
+Auditorías: Para cumplimiento normativo y seguridad, registrando eventos de acceso a datos críticos.
+```
+
 # ver las configuraciones 
 ```
 select * from sys.configurations;
