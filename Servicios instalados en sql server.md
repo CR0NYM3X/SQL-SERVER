@@ -90,3 +90,12 @@ Actualizaciones y parches: Algunas actualizaciones o parches pueden requerir que
 Si solo tienes una instancia de SQL Server, el hecho de que el SQL Server Browser esté desactivado no debería afectarte significativamente. Dado que no tienes múltiples instancias en el mismo servidor, no tendrás problemas para descubrir o conectarte a una instancia específica.
 
 Sin embargo, ten en cuenta que si en el futuro agregas más instancias o necesitas utilizar el Dedicated Administrator Connection (DAC), es posible que debas activar el SQL Server Browser nuevamente.
+
+--- 
+
+**Sql Server Integration Services (SSIS)** <br>
+**Sql Server analysis services (SSAS)** <br>
+
+**Data quality services (DQS)**  <br>
+**Master Data services** <br>
+**Reporting services**
