@@ -494,10 +494,32 @@ EXEC sp_executesql N'SELECT * FROM  my_tabla_server where ipservidor in( @1, @2)
 
 ```
 
-# Ingresar con el usuario DAC
+# Ingresar con el usuario Control de Acceso Diagnóstico (DAC)
+La conexión de administrador dedicada (DAC) puede ayudarle a salir de una situación difícil. Esto fue creado para ayudarlo a conectarse a SQL Server y ejecutar consultas básicas en casos con problemas críticos de rendimiento, donde no permita realizar una conexión al servidor,  Esto funciona diciéndole a SQL Server que reserve un hilo específicamente para procesar sus consultas en caso de emergencia. Si bien reserva una conexión para usted, es solo un hilo, no hay ningún paralelismo aquí; de hecho, recibirá un error.
+<br>
+De forma predeterminada, el DAC solo escucha en la dirección IP de bucle invertido (127.0.0.1), puerto 1434. Si el puerto TCP 1434 no está disponible, se asigna dinámicamente un puerto TCP cuando se inicia el motor de base de datos. Cuando hay más de una instancia de SQL Server instalada en una computadora
+
 ```
+https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/remote-admin-connections-server-configuration-option?view=sql-server-2017
 https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/diagnostic-connection-for-database-administrators?view=sql-server-ver16
 https://www.sqlshack.com/sql-server-dedicated-admin-connection-dac-how-to-enable-connect-and-use/
+
+
+
+sqlcmd -A -S 127.0.0.1,1434
+
+EXEC sp_configure 'remote admin connections', 1;
+GO
+RECONFIGURE;
+GO
+
+
+
+
+/********  SQL Managment **********/
+Se conecta  con : ADMIN:MSSQLSERVER
+admin:<nombre_instancia>
+admin:<nombre_instancia>\<nombre_instancia>
 
 
 ```
