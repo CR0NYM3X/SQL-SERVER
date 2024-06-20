@@ -114,3 +114,30 @@ En SQL Server, las bases de datos del sistema son bases de datos que se utilizan
 **`tempdb:`** La base de datos "tempdb" es una base de datos temporal que se utiliza para almacenar datos temporales y variables de sesión, así como para ayudar en la clasificación y unión de datos.
 
 
+
+##  cuenta de servicio 
+La cuenta de servicio que configuras al instalar SQL Server es crucial para la seguridad y el rendimiento. Aquí están algunas razones por las que no se recomienda dejar la cuenta predeterminada:
+
+**Seguridad:** <br>
+La cuenta predeterminada suele ser NT SERVICE\MSSQLSERVER, que tiene privilegios elevados (como miembro del rol sysadmin).   
+Usar una cuenta personalizada permite restringir permisos y limitar el acceso a recursos específicos.  <br>
+**Principio de menor privilegio:**  <br>
+Siempre ejecuta los servicios de SQL Server con los privilegios más bajos posibles.  
+Utiliza cuentas de dominio (como gMSA o MSA) si tu servidor está en un dominio.   
+Si no está en un dominio, considera usar cuentas virtuales.  <br>
+**Personalización:**  <br>
+Configurar una cuenta personalizada te permite ajustar permisos según tus necesidades.   
+Puedes otorgar acceso a compartir archivos o otros servidores de bases de datos de manera más controlada.  <br>
+
+
+```
+gMSA (Cuenta de Servicio Administrada de Grupo):
+Funcionalidad: Ofrece la misma funcionalidad que las sMSA, pero se extiende a varios servidores dentro del dominio.
+Uso: Permite que todas las instancias de un servicio en una granja de servidores utilicen la misma entidad de servicio, lo que permite que los protocolos de autenticación mutua funcionen1.
+Administración de Contraseñas: El sistema operativo de Windows administra la contraseña de la cuenta en lugar de requerir intervención manual del administrador.
+Aplicaciones Prácticas: Ideal para servicios que se ejecutan en múltiples servidores sin necesidad de sincronizar contraseñas entre instancias de servicio.
+sMSA (Cuenta de Servicio Administrado Independiente):
+Funcionalidad: Introducida en Windows Server 2008 R2 y Windows 7, proporciona administración automática de contraseñas y SPN.
+Uso: Diseñada para una sola instancia de servicio en un servidor.
+Administración de Contraseñas: Similar a la gMSA, pero no se extiende a varios servidores1.
+```
