@@ -584,7 +584,8 @@ https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-s
 
 ### CONFIGURACIONES DE SEGURIDAD
 ```SQL
-
+--- Tecnicas de seguridad:
+https://jotelulu.com/blog/como-mejorar-la-seguridad-de-tu-sql-server/
 
 Seguridad: 
 https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver16
