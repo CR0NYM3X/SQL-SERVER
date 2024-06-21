@@ -451,7 +451,7 @@ https://learn.microsoft.com/es-es/sql/relational-databases/databases/database-sn
 ```
 
 ### Transparent Data Encryption (TDE)
-
+Tiene una sobre carga intima, esto nos permite encriptar el ldf y mdf a nivel archivo para que no se roben y los quieran atachar en otro server
 ```
 Transparent Data Encryption (TDE): Es una característica de SQL Server que cifra la base de datos completa. TDE cifra los archivos de datos y registros en el nivel de página, y no requiere cambios en la aplicación.
 ```
