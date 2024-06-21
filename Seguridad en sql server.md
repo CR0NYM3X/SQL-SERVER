@@ -436,7 +436,7 @@ https://www.c-sharpcorner.com/article/using-openjson-function-in-sql-server/
 
 
 
-# Agregar procedimientos almecenados desde un archivo dll
+# Agregar procedimientos almecenados extendidos desde un archivo dll
 permite agregar procedimientos almacenados extendidos a SQL Server. Estos procedimientos almacenados pueden ser archivos DLL que se registran en SQL Server y se pueden ejecutar desde consultas SQL.
 ```
 --Register the function (xp_hello)  
@@ -554,6 +554,18 @@ alter server role [sysadmin] add member [myuser_test]
 go
 ```
 
+
+### Desactivar CLR   Common Language Runtime 
+Estaba destinado a ser tanto una mejora como un reemplazo futuro de los procedimientos almacenados extendidos, que son un tipo especial de procedimiento almacenado escrito en lenguaje C y compilado en código de máquina como una biblioteca dll.
+
+```SQL 
+---- Desactivar  
+EXEC sp_configure 'clr enabled';  
+EXEC sp_configure 'clr enabled' , '0';  
+RECONFIGURE;    
+```
+
+https://www.mssqltips.com/sqlservertip/6104/how-to-enable-sql-server-clr-integration-using-tsql/
 
 
 # Bibliografías 
