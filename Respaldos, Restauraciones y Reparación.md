@@ -450,6 +450,12 @@ https://learn.microsoft.com/es-es/sql/relational-databases/databases/create-a-da
 https://learn.microsoft.com/es-es/sql/relational-databases/databases/database-snapshots-sql-server?view=sql-server-ver16
 ```
 
+### Transparent Data Encryption (TDE)
+
+```
+Transparent Data Encryption (TDE): Es una característica de SQL Server que cifra la base de datos completa. TDE cifra los archivos de datos y registros en el nivel de página, y no requiere cambios en la aplicación.
+```
+
 # Bibliografías :
 ```
 Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
