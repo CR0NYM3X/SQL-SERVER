@@ -40,3 +40,7 @@ https://www.red-gate.com/hub/product-learning
 https://dbadixit.com/
 
 https://soportesql.wordpress.com/
+
+
+### Certificaciones o Examenes 
+https://learn.microsoft.com/es-es/credentials/support/retired-certification-exams
