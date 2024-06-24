@@ -6,6 +6,16 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 
 # Pasos para un performance: 
 
+**0.0 Validaciónes basicas:**
+**0.1** .- Disco SSD o en buen estado y un buen formateo 
+
+**0.2** .- Habilitar High Performance : Control  -> Power Options -> High Performance (Seleccionar)
+
+**0.3** .- Agregar cuenta de Sql server : gpedit.msc -> Windows Settings -> Security Settings -> Local Policy -> User Rights Assigment  -> (Agregar) [Perform Volume Maintence tasks {mejora el tiempo para Agregar mas espacio en disco,cuando se llena} | Lock pages in memory]
+
+**0.4** .- Memoria Ram: 90% 
+**0.5** .- comprimir backup automatico : Server Properties -> DatabaseS Setting -> (Seleccionar) Compress Backup
+
 
 **Paso 1: Validación Inicial del Servidor**  <br>
 **1.1** Verificar Especificaciones del Hardware <br>
