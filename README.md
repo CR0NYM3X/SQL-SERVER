@@ -44,3 +44,4 @@ https://soportesql.wordpress.com/
 
 ### Certificaciones o Examenes 
 https://learn.microsoft.com/es-es/credentials/support/retired-certification-exams
+https://www.microsoft.com/es-es/evalcenter
