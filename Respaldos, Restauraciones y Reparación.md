@@ -462,6 +462,7 @@ FileStream no se Cifra: Los datos de FileStream no están protegidos por TDE.
 La Base de Datos Master no se Cifra: La base de datos master, que contiene metadatos y datos de usuario, no está cifrada.
 TempDB se Cifra Automáticamente: Esto puede afectar a otras bases de datos no cifradas en el mismo servidor.
 
+https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/transparent-data-encryption?view=sql-server-ver16
 ```
 
 # Bibliografías :
