@@ -1,3 +1,9 @@
+### Temas ue faltan por investigar: 
+```
+.- Tablas en memoria  usando MEMORY_OPTIMIZED_DATA
+
+```
+
 
 ### Realizar consultas de una tabla bloqueada
 
