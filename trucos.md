@@ -327,6 +327,19 @@ FOR [servidor.[base_datos].[esquema].]nombre_objeto;
  ```
 
 
+# HACER UN IF NULL 
+ ```SQL
+SELECT coalesce(max(code_id) + 1, 1) 
+FROM configentries 
+WHERE configtable_id = 
+
+Select NULLIF(Max(code_id), 0) +1 
+from  configentries 
+WHERE configtable_id = ...
+ ```
+
+
+
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
 
