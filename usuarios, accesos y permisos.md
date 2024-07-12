@@ -32,8 +32,6 @@ En SQL server existen los permisos
 
  **`DENY:`**   Cuando se niega un permiso con DENY, se bloquea el acceso al objeto de la base de datos para el usuario o rol especificado, incluso si ese usuario o rol tiene el permiso otorgado a través de otros roles o permisos implícitos
 
-
-
 # Ejemplos de uso :
 
 ```SQL
