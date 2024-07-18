@@ -1,3 +1,7 @@
+ WITH EXEC AS OWNER asegura que el procedimiento se ejecute con los permisos del propietario
+
+
+
 type = 'p' procedimiento almacenado
 type = 'U' - Para buscar tablas.
 type = 'V' - Para buscar vistas.
