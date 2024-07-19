@@ -818,6 +818,15 @@ ALTER USER antiguo_usuario WITH NAME = nuevo_usuario;
 
 ```
 
+
+### Bloquear por columnas 
+```SQL
+
+ revoke  SELECT    ON object::dbo.clientes(email) TO jose;
+
+```
+
+
 #### Pendientes por actualizar este documento :
 ```SQL
 1- especificar para que sirve cada permiso
