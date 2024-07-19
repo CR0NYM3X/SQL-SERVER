@@ -360,7 +360,8 @@ GRANT SHOWPLAN TO user1;
 /* ESTOS PERMISOS GRANULARES SON A NIVEL BASE DE DATOS */
 
 https://learn.microsoft.com/es-es/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver16
-SELECT * FROM fn_my_permissions(NULL, 'DATABASE'); 
+SELECT * FROM fn_my_permissions(NULL, 'SERVER');
+SELECT * FROM fn_my_permissions(NULL, 'DATABASE');
 
 CREATE TABLE --- este permiso tambien te va solicitar el permiso ALTER ya que  si no lo colocas te va salir
 el error de 'dbo' no existe
