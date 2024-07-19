@@ -14,6 +14,9 @@ SELECT TOP 10 *  FROM sys.objects WHERE object_id IN(983502295) -- type = 'V' --
  SELECT TOP 10 OBJECT_NAME(OBJECT_ID), * FROM sys.sql_modules
  WHERE OBJECT_NAME(OBJECT_ID) LIKE '%Proc_CambiodePrecio%'
 
+
+
+-- Ver el codigo de los procesos almacenados 
 EXEC SP_HELPTEXT Proc_CambiodePrecio
 
 SELECT TOP 10 * FROM  syscomments
