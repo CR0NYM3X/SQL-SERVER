@@ -107,7 +107,7 @@ PostgreSQL ODBC Driver (psqlODBC) connection strings: https://www.connectionstri
 
 
 https://www.sqlshack.com/how-to-configure-a-linked-server-using-the-odbc-driver/
-
+https://www.sqlshack.com/how-to-create-and-configure-a-linked-server-in-sql-server-management-studio/
 
 ```
 
