@@ -70,6 +70,9 @@ SELECT name,password_hash,default_database_name, is_expiration_checked, is_polic
 ### ver hash password de todos login sql, no de los windows login, para pasar a otro server
 ```SQL
 exec sp_help_revlogin
+
+https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/security/transfer-logins-passwords-between-instances
+
 ```
 ### Saber quien es owner 
 ```SQL
