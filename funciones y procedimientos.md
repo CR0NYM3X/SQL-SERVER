@@ -88,4 +88,4 @@ DECLARE @SumaResultado INT;
 EXEC SumarNumeros @Numero1 = 10, @Numero2 = 20, @Resultado = @SumaResultado OUTPUT;
 SELECT @SumaResultado AS ResultadoSuma;
 
-```sql
+``` 
