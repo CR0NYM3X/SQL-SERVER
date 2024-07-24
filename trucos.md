@@ -125,7 +125,8 @@ BEGIN
 END
 ```
 
-**WHEN CASE**
+**WHEN / Switch   **
+En sql server no existe el Switch  existe el when
 ```
 SELECT 
     CASE
