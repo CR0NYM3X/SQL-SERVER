@@ -113,16 +113,18 @@ SELECT @mi_variable AS 'Valor de la variable';
 ### Condicionales 
 **IF**
 ```
-DECLARE @variable INT = 10;
+DECLARE @variable INT = 2;
 
-IF @variable > 5
-BEGIN
-    PRINT 'La variable es mayor que 5.';
-END
-ELSE
-BEGIN
-    PRINT 'La variable no es mayor que 5.';
-END
+IF @variable = 1
+    BEGIN
+        -- Inserta tu primera consulta aquí
+         print 'VALOR #1';
+    END
+    ELSE IF @variable = 2
+    BEGIN
+        -- Inserta tu segunda consulta aquí
+        print 'VALOR #2';
+    END
 ```
 
 **WHEN / Switch   **
