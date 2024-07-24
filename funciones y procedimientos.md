@@ -68,3 +68,24 @@ FROM sys.Procedures
 WHERE object_definition(OBJECT_ID) LIKE '%' + 'BusinessEntityID' + '%'
 
 
+
+
+
+
+# Ejemplo de un procedimiento 
+``` sql
+CREATE PROCEDURE SumarNumeros
+    @Numero1 INT,
+    @Numero2 INT,
+    @Resultado INT OUTPUT
+AS
+BEGIN
+    SET @Resultado = @Numero1 + @Numero2;
+END
+
+
+DECLARE @SumaResultado INT;
+EXEC SumarNumeros @Numero1 = 10, @Numero2 = 20, @Resultado = @SumaResultado OUTPUT;
+SELECT @SumaResultado AS ResultadoSuma;
+
+```sql
