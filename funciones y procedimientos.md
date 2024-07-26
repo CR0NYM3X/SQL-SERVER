@@ -68,9 +68,20 @@ FROM sys.Procedures
 WHERE object_definition(OBJECT_ID) LIKE '%' + 'BusinessEntityID' + '%'
 
 
+``` sql
+SELECT  type FROM sys.objects
 
-
-
+U (Tabla de usuario): Representa una tabla creada por el usuario.
+V (Vista): Representa una vista creada por el usuario.
+P (Procedimiento almacenado): Representa un procedimiento almacenado.
+FN (Función escalar): Representa una función escalar definida por el usuario.
+IF (Función en línea): Representa una función en línea definida por el usuario.
+TF (Función de tabla): Representa una función de tabla definida por el usuario.
+TR (Desencadenador): Representa un desencadenador (trigger) creado por el usuario.
+SN (Secuencia): Representa una secuencia creada por el usuario.
+UQ (Restricción de clave única): Representa una restricción de clave única.
+PK (Restricción de clave primaria): Representa una restricción de clave primaria.
+``` sql
 
 # Ejemplo de un procedimiento 
 ``` sql
