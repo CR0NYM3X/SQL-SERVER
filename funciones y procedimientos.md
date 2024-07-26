@@ -81,7 +81,7 @@ TR (Desencadenador): Representa un desencadenador (trigger) creado por el usuari
 SN (Secuencia): Representa una secuencia creada por el usuario.
 UQ (Restricción de clave única): Representa una restricción de clave única.
 PK (Restricción de clave primaria): Representa una restricción de clave primaria.
-``` sql
+```  
 
 # Ejemplo de un procedimiento 
 ``` sql
@@ -99,4 +99,22 @@ DECLARE @SumaResultado INT;
 EXEC SumarNumeros @Numero1 = 10, @Numero2 = 20, @Resultado = @SumaResultado OUTPUT;
 SELECT @SumaResultado AS ResultadoSuma;
 
-``` 
+```
+
+
+# Ejemplo de un funcion 
+```sql
+CREATE FUNCTION dbo.AddNumbers
+(
+    @Number1 INT,
+    @Number2 INT
+)
+RETURNS INT
+AS
+BEGIN
+    RETURN @Number1 + @Number2
+END
+
+
+SELECT dbo.AddNumbers(10, 20) AS Resultado
+```
