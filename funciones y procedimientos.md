@@ -74,9 +74,9 @@ SELECT  type FROM sys.objects
 U (Tabla de usuario): Representa una tabla creada por el usuario.
 V (Vista): Representa una vista creada por el usuario.
 P (Procedimiento almacenado): Representa un procedimiento almacenado.
-FN (Función escalar): Representa una función escalar definida por el usuario.
-IF (Función en línea): Representa una función en línea definida por el usuario.
-TF (Función de tabla): Representa una función de tabla definida por el usuario.
+FN (Función Escalar): Una función escalar toma uno o más valores de entrada y devuelve un solo valor como resultado. Por ejemplo, puedes crear una función escalar que calcule el área de un círculo dado su radio.
+IF (Función en Línea) : Una función en línea también devuelve un solo valor, pero se diferencia en que se evalúa como parte de una consulta. Estas funciones son más eficientes en términos de rendimiento y se utilizan en expresiones dentro de SELECT, WHERE, HAVING y otras cláusulas.
+TF (Función de Tabla) : Una función de tabla devuelve un conjunto de filas como resultado. Puedes pensar en ella como una vista que acepta parámetros. Las funciones de tabla se utilizan para encapsular lógica compleja y reutilizable.
 TR (Desencadenador): Representa un desencadenador (trigger) creado por el usuario.
 SN (Secuencia): Representa una secuencia creada por el usuario.
 UQ (Restricción de clave única): Representa una restricción de clave única.
