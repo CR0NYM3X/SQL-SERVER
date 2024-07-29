@@ -120,11 +120,23 @@ Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente l
 
 Índice de columnas incluidas (Included Column Index): Este tipo de índice permite incluir columnas adicionales (no claves) en el índice para cubrir consultas y mejorar el rendimiento sin agregarlas a la clave del índice.
 ```
+ 
 
-### Borrar indices 
+### Para borrar un índice  
+
 ```sql
+DROP INDEX [CONCURRENTLY] [IF EXISTS] nombre_del_indice [CASCADE | RESTRICT];
 DROP INDEX idx_Combinado ON DESCRIPCION_ARTICULO;
 ```
+
+- **CONCURRENTLY**: Permite eliminar el índice sin bloquear las operaciones concurrentes de selección, inserción, actualización y eliminación en la tabla del índice.
+- **IF EXISTS**: Evita errores si el índice no existe.
+- **CASCADE**: Elimina automáticamente los objetos que dependen del índice.
+- **RESTRICT**: Impide la eliminación del índice si hay objetos que dependen de él (es la opción predeterminada).
+
+
+
+
 
 ####  saber la fragmentacion de los index y el uso de los index  
 ```sql
