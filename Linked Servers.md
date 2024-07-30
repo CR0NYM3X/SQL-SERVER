@@ -18,6 +18,7 @@ EXEC master.dbo.sp_addlinkedsrvlogin @rmtsrvname = N'192.44.4.85', @locallogin =
 ```SQL
 SELECT * FROM sys.linked_logins WHERE server_id in(SELECT server_id FROM sys.servers WHERE is_linked = 1);
 SELECT  * FROM sys.servers  WHERE is_linked = 1;
+ select * from sys.remote_logins
 ```
 
 ### Ejemplo usando un linkeo
