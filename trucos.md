@@ -1,3 +1,10 @@
+
+### No identifique si comillas dobes o simples 
+```sql
+	SET QUOTED_IDENTIFIER OFF;
+	select "versio"
+``` 
+
 ### Hacer un begin y un rollback
 
 **`[NOTA]`** Es importante saber que cuando se realiza una modificacion dentro del begin este bloquea la tabla de diferentes formas: <br>
