@@ -74,7 +74,8 @@ SECRET = '123123';
 
 
 /*
-### Este procedimiento validara que el usuario nivel S.O  que estas ingresando  si exista y tenga la contraseña correcta en caso de que este mal marcara el error  
+### Este procedimiento hace lo mismo que crear la credencia de manera manual pero la diferencia es que 
+validara que el usuario nivel S.O  que estas ingresando  si exista y tenga la contraseña correcta, en caso de que este mal marcara el error  
 ---> ( An error occurred during the execution of sp_xp_cmdshell_proxy_account. Possible reasons: the provided account was invalid or the '##xp_cmdshell_proxy_account##' credential could not be created. Error code: 1326(The user name or password is incorrect.), Error Status: 0.) 
 */
 EXEC sp_xp_cmdshell_proxy_account 'dominio\user_admin', '123123';
