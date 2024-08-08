@@ -40,6 +40,53 @@ En SQL Server, **`NT SERVICE\SYSTEM`** es una cuenta de sistema incorporada en W
 Esta cuenta tiene privilegios elevados y se utiliza para realizar tareas de alto nivel en el sistema. Cuando se configura SQL Server para usar una cuenta de servicio determinada, como en el caso de los servicios de SQL Server durante la instalación, puede optarse por usar NT SERVICE\SYSTEM como cuenta de servicio.
 
 
+# Como habilitar xp_cmdshell para usuario que no son sysadmin
+```sql
+
+--- validar si existe alguna credencia 
+SELECT * FROM sys.credentials WHERE name = '##xp_cmdshell_proxy_account##';
+
+--- Validar si que usuario se usa para levantar el servicio
+	SELECT * FROM sys.dm_server_services;
+
+use master 
+
+----- HABILITAMOS EL PROCEDIMIENTO YA QUE POR SEGURIDAD VIENE DESHABILITADO
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'xp_cmdshell', 1;
+RECONFIGURE;
+ 
+
+--- creamos el usuario en la master ya que el procedimiento existe en la master  
+CREATE USER [exe_1] FOR LOGIN [exe_1]
+
+---- damos permisos al usuario para que pueda usar el procedimiento 
+GRANT EXECUTE ON master.dbo.xp_cmdshell TO [exe_1] ;   
+
+/* CREAMOS LA CREDENCIA , SE OCUPA UN USUARIO NIVEL S.O , ESTO PERMITIRA QUE LAS PERSONAS QUE NO SON SYSADMIN USEN ESE USUARIO NVL S.O  PARA EJECUTAR COMANDO EN EL SERVIDOR 
+#### EN CASO DE QUE COLOQUES MAL EL USUARIO Y CONTRASEÑA SE VA GUARDAR LA CREDENCIAL, EL PROBLEMA VA SER CUANDO EL USUARIO USE xp_cmdshell
+APARECERA ESTE ERROR --> ( An error occurred during the execution of xp_cmdshell. A call to 'LogonUserW' failed with error code: '1326')  */
+CREATE CREDENTIAL ##xp_cmdshell_proxy_account##
+WITH IDENTITY =  'dominio\user_admin', 
+SECRET = '123123';
+
+
+
+/*
+### Este procedimiento validara que el usuario nivel S.O  que estas ingresando  si exista y tenga la contraseña correcta en caso de que este mal marcara el error  
+---> ( An error occurred during the execution of sp_xp_cmdshell_proxy_account. Possible reasons: the provided account was invalid or the '##xp_cmdshell_proxy_account##' credential could not be created. Error code: 1326(The user name or password is incorrect.), Error Status: 0.) 
+*/
+EXEC sp_xp_cmdshell_proxy_account 'dominio\user_admin', '123123';
+
+--- PROBAMOS SI FUNCIONO 
+EXEC xp_cmdshell 'whoami';
+
+
+---- BIBLIOGRADÍAS 
+ https://www.sqlshack.com/xp_cmdshell-and-sp_xp_cmdshell_proxy_account-stored-procedures-in-sql-server/
+```
+
 
 
 # Ejecutar comandos en windows desde sql server 
