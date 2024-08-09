@@ -348,8 +348,10 @@ from  configentries
 WHERE configtable_id = ...
  ```
 
-
-
+### Trabajar con strings
+ ```sql
+SELECT SUBSTRING(cast(serverproperty('productversion')  as varchar), 1, CHARINDEX('.', cast(serverproperty('productversion')  as varchar)) - 1) AS value;
+ ```
 ### Bibliografía 
 https://sql-listo.com/t-sql/exec-vs-sp_executesql/
 
