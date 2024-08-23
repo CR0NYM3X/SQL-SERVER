@@ -4,7 +4,7 @@ wmic csproduct get name, identifyingnumber
 
 ### OBTENER, IP DEL SERVIDOR, puerto del servidor, EL HOSTNAME, VERSION Y CANTIDAD DE BASE DE DATOS 
 ```sql
-select     (SELECT local_net_address FROM sys.dm_exec_connections where   session_id = @@SPID  ) IP_SERVER,
+select     (SELECT local_net_address FROM sys.dm_exec_connections where   session_id = @@SPID  ) IP_SERVER, -- select cast(connectionproperty ('local_net_address') as varchar)  as ip_server  
 	   (SELECT  local_tcp_port FROM sys.dm_exec_connections where   session_id = @@SPID  ) PORT_SERVER,
             @@SERVERNAME hostname,
 	    @@servicename instancia,
