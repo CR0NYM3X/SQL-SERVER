@@ -115,10 +115,169 @@ ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
 ### solucion 
 se cambio de contraseña el correo 
 
+Para validar si tu servidor está dentro de un dominio y a qué dominios apunta, puedes usar varios comandos en la línea de comandos (CMD). Aquí te dejo los pasos detallados:
+
+### Validar si el Servidor Está en un Dominio
+
+1. **Abrir CMD con Privilegios de Administrador**:
+   - Haz clic derecho en el menú de inicio y selecciona "Símbolo del sistema (Administrador)".
+
+2. **Usar el Comando `systeminfo`**:
+   - Escribe el siguiente comando para obtener información del sistema, incluyendo el dominio al que pertenece:
+
+     ```cmd
+     systeminfo | findstr /B /C:"Domain"
+     ```
+
+   - Este comando buscará la línea que comienza con "Domain" en la salida de `systeminfo`.
+
+### Ejemplo de Salida
+
+```cmd
+Domain:                    DOMINIO_LOCAL
+```
+
+Si el servidor está en un dominio, verás el nombre del dominio. Si no está en un dominio, verás algo como "Workgroup".
+
+### Ver a Qué Dominios Apunta
+
+1. **Usar el Comando `nltest`**:
+   - Puedes usar `nltest` para listar los controladores de dominio (DC) disponibles en tu dominio:
+
+     ```cmd
+     nltest /dclist:tu_dominio
+     ```
+
+   - Reemplaza `tu_dominio` con el nombre de tu dominio.
+
+### Ejemplo de Salida
+
+```cmd
+C:\> nltest /dclist:dominio
+    Lista de DCs en dominio "dominio" desde \\DC1
+        DC1.dominio.com [PDC]
+        DC2.dominio.com
+    El comando se completó correctamente
+```
+
+### Verificar Relaciones de Confianza entre Dominios
+ puede verificar las relaciones de confianza entre dominios. Esto es útil para asegurarse de que los dominios confían entre sí y que la autenticación cruzada funciona correctamente.
+
+1. **Usar el Comando `netdom`**:
+   - Para verificar las relaciones de confianza entre dominios, puedes usar el siguiente comando:
+
+     ```cmd
+     netdom trust trusting_domain /d:trusted_domain /verify
+     ```
+
+   - Reemplaza `trusting_domain` y `trusted_domain` con los nombres de los dominios correspondientes.
+
+2. **Listar Relaciones de Confianza**:
+   - Puedes listar todas las relaciones de confianza que un dominio tiene con otros dominios.
+
+     ```cmd
+     netdom trust nombre_del_dominio /domain:dominio /enumerate
+     ```
+
+
+### Ejemplo de Uso
+
+```cmd
+netdom trust dominio_local /d:dominio_remoto /verify
+```
+
+
+
+
+Para validar si un usuario existe en el Active Directory desde la línea de comandos (CMD), puedes utilizar el comando `dsquery`. Aquí te dejo los pasos para hacerlo:
+
+### Validar Usuario en Active Directory
+
+1. **Buscar Usuarios**:
+   - Puedes buscar usuarios en el dominio utilizando varios criterios, como el nombre.
+
+     ```cmd
+     dsquery user -name "nombre_del_usuario"
+     ```
+
+2. **Buscar Grupos**:
+   - Puedes buscar grupos en el dominio.
+
+     ```cmd
+     dsquery group -name "nombre_del_grupo"
+     ```
+
+3. **Buscar Unidades Organizativas (OU)**:
+   - Puedes buscar unidades organizativas en el dominio.
+
+     ```cmd
+     dsquery ou -name "nombre_de_la_ou"
+     ```
+
+4. **Buscar Equipos**:
+   - Puedes buscar equipos en el dominio.
+
+     ```cmd
+     dsquery computer -name "nombre_del_equipo"
+     ```
+ 
+
+
+### Ejemplo 
+
+Aquí tienes un ejemplo completo de cómo se vería:
+
+```cmd
+C:\> dsquery user -name "juan.perez"
+"CN=Juan Perez,OU=Usuarios,DC=dominio,DC=com"
+```
+
+
+
+### Alternativa con `net user`
+
+Otra forma de verificar si un usuario de dominio existe es utilizando el comando `net user`:
+
+```cmd
+net user nombre_del_usuario /domain
+```
+
+Por ejemplo:
+
+```cmd
+net user juan.perez /domain
+```
+  
+
+
+### Resumen
+
+- **`systeminfo`**: Para verificar si el servidor está en un dominio.
+- **`nltest`**: Para listar los controladores de dominio.
+- **`netdom`**: Para verificar relaciones de confianza entre dominios.
+ 
+ 
+
+
+
+
+
+
 ### link de apoyo
 ************** The login is from an untrusted ************** <br>
 https://windowsreport.com/0x8009030c/ <br>
 https://dba.stackexchange.com/questions/191267/sspi-handshake-failed-with-error-code-0x8009030c-state-14
+
+
+
+
+
+
+
+
+
+
+
 
 # Error \#2 : Could not open error log file.
 Al intentar inciar el servicio de sql, aparecia el siguiente error 
@@ -129,8 +288,6 @@ Al intentar inciar el servicio de sql, aparecia el siguiente error
 ****************** SOLUCION ******************
 se dio permiso en el disco F al usuario que levanta el servicio de sql server
 ```
-
-
 
 
 
