@@ -1,4 +1,11 @@
 
+###  Recorrer una tabla grande 
+```sql
+	select   * from project_configuration order by id OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY 
+``` 
+
+
+
 ### No identifique si comillas dobes o simples 
 ```sql
 	SET QUOTED_IDENTIFIER OFF;
