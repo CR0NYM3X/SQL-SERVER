@@ -28,7 +28,9 @@ ROLLBACK TRANSACTION;  -- esto si no queremos que realice los cambios realizados
 
 ### Colocar tiempo para que se ejecute una consulta 
 ```
-WAITFOR DELAY '00:00:05';
+WAITFOR TIME '23:59:59'; -- Pausa la ejecución hasta la hora especificada
+WAITFOR DELAY '00:00:05'; -- Pausa la ejecución por 5 segundos
+
 ```
 
 ### Ejecutar una consulta en todas las base de datos  
