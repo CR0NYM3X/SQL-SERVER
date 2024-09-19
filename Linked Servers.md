@@ -96,7 +96,7 @@ ALTER SERVICE MASTER KEY FORCE REGENERATE;
 - Para conectar el linkeo a  POSTGRESQL se coloca en provider
 ```
 En Provider:  Microsoft OLE DB Provider for ODBC  Drivers
-Provider String: Driver={PostgreSQL ANSI};Server=IP address;Port=5432;Database=myDataBase;Uid=myUsername;Pwd=myPassword;
+Provider String: Driver={PostgreSQL UNICODE};Server=IP address;Port=5432;Database=myDataBase;Uid=myUsername;Pwd=myPassword;
 Para consultar : select *from test2.postgres.[public].empleados
 
 
