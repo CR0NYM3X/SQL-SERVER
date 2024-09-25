@@ -41,7 +41,7 @@ Actualización de Estadísticas<br>
 Tareas de Mantenimiento como INDEX  REORGANIZE y REBUILD <br><br>
 
 **Paso 5: Consideraciones Adicionales** <br>
-la TempDB Configuration ya que es el encargado de realizar estas Operaciones Temporales: <br>
+la TempDB es el encargado de realizar estas Operaciones Temporales: <br>
 
 Tablas Temporales <br>
 Variables de Tabla  <br>
@@ -52,7 +52,9 @@ configuraciones  importantes : <br>
 Coloca TempDB en almacenamiento rápido (SSD o NVMe)  <br>
 Tamaño Inicial: <br>
 Crecimiento Automático <br>
-Comienza con el mismo número de archivos de datos que el número de núcleos de CPU, hasta un máximo de 8 archivos.
+Comienza con el mismo número de archivos de datos que el número de núcleos de CPU, hasta un máximo de 8 archivos.<br>
+Configuración recomendada: La práctica recomendada es tener un archivo de datos por cada procesador lógico, hasta un máximo de 8 archivos
+
 
  
 
