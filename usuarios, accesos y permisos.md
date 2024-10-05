@@ -646,12 +646,15 @@ el usuario se quedo huérfanos porque ya no esta ligado a un login, y siempre un
 ```SQL
 ***** Identificar usuarios sin asociar con logins: *****
 
+select name,sid from sys.database_principals where name = 'systest'
+select name,sid  from sys.server_principals  where name = 'systest'
+
 -- Si no coinciden entonces es un usuario huérfanos
 SELECT a.name, a.sid, b.sid, a.type_desc
 FROM sys.database_principals AS a
 LEFT JOIN sys.server_principals AS b on a.name COLLATE DATABASE_DEFAULT = b.name COLLATE DATABASE_DEFAULT
 where a.type_desc in('WINDOWS_USER', 'SQL_USER' ,  'DATABASE_ROLE','WINDOWS_GROUP') and 
-a.sid != b.sid --and a.name= 'AdmonFlotas'
+a.sid != b.sid  and  a.name != 'public'
 ORDER BY a.type_desc,a.name;
 
 -- o puedes usar el procedimiento que es para lo mismo
@@ -661,7 +664,13 @@ EXEC sp_change_users_login 'Report';
 
 
 ***** Vincular un usuario huérfano con un inicio de sesión: ***** 
-EXEC sp_change_users_login 'Update_One', 'nombre_de_usuario', 'nombre_de_login';
+--- Este comando intenta automáticamente vincular usuarios huérfanos con inicios de sesión que tengan el mismo nombre. Si no existe un inicio de sesión con el mismo nombre, lo crea y le asigna una contraseña.
+EXEC sp_change_users_login 'Auto_Fix', 'nombre_usuario', NULL, 'contraseña';
+EXEC sp_change_users_login 'Auto_Fix', 'nombre_usuario'; -- si no colocas contraseña  funciona como el Update_One
+
+-- Este comando vincula un usuario específico de la base de datos con un inicio de sesión existente. No crea nuevos inicios de sesión.
+EXEC sp_change_users_login 'Update_One', 'nombre_usuario', 'nombre_login';
+
 
 ***** OTRA OPCIÓN ES ***** 
 ALTER USER nombre_de_usuario WITH LOGIN = nombre_de_login;
