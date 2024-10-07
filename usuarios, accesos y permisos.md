@@ -59,7 +59,7 @@ select * from sys.server_principals where type_desc in('WINDOWS_LOGIN', 'SQL_LOG
 --- Esta query te muestra a nivel de base de datos todo solo los usuarios sql y windows user que se asociaron a una base de datos en especifica 
 select * from sys.database_principals where  type_desc in('WINDOWS_USER', 'SQL_USER' ,  'DATABASE_ROLE','WINDOWS_GROUP') order by type_desc,name  
 
---- Esta query puede ver el hash los SQL_USER 
+--- Esta query puede ver el hash del password los SQL_USER 
 SELECT name,password_hash,default_database_name, is_expiration_checked, is_policy_checked  FROM sys.sql_logins order by name
 
 ---  
