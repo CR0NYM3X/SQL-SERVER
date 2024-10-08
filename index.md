@@ -312,8 +312,35 @@ https://www.mssqltips.com/sqlservertip/3604/identify-sql-server-indexes-with-dup
 https://www.sqlservercentral.com/articles/finding-and-eliminating-duplicate-or-overlapping-indexes-1
 
 ```
+#  Unused Indexes
+```sql
+use test_db
+--- Índices que no se usan 
 
+SELECT 
+    OBJECT_NAME(i.object_id) AS TableName,
+    i.name AS IndexName,
+    i.index_id,
+    u.user_seeks,
+    u.user_scans,
+    u.user_lookups,
+    u.user_updates
+FROM 
+    sys.indexes AS i
+    LEFT JOIN sys.dm_db_index_usage_stats AS u ON i.object_id = u.object_id AND i.index_id = u.index_id AND u.database_id = DB_ID()
+WHERE 
+    i.is_primary_key = 0 AND i.is_unique = 0
+    AND (u.user_seeks IS NULL AND u.user_scans IS NULL AND u.user_lookups IS NULL) 
+        and  OBJECT_NAME(i.object_id)  in('test_table'
+                        )
+ORDER BY 
+    OBJECT_NAME(i.object_id), i.name;
+	
+	
+	https://www.mssqltips.com/sqlservertutorial/256/discovering-unused-indexes/
+	https://www.mssqltips.com/sqlservertip/1545/deeper-insight-into-used-and-unused-indexes-for-sql-server/
 
+```
 
 https://soportesql.wordpress.com/2016/07/29/columnstore-indexes-en-sql-server/ <br>
 https://learn.microsoft.com/es-es/sql/relational-databases/indexes/columnstore-indexes-overview?view=sql-server-ver16<br>
