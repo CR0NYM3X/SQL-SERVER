@@ -348,6 +348,45 @@ CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) qp
 
 
 
+####### Identificar Columnas Más Usadas 
+
+SELECT TOP 10
+    qs.total_worker_time AS CPU_Time,
+    qs.total_elapsed_time AS Total_Time,
+    qs.total_logical_reads AS Reads,
+    qs.total_logical_writes AS Writes,
+    SUBSTRING(st.text, (qs.statement_start_offset/2) + 1,
+    ((CASE qs.statement_end_offset
+        WHEN -1 THEN DATALENGTH(st.text)
+        ELSE qs.statement_end_offset
+    END - qs.statement_start_offset)/2) + 1) AS query_text
+FROM
+    sys.dm_exec_query_stats AS qs
+    CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS st
+ORDER BY
+    qs.total_worker_time DESC;
+	
+	
+ 
+####### Identificar Consultas con Alto Consumo de Recursos
+SELECT
+    OBJECT_NAME(i.object_id) AS TableName,
+    i.name AS IndexName,
+    i.type_desc AS IndexType,
+    ius.user_seeks,
+    ius.user_scans,
+    ius.user_lookups,
+    ius.user_updates
+FROM
+    sys.indexes AS i
+    INNER JOIN sys.dm_db_index_usage_stats AS ius
+        ON i.object_id = ius.object_id AND i.index_id = ius.index_id
+WHERE
+    i.object_id = OBJECT_ID('YourTableName')
+ORDER BY
+    ius.user_seeks DESC;
+
+
 ```
 
 
