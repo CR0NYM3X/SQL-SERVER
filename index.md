@@ -1,7 +1,7 @@
 ### SABER INDEX DE UNA TABLA
 SP_HELPINDEX 'TABLA' 
 
-######  index faltantes que se deben de crear 
+#  index faltantes que se deben de crear 
 https://www.mssqltips.com/sqlservertip/1634/find-sql-server-missing-indexes-with-dmvs/
 
 ```sql
