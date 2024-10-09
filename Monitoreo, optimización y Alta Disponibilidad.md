@@ -1090,7 +1090,7 @@ stress -S servidor_sql -d base_de_datos -Q "SELECT * FROM tabla" -n 10 -r 5
 -r 5 especifica el número de repeticiones para cada consulta.
 
 
-bibliogafía : https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
+
 ```
 
 
@@ -1102,6 +1102,12 @@ https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
 ALTER SERVER CONFIGURATION SET MEMORY_OPTIMIZED TEMPDB_METADATA=ON;
 
 SELECT SERVERPROPERTY('IsTempDBMetadataMemoryOptimized') AS IsTempDBMetadataMemoryOptimized;
+
+bibliogafías :
+https://blogs.triggerdb.com/2022/12/27/sql-2022-optimizacion-tempdb/
+https://www.mssqltips.com/sqlservertip/6230/memoryoptimized-tempdb-metadata-in-sql-server-2019/
+
+
 ```
 
 
