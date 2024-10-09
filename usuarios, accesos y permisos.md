@@ -360,6 +360,8 @@ GRANT VIEW ANY COLUMN MASTER KEY DEFINITION TO nombre_usuario;
 GRANT CREATE TABLE TO [MYDOMINIOS\my_user_test_windows];
 GRANT SHOWPLAN TO user1;
 
+GRANT CREATE SEQUENCE ON SCHEMA::dbo TO  [Endy]
+
 /* ESTOS PERMISOS GRANULARES SON A NIVEL BASE DE DATOS */
 
 https://learn.microsoft.com/es-es/sql/relational-databases/security/permissions-database-engine?view=sql-server-ver16
