@@ -2,79 +2,101 @@
  
 # Configuraciones Generales y Esenciales
 
+## Configuración a nivel Base de datos 
+```Markdown
 ## Recovery Model
 Asegúrate de que el modelo de recuperación sea apropiado (FULL, SIMPLE, BULK_LOGGED) según tus necesidades de respaldo y restauración.
 
 ## Auto Growth
 Configura el crecimiento automático para que sea adecuado (por porcentaje o por tamaño específico) y evita el autogrowth en pequeñas cantidades frecuentes.
 
-## Rendimiento
-- **Indexación**: Verifica que las tablas más grandes y las más consultadas tengan índices adecuados y realiza mantenimientos periódicos.
-- **Estadísticas**: Asegúrate de que las estadísticas estén actualizadas para mejorar el rendimiento de las consultas.
-- **TempDB**: Asegúrate de que tempdb esté bien configurada, ya que afecta el rendimiento global. Considera múltiples archivos de datos para reducir la contención.
+```
 
-## Configuración de Memoria
-- **Max Server Memory**: Ajusta la memoria máxima del servidor para evitar que SQL Server use toda la memoria del sistema.
-- **Buffer Pool Extension**: Considera habilitar la extensión del pool de búfer para mejorar la eficiencia del uso de memoria.
+## Configuraciones a nivel Servidor SQL server 
+```Markdown
+************ Concurrencia ************ 
+## Max Degree of Parallelism (MAXDOP):
+Ajusta este valor según las mejores prácticas para evitar el exceso de paralelismo.
 
-## Configuraciones de Concurrencia
-- **Max Degree of Parallelism (MAXDOP)**: Ajusta este valor según las mejores prácticas para evitar el exceso de paralelismo.
-- **Cost Threshold for Parallelism**: Establece un valor que permita el uso adecuado del paralelismo para consultas complejas.
+## Cost Threshold for Parallelism:
+Establece un valor que permita el uso adecuado del paralelismo para consultas complejas.
 
-## Seguridad
-- **Permisos**: Revisa los permisos de los usuarios para asegurarte de que sólo tengan los necesarios.
-- **Auditoría**: Implementa auditorías para registrar actividades críticas en la base de datos.
+************ Memoria ************ 
+## Max Server Memory
+Ajusta la memoria máxima del servidor para evitar que SQL Server use toda la memoria del sistema.
 
-## Mantenimiento
-- **Backups**: Asegúrate de que las copias de seguridad automáticas estén configuradas adecuadamente.
-- **Mantenimiento de Índices**: Realiza mantenimientos periódicos para asegurar el buen estado de los índices.
+## Buffer Pool Extension
+Considera habilitar la extensión del pool de búfer para mejorar la eficiencia del uso de memoria.
+
+```
 
 ## TempDB
-- Asegúrate de que tempdb tenga suficientes archivos de datos para evitar contención de recursos.
-- Coloca tempdb en un disco rápido y separado si es posible.
+TempDB es una base de datos del sistema en SQL Server que se utiliza para almacenar datos temporales y objetos como tablas temporales, variables de tabla, y datos intermedios durante operaciones de clasificación y agregación . Es una base de datos no duradera, lo que significa que se recrea cada vez que se reinicia el servicio SQL Server 
+
+```Markdown
+
+- Habilita el tempdb metadata memory-optimized en versiones 2019 en adelante 
+- **TempDB**: Asegúrate de que tempdb esté bien configurada, ya que afecta el rendimiento global. Considera múltiples archivos de datos para reducir la contención.
+ 
+
+
+```
+
  
 ## Índices
-- **Índices en columnas frecuentemente consultadas**: Crea índices en columnas que se usen en cláusulas WHERE, JOIN, y ORDER BY.
-- **Evita índices en columnas con alta cardinalidad**: No crees índices en columnas con pocos valores únicos.
-- **Mantén índices actualizados**: Usa REORGANIZE y REBUILD para mantener los índices en buen estado.
-- **Índices grandes**
-- **Índices que no se usan**
-- **Índices duplicados**
-- 
+```Markdown
+## Índices que no se usan
+## Índices duplicados
+## Identifica Índices grandes
+## Índices Perdidos:
+	Crear Índices en columnas frecuentemente consultadas: Crea índices en columnas que se usen en cláusulas WHERE, JOIN, y ORDER BY.
+## Evita índices en columnas con alta cardinalidad:
+	No crees índices en columnas con pocos valores únicos.
+## Evita tener demasiados índices innecesarios
+	 ya que pueden ralentizar las operaciones de inserción, actualización y eliminación.
+## Mantén índices actualizados:
+	Usa REORGANIZE y REBUILD para mantener los índices en buen estado.para que el optimizador de consultas pueda generar planes de ejecución óptimos. 
+## Evitar tablas sin índices clustered/agrupados.
+## No usar más índices que columnas.
+## Limitar la fragmentación de índices.
+```
+
+## Tablas 
+```Markdown
+	- Depuración a tablas pesadas o con muchos años
+
+	- Evita Tablas sin Index
+	- Evita Tablas sin PK
+
+************ Particionamiento ************ 
+	- Divide tablas grandes en particiones para mejorar el rendimiento de las consultas y la administración de datos.
+	- Almacenamiento en disco SSD.
+```
+
+
 ## Consulta Eficiente
 - **Usa JOINs en lugar de subconsultas**: Las subconsultas anidadas pueden ser ineficientes.
 - **Filtra temprano**: Aplica filtros en la cláusula WHERE para reducir el conjunto de datos lo antes posible.
 - **Selecciona solo las columnas necesarias**: Evita el uso de SELECT *.
 
+## Mantenimiento
+- **Backups**: Asegúrate de que las copias de seguridad automáticas estén configuradas adecuadamente.
+- **Mantenimiento de Índices**: Realiza mantenimientos periódicos para asegurar el buen estado de los índices.
+- **Estadísticas**: Asegúrate de que las estadísticas estén actualizadas para mejorar el rendimiento de las consultas.
 
-### Validaciones
-1. **Validar que todas las tablas tengan PK**: Cuando en una tabla se asigna un primary key, esto genera en automático un índice agrupado, por lo que ya no se puede generar otro. No pueden existir 2 PK.
-
-### Índices Eficientes
-2.1. Identifica las consultas más comunes y crea índices adecuados para ellas.
-2.2. Evita tener demasiados índices innecesarios, ya que pueden ralentizar las operaciones de inserción, actualización y eliminación.
-2.3. Mantén actualizadas las estadísticas de índice para que el optimizador de consultas pueda generar planes de ejecución óptimos.
-2.4. Columnas con más de 2 índices.
-2.5. Evitar tablas sin índices clustered/agrupados.
-2.6. No usar más índices que columnas.
-2.7. Limitar la fragmentación de índices.
-
-### Particionamiento de la Tabla
-Divide tablas grandes en particiones para mejorar el rendimiento de las consultas y la administración de datos.
-3. Fragmentación de índices.
-4. Consultas eficientes.
-5. Almacenamiento en disco SSD.
-6. Re index.
-7. Mantenimientos.
-
-## Generales
-- **Asegúrate de que las consultas usen índices adecuados.**
-- **Depuración a tablas pesadas o con muchos años**
  
-
+ 
 ## Usa herramientas de monitoreo
 - SQL Server Profiler o Extended Events.
 - Analiza los wait types en sys.dm_os_wait_stats.
+
+
+## Seguridad
+- **Permisos**: Revisa los permisos de los usuarios para asegurarte de que sólo tengan los necesarios.
+- **Auditoría**: Implementa auditorías para registrar actividades críticas en la base de datos.
+
+
+
 
 --- 
 # Parametros de optimización de la tabla sys.databases
@@ -105,7 +127,8 @@ Divide tablas grandes en particiones para mejorar el rendimiento de las consulta
   - Mejora la concurrencia al permitir lecturas consistentes sin bloqueos.
   - Reduce los bloqueos de lectura.
 - **Desventajas**:
-  - Puede aumentar el uso de espacio en el disco debido a la versión de filas.
+  - Sobrecarga de almacenamiento: Mantener versiones de fila puede aumentar el uso de espacio en tempdb, ya que es donde se almacenan las versiones anteriores de las filas.
+  -  no puede ser configurada a nivel de sesión.
 - **Recomendaciones**:
   - Útil en entornos con alta concurrencia de lecturas y escrituras.
   - 
@@ -282,7 +305,7 @@ El Buffer Pool Extension crea una extensión del buffer pool en un SSD, permitie
 
 
  
-### Max Server Memory
+# Max Server Memory
 Limita la cantidad máxima de memoria que SQL Server puede usar, asegurando que no consuma toda la memoria del sistema.
 #### Recomendado:
 1. **Servidores con Múltiples Aplicaciones**:
@@ -316,7 +339,7 @@ Limita la cantidad máxima de memoria que SQL Server puede usar, asegurando que 
   ```
 
 
-### Cost Threshold for Parallelism
+# Cost Threshold for Parallelism
 Define el costo mínimo de una consulta para que SQL Server considere ejecutarla en paralelo.
 #### Recomendado:
 1. **Consultas Complejas y Pesadas**:
@@ -350,7 +373,7 @@ Define el costo mínimo de una consulta para que SQL Server considere ejecutarla
   ```
 
 
-### Max Degree of Parallelism
+# Max Degree of Parallelism
 Establece el número máximo de procesadores que se pueden usar para ejecutar una sola consulta en paralelo.
 #### Recomendado:
 1. **Sistemas de Data Warehouse**:
@@ -386,7 +409,7 @@ Establece el número máximo de procesadores que se pueden usar para ejecutar un
 
 
 
-### Page Life Expectancy
+# Page Life Expectancy
 Mide el tiempo promedio que una página de datos permanece en la memoria antes de ser reemplazada, ayudando a evaluar el rendimiento de la memoria del servidor.
 #### Recomendado:
 1. **Sistemas con Alta Carga de Lectura**:
@@ -418,3 +441,61 @@ Mide el tiempo promedio que una página de datos permanece en la memoria antes d
 
 
 
+
+# TempDB Metadata Memory-Optimized
+
+#### ¿Para qué sirve?
+La característica **TempDB Metadata Memory-Optimized** en SQL Server 2019 y versiones posteriores está diseñada para mejorar el rendimiento de TempDB al mover las tablas de metadatos del sistema más utilizadas a tablas optimizadas para memoria . Esto reduce la contención en las páginas de asignación y mejora la eficiencia de las operaciones que involucran tablas temporales y otras estructuras de TempDB 
+
+#### Ventajas
+- **Reducción de Contención**: Al mover los metadatos a tablas optimizadas para memoria, se reduce la contención en las páginas de asignación (PFS, GAM, SGAM), mejorando el rendimiento en entornos con alta concurrencia 
+- **Mejora del Rendimiento**: Las tablas optimizadas para memoria ofrecen baja latencia y alta capacidad de procesamiento, lo que acelera las operaciones que dependen de TempDB 
+- **Eficiencia en Operaciones Temporales**: Mejora la eficiencia de las operaciones que crean, alteran y eliminan tablas temporales, así como otras estructuras de TempDB 
+
+#### Desventajas
+- **Consumo de Memoria**: Esta característica puede aumentar significativamente el consumo de memoria, lo que podría llevar a errores de falta de memoria si no se gestiona adecuadamente 
+- **Complejidad de Configuración**: Requiere una configuración cuidadosa y monitoreo constante para evitar problemas de rendimiento relacionados con el uso de memoria 
+- **Compatibilidad**: No todas las versiones de SQL Server soportan esta característica, y puede no ser adecuada para todos los entornos 
+
+#### Ejemplos Reales de Cuándo Usarlo
+- **Alta Concurrencia**: En entornos con alta concurrencia donde muchas sesiones están creando y manipulando tablas temporales simultáneamente 
+- **Operaciones Intensivas en TempDB**: Cuando se realizan operaciones intensivas en TempDB que causan contención en las páginas de asignación 
+
+#### Ejemplos Reales de Cuándo No Usarlo
+- **Limitaciones de Memoria**: En sistemas con limitaciones de memoria donde el aumento en el consumo de memoria podría causar problemas de rendimiento 
+- **Baja Concurrencia**: En entornos con baja concurrencia donde la contención en TempDB no es un problema significativo 
+
+### Cómo Habilitar TempDB Metadata Memory-Optimized
+Para habilitar esta característica, sigue estos pasos:
+
+1. **Modificar la Configuración del Servidor**:
+   ```sql
+   ALTER SERVER CONFIGURATION SET MEMORY_OPTIMIZED TEMPDB_METADATA = ON;
+   GO
+   ```
+
+2. **Reiniciar el Servicio de SQL Server**:
+   - Después de ejecutar el comando anterior, reinicia el servicio de SQL Server para que los cambios surtan efecto 
+
+3. **Verificar la Configuración**:
+   ```sql
+   SELECT SERVERPROPERTY('IsTempdbMetadataMemoryOptimized');
+   GO
+   ```
+ 
+
+
+
+
+
+# Bibliofrafía :
+```sql
+
+https://www.mssqltips.com/sqlservertip/7012/rebuild-tempdb-sql-server/
+https://www.mssqltips.com/sqlservertip/6230/memoryoptimized-tempdb-metadata-in-sql-server-2019/
+https://www.mssqltips.com/sqlservertip/6763/sql-server-tempdb-database-facts/
+https://www.mssqltips.com/sqlservertip/6493/sql-server-tempdb-tutorial/
+https://www.mssqltips.com/sqlservertip/3276/sql-server-alert-for-tempdb-growing-out-of-control/
+https://www.mssqltips.com/sqlservertip/1432/tempdb-configuration-best-practices-in-sql-server/
+https://www.mssqltips.com/sqlservertip/1388/properly-sizing-the-sql-server-tempdb-database/
+```
