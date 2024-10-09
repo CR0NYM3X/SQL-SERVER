@@ -133,6 +133,9 @@ COLLATE French_CI_AS ;
 
 ### Saber el tamaño utilizado de los archivos MDF, NDF y LDF de todas las base de datos
 ```SQL
+
+
+
 -- ******* OPCION #1 *******
 /* CREAMOS LA TABLA TEMPORAL DONDE SE INSERTARAN LOS REGISTROS DE TODAS LAS BASES DE DATOS */
 
@@ -188,6 +191,25 @@ FROM sys.database_files;
 
 -- ******* OPCION #3 *******
 DBCC SQLPERF(logspace);
+
+-- ******* OPCION #4 *******
+EXEC sp_helpfile;
+
+
+-- ******* OPCION #5 *******
+select  name,  fileid, filename,  
+ filegroup = filegroup_name(groupid),  
+ 'size' = convert(nvarchar(15), convert (bigint, size) * 8) + N' KB',  
+ 'maxsize' = (case maxsize when -1 then N'Unlimited'  
+   else  
+   convert(nvarchar(15), convert (bigint, maxsize) * 8) + N' KB' end),  
+ 'growth' = (case status & 0x100000 when 0x100000 then  
+  convert(nvarchar(15), growth) + N'%'  
+  else  
+  convert(nvarchar(15), convert (bigint, growth) * 8) + N' KB' end),  
+ 'usage' = (case status & 0x40 when 0x40 then 'log only' else 'data only' end)  
+ from sysfiles  
+ order by fileid  
 ```
 
 
