@@ -42,12 +42,13 @@ Tareas de Mantenimiento como INDEX  REORGANIZE y REBUILD <br><br>
 
 **Paso 5: Consideraciones Adicionales** <br>
 la TempDB es el encargado de realizar estas Operaciones Temporales: <br>
-
-Tablas Temporales <br>
-Variables de Tabla  <br>
-Cursors <br>
-Operaciones de Sort y Join <br> 
-
+```
+Tablas temporales globales (##temp) o locales (#temp), índices de tablas temporales, procedimientos almacenados temporales, variables de tabla, tablas devueltas en funciones con valores de tabla o cursores.
+Objetos del motor de base de datos para completar una consulta, como tablas de trabajo para almacenar resultados intermedios para spools o para ordenar a partir de consultas GROUP BY, ORDER BY o UNION específicas.
+Valores de versiones de filas para procesos de índice en línea, sesiones de conjuntos de resultados activos múltiples (MARS), activadores AFTER y operaciones de índice (SORT_IN_TEMPDB).
+Tablas de trabajo DBCC CHECKDB.
+Variables y parámetros de tipo de datos de objetos grandes (varchar(max), nvarchar(max), varbinary(max), texto, ntext, imagen, xml).
+```
 configuraciones  importantes : <br>
 Coloca TempDB en almacenamiento rápido (SSD o NVMe)  <br>
 Tamaño Inicial: <br>
