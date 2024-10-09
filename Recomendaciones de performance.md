@@ -213,6 +213,30 @@ El **Buffer Pool Extension** en SQL Server sirve para mejorar el rendimiento de 
 4. **Mejora del Rendimiento de Lectura**:
    - **Descripción**: Al tener una caché híbrida más grande (RAM + SSD), se mejora el rendimiento de lectura, ya que más datos pueden ser almacenados en la memoria caché rápida 
 
+### Cuándo Usar Buffer Pool Extension
+
+1. **Limitaciones de Memoria RAM**:
+   - Si tu servidor tiene limitaciones de memoria RAM y no puedes agregar más memoria física, habilitar BPE puede ayudar a mejorar el rendimiento al usar un SSD como extensión de la memoria 
+
+2. **Carga de Trabajo con Alta I/O Aleatoria**:
+   - En escenarios donde hay muchas operaciones de lectura/escritura aleatorias pequeñas, BPE puede reducir la latencia y mejorar el rendimiento general del sistema 
+
+3. **Presupuesto Limitado**:
+   - Si no puedes invertir en más memoria RAM debido a restricciones presupuestarias, usar un SSD para extender el buffer pool puede ser una solución más económica 
+
+### Cuándo No Usar Buffer Pool Extension
+
+1. **Disponibilidad de Memoria RAM Suficiente**:
+   - Si tu servidor ya tiene suficiente memoria RAM para manejar la carga de trabajo, habilitar BPE no proporcionará beneficios adicionales significativos 
+
+2. **Discos SSD de Baja Calidad**:
+   - Usar SSDs de baja calidad o con baja durabilidad puede resultar en un desgaste rápido del disco, lo que podría afectar negativamente el rendimiento y la fiabilidad del sistema 
+
+3. **Carga de Trabajo con Alta I/O Secuencial**:
+   - En escenarios donde las operaciones de I/O son principalmente secuenciales, los beneficios de BPE serán mínimos, ya que los discos mecánicos pueden manejar bien este tipo de carga 
+ 
+
+
 ### Funcionamiento
 
 El Buffer Pool Extension crea una extensión del buffer pool en un SSD, permitiendo que las páginas de datos que son expulsadas de la memoria RAM se almacenen en el SSD en lugar de ser leídas y escritas directamente en discos mecánicos. Esto ayuda a mantener un mayor número de páginas de datos en almacenamiento rápido, mejorando el rendimiento de las consultas y transacciones 
