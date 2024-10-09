@@ -38,7 +38,38 @@ TempDB es una base de datos del sistema en SQL Server que se utiliza para almace
 - Habilita el tempdb metadata memory-optimized en versiones 2019 en adelante 
 - **TempDB**: Asegúrate de que tempdb esté bien configurada, ya que afecta el rendimiento global. Considera múltiples archivos de datos para reducir la contención.
  
+1. **Pre-dimensionamiento de TempDB**
+   - **Descripción**: Asignar un tamaño inicial adecuado para evitar el crecimiento automático frecuente.
+   - **Acción**: Configurar el tamaño inicial de TempDB para que sea al menos el 25% del tamaño de la base de datos más grande
 
+2. **Ubicación en Discos Rápidos**
+   - **Descripción**: Colocar los archivos de TempDB en discos SSD para mejorar el rendimiento de E/S.
+   - **Acción**: Utilizar discos SSD dedicados para los archivos de datos y log de TempDB 
+
+3. **Separación de Archivos de Datos y Log**
+   - **Descripción**: Mantener los archivos de datos y log en discos separados para aprovechar las operaciones de E/S paralelas.
+   - **Acción**: Configurar discos separados para los archivos de datos y log 
+
+4. **Múltiples Archivos de Datos**
+   - **Descripción**: Crear múltiples archivos NDF de datos para distribuir la carga de trabajo.
+   - **Acción**: Crear un archivo de datos por cada núcleo lógico del procesador, hasta un máximo de 8
+
+5. **Configurar FileGrowth a un Valor Fijo Grande**
+   - **Descripción**: Establecer un valor fijo grande para el crecimiento automático de los archivos de TempDB.
+   - **Acción**: Configurar el crecimiento automático de los archivos de TempDB a un valor fijo grande para evitar la sobrecarga en la CPU 
+
+6. **Habilitar Trace Flags 1117 y 1118**
+   - **Descripción**: Reducir la contención en la metadata.
+   - **Acción**: Habilitar estos trace flags si se utiliza una versión anterior a SQL Server 2016 
+
+7. **Optimización de la Contención de Asignación**
+   - **Descripción**: Reducir la contención en las páginas de asignación (PFS, SGAM).
+   - **Acción**: Aumentar el número de archivos de datos y asegurarse de que tengan un tamaño igual
+
+8. **Monitoreo y Mantenimiento Regular**
+   - **Descripción**: Realizar un monitoreo constante del uso de TempDB y planificar tareas de mantenimiento.
+   - **Acción**: Utilizar herramientas de monitoreo como SQL Sentry para identificar y resolver problemas de rendimiento
+ 
 
 ```
 
