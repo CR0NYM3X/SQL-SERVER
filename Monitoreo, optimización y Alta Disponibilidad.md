@@ -1051,25 +1051,53 @@ FROM sys.databases;
 
 /******** Valores Comunes de log_reuse_wait_desc *************\
 
-NOTHING: No hay nada que impida la reutilización del espacio del registro de transacciones.
+ 
+1. **NOTHING**
+   - **Descripción**:  No hay nada que impida la reutilización del espacio del registro de transacciones.
+   - **Motivo**: El registro de transacciones está funcionando normalmente.
+   - **Solución**: No se requiere ninguna acción.
 
-CHECKPOINT: El espacio no puede ser reutilizado porque el último punto de control no ha sido escrito. Un punto de control asegura que todas las páginas sucias han sido escritas al disco y que las entradas de registro necesarias están en el disco.
+2. **CHECKPOINT**
+   - **Descripción**: El espacio no puede ser reutilizado porque el último punto de control no ha sido realizado o escrito. Un punto de control asegura que todas las páginas sucias han sido escritas al disco y que las entradas de registro necesarias están en el disco.
+   - **Motivo**: Las transacciones que se han confirmado o revertido después del último punto de control están impidiendo la truncación del registro.
+   - **Solución**: Asegúrate de que los puntos de control se están ejecutando correctamente. Puedes forzar un punto de control manualmente con el comando `CHECKPOINT` 
 
-LOG_BACKUP: El espacio no puede ser reutilizado porque no se ha realizado un backup del registro de transacciones. En el modelo de recuperación completa, el registro debe ser respaldado periódicamente para liberar espacio.
+3. **LOG_BACKUP**
+   - **Descripción**: El espacio no puede ser reutilizado porque no se ha realizado un backup del registro de transacciones. En el modelo de recuperación completa, el registro debe ser respaldado periódicamente para liberar espacio.
+   - **Motivo**: No se ha realizado una copia de seguridad del registro de transacciones recientemente.
+   - **Solución**: Realiza una copia de seguridad del registro de transacciones con el comando `BACKUP LOG`
 
-ACTIVE_BACKUP_OR_RESTORE: El espacio no puede ser reutilizado porque hay una operación de backup o restauración en progreso.
+4. **ACTIVE_BACKUP_OR_RESTORE**
+   - **Descripción**:  El espacio no puede ser reutilizado porque hay una operación de backup o restauración en progreso.
+   - **Motivo**: Una operación de copia de seguridad o restauración está en curso.
+   - **Solución**: Espera a que la operación de copia de seguridad o restauración se complete 
 
-ACTIVE_TRANSACTION: El espacio no puede ser reutilizado porque hay transacciones activas. Las transacciones deben completarse para que el espacio pueda ser reutilizado.
+5. **ACTIVE_TRANSACTION**
+   - **Descripción**: El espacio no puede ser reutilizado porque hay transacciones activas. Las transacciones deben completarse para que el espacio pueda ser reutilizado.
+   - **Motivo**: Hay una transacción larga o activa que impide la truncación del registro.
+   - **Solución**: Espera a que la transacción se complete o investiga y finaliza transacciones largas si es seguro hacerlo.
 
-DATABASE_MIRRORING: El espacio no puede ser reutilizado debido a la replicación de la base de datos. Esto sucede cuando la replicación no está al día.
+6. **DATABASE_MIRRORING**
+   - **Descripción**: El espacio no puede ser reutilizado debido a la replicación de la base de datos. Esto sucede cuando la replicación no está al día o  está esperando a que se sincronicen los registros de transacciones con la base de datos espejo.
+   - **Motivo**: La base de datos está configurada para mirroring y está esperando a que se sincronicen los registros.
+   - **Solución**: Asegúrate de que la base de datos espejo esté en línea y funcionando correctamente.
 
-REPLICATION: El espacio no puede ser reutilizado debido a la replicación transaccional. Esto ocurre cuando los registros no han sido entregados a todos los suscriptores.
+7. **REPLICATION** 
+   - **Descripción**:  El espacio no puede ser reutilizado debido a la replicación transaccional. Esto ocurre cuando los registros no han sido entregados a todos los suscriptores. está esperando a que se repliquen los registros de transacciones.
+   - **Motivo**: La base de datos está configurada para replicación y está esperando a que se repliquen los registros.
+   - **Solución**: Verifica que la replicación esté funcionando correctamente y que no haya retrasos en la distribución.
 
-AVAILABILITY_REPLICA: El espacio no puede ser reutilizado porque la réplica de disponibilidad en un grupo de disponibilidad AlwaysOn no está sincronizada.
+8. **AVAILABILITY_REPLICA**
+   - **Descripción**: El espacio no puede ser reutilizado porque la réplica de disponibilidad en un grupo de disponibilidad AlwaysOn no está sincronizada.  está esperando a que se sincronicen los registros con una réplica de disponibilidad.
+   - **Motivo**: La base de datos está en un grupo de disponibilidad AlwaysOn y está esperando a que se sincronicen los registros.
+   - **Solución**: Asegúrate de que las réplicas de disponibilidad estén en línea y sincronizadas correctamente 
 
-OTHER_TRANSIENT: Otras razones transitorias que no caen en las categorías anteriores.
-
-
+9. **OTHER_TRANSIENT**
+   - **Descripción**: El registro de transacciones está esperando por otra razón transitoria.
+   - **Motivo**: Puede ser causado por varias razones transitorias que no se ajustan a las categorías anteriores.
+   - **Solución**: Monitorea la situación para ver si se resuelve por sí sola o investiga más a fondo si persiste.
+ 
+ 
 
 ```
 
