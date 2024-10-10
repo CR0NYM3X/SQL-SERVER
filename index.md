@@ -4,14 +4,16 @@ SP_HELPINDEX 'TABLA'
 #  index faltantes que se deben de crear 
 https://www.mssqltips.com/sqlservertip/1634/find-sql-server-missing-indexes-with-dmvs/
 
-## Saber los indices y las columnas 
+## Saber los indices y las columnas y si tiene algun  filtro where
 ```sql
+
  SELECT
     i.name AS IndexName,
     i.type_desc AS IndexType,
     c.name AS ColumnName,
     ic.key_ordinal AS ColumnOrder,
-    ic.is_included_column AS IsIncludedColumn
+    ic.is_included_column AS IsIncludedColumn,
+	i.filter_definition AS FilterDefinition
 FROM
     sys.indexes AS i
     INNER JOIN sys.index_columns AS ic
