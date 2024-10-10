@@ -52,6 +52,38 @@ ORDER BY
     ImprovementMeasure DESC;
 
 
+
+SELECT
+    'CREATE INDEX IDX_EQ_' + REPLACE(REPLACE(REPLACE(mid.[statement], '[', ''), ']', ''), ' ', '_') + '_' + CAST(mig.index_handle AS VARCHAR) + 
+    ' ON ' + REPLACE(REPLACE(mid.[statement], '[', ''), ']', '') +
+    ' (' + ISNULL(mid.equality_columns, '') + ')' +
+    CASE WHEN mid.included_columns IS NOT NULL THEN ' INCLUDE (' + mid.included_columns + ')' ELSE '' END AS CreateEqualityIndexStatement,
+    
+    'CREATE INDEX IDX_INEQ_' + REPLACE(REPLACE(REPLACE(mid.[statement], '[', ''), ']', ''), ' ', '_') + '_' + CAST(mig.index_handle AS VARCHAR) + 
+    ' ON ' + REPLACE(REPLACE(mid.[statement], '[', ''), ']', '') +
+    ' (' + ISNULL(mid.inequality_columns, '') + ')' +
+    CASE WHEN mid.included_columns IS NOT NULL THEN ' INCLUDE (' + mid.included_columns + ')' ELSE '' END AS CreateInequalityIndexStatement,
+    
+    migs.avg_total_user_cost * migs.avg_user_impact AS ImprovementMeasure,
+    mid.[statement] AS TableName,
+    mid.equality_columns AS EqualityColumns,
+    mid.inequality_columns AS InequalityColumns,
+    mid.included_columns AS IncludedColumns,
+    migs.user_seeks,
+    migs.user_scans,
+    migs.last_user_seek,
+    migs.last_user_scan
+FROM
+    sys.dm_db_missing_index_group_stats AS migs
+    INNER JOIN sys.dm_db_missing_index_groups AS mig
+        ON migs.group_handle = mig.index_group_handle
+    INNER JOIN sys.dm_db_missing_index_details AS mid
+        ON mig.index_handle = mid.index_handle
+WHERE
+    mid.[statement] LIKE '%cenMaestroFamilias%'
+ORDER BY
+    ImprovementMeasure DESC;
+
  
 
 ImprovementMeasure: Calcula una medida de mejora potencial multiplicando el costo total promedio del usuario por el impacto promedio del usuario. Esto te da una idea de cuánto podría mejorar el rendimiento si se implementa el índice faltante.
