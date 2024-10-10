@@ -27,14 +27,17 @@ ORDER BY
     ImprovementMeasure DESC;
 
 
-ImprovementMeasure: Un valor calculado que te da una idea del impacto que tendría el índice recomendado. Se basa en el costo y el impacto estimado de usuario.
-TableName: El nombre de la tabla para la cual se recomienda el índice.
-EqualityColumns: Columnas que deben estar en la parte de igualdad del índice.
-InequalityColumns: Columnas que deben estar en la parte de desigualdad del índice.
-IncludedColumns: Columnas que deben ser incluidas en el índice.
-user_seeks y user_scans: Número de búsquedas y exploraciones de usuario que podrían beneficiarse del índice.
-last_user_seek y last_user_scan: Las últimas fechas en que se realizó una búsqueda o exploración que podría beneficiarse del índice.
+ 
 
+ImprovementMeasure: Calcula una medida de mejora potencial multiplicando el costo total promedio del usuario por el impacto promedio del usuario. Esto te da una idea de cuánto podría mejorar el rendimiento si se implementa el índice faltante.
+TableName: Muestra el nombre de la tabla donde se sugiere el índice faltante.
+EqualityColumns: Lista las columnas que se utilizan en las condiciones de igualdad (=) en las consultas que podrían beneficiarse del índice.
+InequalityColumns: Lista las columnas que se utilizan en las condiciones de desigualdad (<, >, !=, etc.) en las consultas que podrían beneficiarse del índice.
+IncludedColumns: Muestra las columnas que se incluirían en el índice para cubrir las consultas, mejorando así el rendimiento sin necesidad de acceder a la tabla base.
+user_seeks: Indica el número de veces que se ha buscado el índice faltante.
+user_scans: Indica el número de veces que se ha escaneado el índice faltante.
+last_user_seek: Muestra la última vez que se buscó el índice faltante.
+last_user_scan: Muestra la última vez que se escaneó el índice faltante.
 
 
 
