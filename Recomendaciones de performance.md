@@ -517,6 +517,132 @@ Para habilitar esta característica, sigue estos pasos:
 
 
 
+### 1. Pre-dimensionamiento de TempDB
+**Descripción**: Configurar el tamaño inicial de la base de datos TempDB para evitar el crecimiento automático frecuente.
+**Ventajas**:
+- Reduce la fragmentación.
+- Mejora el rendimiento al evitar el crecimiento automático frecuente.
+**Desventajas**:
+- Requiere estimar correctamente el tamaño necesario.
+**Ejemplo**:
+- **Cuándo configurarlo**: En sistemas con alta actividad en TempDB, como grandes operaciones de ordenamiento o uso intensivo de tablas temporales.
+- **Cuándo no configurarlo**: En sistemas pequeños o con baja actividad en TempDB.
+
+
+### 4. Múltiples Archivos de Datos
+**Descripción**: Dividir TempDB en múltiples archivos de datos para distribuir la carga de trabajo.
+**Ventajas**:
+- Mejora el rendimiento al reducir la contención en las páginas de asignación.
+- Distribuye la carga de I/O.
+**Desventajas**:
+- Requiere configuración y monitoreo adicionales.
+**Ejemplo**:
+- **Cuándo configurarlo**: En servidores con múltiples CPUs y alta concurrencia de transacciones.
+- **Cuándo no configurarlo**: En servidores con pocas CPUs o baja concurrencia.
+
+
+### 5. Configurar FileGrowth a un Valor Fijo Grande
+**Descripción**: Configurar el crecimiento automático de los archivos de TempDB a un valor fijo grande en lugar de un porcentaje.
+**Ventajas**:
+- Reduce la frecuencia de eventos de crecimiento.
+- Minimiza la fragmentación.
+**Desventajas**:
+- Puede requerir más espacio en disco.
+**Ejemplo**:
+- **Cuándo configurarlo**: En bases de datos con crecimiento rápido y constante.
+- **Cuándo no configurarlo**: En bases de datos pequeñas o con crecimiento lento.
+
+
+### 6. Habilitar Trace Flags 1117 y 1118
+**Descripción**: 
+- **Trace Flag 1117**: Hace que todos los archivos de TempDB crezcan al mismo tiempo.
+- **Trace Flag 1118**: Fuerza la asignación de páginas en extensiones uniformes en lugar de mixtas.
+**Ventajas**:
+- Reduce la contención en TempDB.
+- Mejora el rendimiento de asignación de páginas.
+**Desventajas**:
+- No es necesario en SQL Server 2016 y versiones posteriores, ya que estas configuraciones son predeterminadas.
+**Ejemplo**:
+- **Cuándo configurarlo**: En versiones de SQL Server anteriores a 2016.
+- **Cuándo no configurarlo**: En SQL Server 2016 y versiones posteriores.
+
+
+### 7. Optimización de la Contención de Asignación
+**Descripción**: Técnicas para reducir la contención en las páginas de asignación de TempDB.
+**Ventajas**:
+- Mejora el rendimiento en entornos con alta concurrencia.
+- Reduce los bloqueos y esperas en TempDB.
+**Desventajas**:
+- Requiere monitoreo y ajustes continuos.
+**Ejemplo**:
+- **Cuándo configurarlo**: En sistemas con alta concurrencia y uso intensivo de TempDB.
+- **Cuándo no configurarlo**: En sistemas con baja concurrencia y uso moderado de TempDB.
+
+
+
+
+--------------------------------
+
+
+### 1. Pre-dimensionamiento de TempDB
+**Configuración**:
+1. Abre SQL Server Management Studio (SSMS).
+2. Conéctate a tu instancia de SQL Server.
+3. Ejecuta el siguiente script para establecer el tamaño inicial de los archivos de TempDB:
+   ```sql
+   USE master;
+   GO
+   ALTER DATABASE tempdb 
+   MODIFY FILE (NAME = tempdev, SIZE = 1024MB); -- Ajusta el tamaño según tus necesidades
+   ALTER DATABASE tempdb 
+   MODIFY FILE (NAME = templog, SIZE = 512MB); -- Ajusta el tamaño según tus necesidades
+   GO
+   ```
+
+### 4. Múltiples Archivos de Datos
+**Configuración**:
+1. Abre SSMS y conéctate a tu instancia de SQL Server.
+2. Ejecuta el siguiente script para agregar múltiples archivos de datos a TempDB:
+   ```sql
+   USE master;
+   GO
+   ALTER DATABASE tempdb 
+   ADD FILE (NAME = tempdev2, FILENAME = 'C:\TempDB\tempdev2.ndf', SIZE = 1024MB);
+   ALTER DATABASE tempdb 
+   ADD FILE (NAME = tempdev3, FILENAME = 'C:\TempDB\tempdev3.ndf', SIZE = 1024MB);
+   ALTER DATABASE tempdb 
+   ADD FILE (NAME = tempdev4, FILENAME = 'C:\TempDB\tempdev4.ndf', SIZE = 1024MB);
+   GO
+   ```
+
+### 5. Configurar FileGrowth a un Valor Fijo Grande
+**Configuración**:
+1. Abre SSMS y conéctate a tu instancia de SQL Server.
+2. Ejecuta el siguiente script para establecer el crecimiento automático a un valor fijo:
+   ```sql
+   USE master;
+   GO
+   ALTER DATABASE tempdb 
+   MODIFY FILE (NAME = tempdev, FILEGROWTH = 256MB); -- Ajusta el valor según tus necesidades
+   ALTER DATABASE tempdb 
+   MODIFY FILE (NAME = templog, FILEGROWTH = 128MB); -- Ajusta el valor según tus necesidades
+   GO
+   ```
+
+### 6. Habilitar Trace Flags 1117 y 1118
+**Configuración**:
+1. Abre SSMS y conéctate a tu instancia de SQL Server.
+2. Ejecuta el siguiente script para habilitar los trace flags:
+   ```sql
+   DBCC TRACEON (1117, -1);
+   DBCC TRACEON (1118, -1);
+   GO
+   ```
+3. Para hacer estos cambios permanentes, agrega los trace flags al parámetro de inicio del servicio SQL Server:
+   - Abre SQL Server Configuration Manager.
+   - Selecciona tu instancia de SQL Server y abre las propiedades.
+   - En la pestaña **Startup Parameters**, agrega `-T1117` y `-T1118`.
+ 
 
 
 # Bibliofrafía :
@@ -530,3 +656,4 @@ https://www.mssqltips.com/sqlservertip/3276/sql-server-alert-for-tempdb-growing-
 https://www.mssqltips.com/sqlservertip/1432/tempdb-configuration-best-practices-in-sql-server/
 https://www.mssqltips.com/sqlservertip/1388/properly-sizing-the-sql-server-tempdb-database/
 ```
+
