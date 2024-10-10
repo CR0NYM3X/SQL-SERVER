@@ -4,6 +4,29 @@ SP_HELPINDEX 'TABLA'
 #  index faltantes que se deben de crear 
 https://www.mssqltips.com/sqlservertip/1634/find-sql-server-missing-indexes-with-dmvs/
 
+## Saber los indices y las columnas 
+```sql
+ SELECT
+    i.name AS IndexName,
+    i.type_desc AS IndexType,
+    c.name AS ColumnName,
+    ic.key_ordinal AS ColumnOrder,
+    ic.is_included_column AS IsIncludedColumn
+FROM
+    sys.indexes AS i
+    INNER JOIN sys.index_columns AS ic
+        ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+    INNER JOIN sys.columns AS c
+        ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+WHERE
+    i.object_id = OBJECT_ID('cenMaestroCodigo')
+ORDER BY
+    i.name,
+    ic.key_ordinal;
+```
+
+
+## saber los indices faltantes 
 ```sql
 SELECT
     migs.avg_total_user_cost * migs.avg_user_impact AS ImprovementMeasure,
@@ -122,6 +145,14 @@ Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente l
 Índice filtrado (Filtered Index): Este tipo de índice se crea con una cláusula WHERE para filtrar las filas que se incluirán en el índice. Pueden mejorar el rendimiento de las consultas al reducir el tamaño del índice y enfocarse en un subconjunto específico de datos.
 
 Índice de columnas incluidas (Included Column Index): Este tipo de índice permite incluir columnas adicionales (no claves) en el índice para cubrir consultas y mejorar el rendimiento sin agregarlas a la clave del índice.
+
+Índice sin INCLUDE: El primer índice mejora el rendimiento de la consulta al filtrar y ordenar por CustomerID y OrderDate. Sin embargo, si la consulta necesita otras columnas (OrderID, TotalAmount), SQL Server tendrá que acceder a la tabla base para obtener esos datos.
+
+
+SELECT OrderID, OrderDate, TotalAmount FROM Orders WHERE CustomerID = 123 ORDER BY OrderDate;
+CREATE INDEX IDX_Orders_CustomerID_OrderDate ON Orders (CustomerID, OrderDate) INCLUDE (OrderID, OrderDate, TotalAmount);
+Índice con INCLUDE: El  índice cubre todas las columnas necesarias (OrderID, OrderDate, TotalAmount), lo que significa que SQL Server puede obtener todos los datos necesarios directamente del índice sin acceder a la tabla base, mejorando así el rendimiento.
+
 ```
  
 
