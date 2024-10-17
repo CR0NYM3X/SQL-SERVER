@@ -86,6 +86,14 @@ EXEC xp_cmdshell 'whoami';
 
 ---- BIBLIOGRAFÍAS 
  https://www.sqlshack.com/xp_cmdshell-and-sp_xp_cmdshell_proxy_account-stored-procedures-in-sql-server/
+
+
+
+/* for mount points, something like this */
+EXECUTE sys.xp_cmdshell 'wmic volume get name, freespace, capacity, label'
+/* the base wmi query that does not support mount points */
+EXECUTE xp_cmdshell 'wmic logicaldisk get name,freespace,size,volumename,blocksize'
+
 ```
 
 
