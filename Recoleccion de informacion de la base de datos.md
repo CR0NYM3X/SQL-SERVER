@@ -56,13 +56,18 @@ Select-Object DeviceID, VolumeName,
 @{Name="Size(GB)";Expression={"{0:N2}" -f ($_.size / 1GB)}},
 @{Name="FreeSpace(GB)";Expression={"{0:N2}" -f ($_.freespace / 1GB)}}
 
+Get-PSDrive -PSProvider FileSystem | Select-Object Name, @{Name="TotalSpaceGB";Expression={[math]::round($_.Used / 1GB, 2)}}, @{Name="FreeSpaceGB";Expression={[math]::round($_.Free / 1GB, 2)}}
+
+
+
 ---- cmd windows  
 wmic logicaldisk get deviceid, size, freespace, volumename /format:list
 wmic cpu get name, caption, maxclockspeed, numberofcores, numberoflogicalprocessors
 ```
 
 ### Saber el tamaños de los discos de windows  con sql server
-```SQL 
+```SQL
+xp_fixeddrives
 
 /* Te muesta mas detallada la info de los discos */
 select DISTINCT  
