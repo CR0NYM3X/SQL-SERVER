@@ -162,3 +162,7 @@ C:\Program Files\Microsoft SQL Server\110\Setup Bootstrap\Log
 
 
 ```
+
+
+
+ EXEC xp_logininfo '[sysappdynamics]', 'all'
