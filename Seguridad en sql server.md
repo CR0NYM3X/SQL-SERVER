@@ -84,7 +84,7 @@ EXEC sp_xp_cmdshell_proxy_account 'dominio\user_admin', '123123';
 EXEC xp_cmdshell 'whoami';
 
 
----- BIBLIOGRADÍAS 
+---- BIBLIOGRAFÍAS 
  https://www.sqlshack.com/xp_cmdshell-and-sp_xp_cmdshell_proxy_account-stored-procedures-in-sql-server/
 ```
 
