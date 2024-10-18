@@ -53,6 +53,11 @@ ORDER BY
 
 
 
+
+
+ 
+
+select 		db_name,	table_name ,create_index_statement from (
 select  'CREATE INDEX idx_' + table_name  + '_' + REPLACE(REPLACE( CASE 
         WHEN EqualityColumns <> ''  THEN  EqualityColumns 
         ELSE InequalityColumns
@@ -97,8 +102,12 @@ FROM
 
 ) as a 
 where ( not InequalityColumns like '%$%' or  not EqualityColumns like '%$%'    ) 
-    order by db_name desc , table_name , ImprovementMeasure DESC;
+and not db_name in('master','msdb','tempdb','model','Temporales') 
+  
+) as b group by create_index_statement,		db_name,	table_name
 
+order by db_name desc , table_name  ;
+ 
  
 
 ImprovementMeasure: Calcula una medida de mejora potencial multiplicando el costo total promedio del usuario por el impacto promedio del usuario. Esto te da una idea de cuánto podría mejorar el rendimiento si se implementa el índice faltante.
