@@ -53,22 +53,37 @@ ORDER BY
 
 
 
-SELECT
-    'CREATE INDEX IDX_EQ_' + REPLACE(REPLACE(REPLACE(mid.[statement], '[', ''), ']', ''), ' ', '_') + '_' + CAST(mig.index_handle AS VARCHAR) + 
-    ' ON ' + REPLACE(REPLACE(mid.[statement], '[', ''), ']', '') +
-    ' (' + ISNULL(mid.equality_columns, '') + ')' +
-    CASE WHEN mid.included_columns IS NOT NULL THEN ' INCLUDE (' + mid.included_columns + ')' ELSE '' END AS CreateEqualityIndexStatement,
+select  'CREATE INDEX idx_' + table_name  + '_' + REPLACE(REPLACE( CASE 
+        WHEN EqualityColumns <> ''  THEN  EqualityColumns 
+        ELSE InequalityColumns
+    END , ',', '_'), ' ', '') + 
+    ' ON ' + table_name + 
+    ' (' +        
+	 CASE 
+        WHEN EqualityColumns <> '' or EqualityColumns is not null THEN  EqualityColumns 
+        ELSE '' 
+    END 
+	+ 
+    CASE 
+		WHEN EqualityColumns = '' or EqualityColumns is null then InequalityColumns
+        WHEN InequalityColumns <> ''   THEN ', ' + InequalityColumns 
+		ELSE '' 
+    END + 
+
+	')' + 
     
-    'CREATE INDEX IDX_INEQ_' + REPLACE(REPLACE(REPLACE(mid.[statement], '[', ''), ']', ''), ' ', '_') + '_' + CAST(mig.index_handle AS VARCHAR) + 
-    ' ON ' + REPLACE(REPLACE(mid.[statement], '[', ''), ']', '') +
-    ' (' + ISNULL(mid.inequality_columns, '') + ')' +
-    CASE WHEN mid.included_columns IS NOT NULL THEN ' INCLUDE (' + mid.included_columns + ')' ELSE '' END AS CreateInequalityIndexStatement,
-    
+	CASE 
+        WHEN IncludedColumns <> '' THEN ' INCLUDE (' + IncludedColumns + ')' 
+        ELSE '' 
+    END AS create_index_statement,* from 
+(SELECT
     migs.avg_total_user_cost * migs.avg_user_impact AS ImprovementMeasure,
-    mid.[statement] AS TableName,
-    mid.equality_columns AS EqualityColumns,
-    mid.inequality_columns AS InequalityColumns,
-    mid.included_columns AS IncludedColumns,
+    -- mid.[statement] ,
+	db_name(database_id) as db_name,
+	OBJECT_NAME(mid.object_id, mid.database_id) AS table_name,
+    replace(replace(mid.equality_columns,'[',''),']','') AS EqualityColumns,
+    replace(replace(mid.inequality_columns,'[',''),']','') AS InequalityColumns,
+    replace(replace(mid.included_columns,'[',''),']','') AS IncludedColumns,
     migs.user_seeks,
     migs.user_scans,
     migs.last_user_seek,
@@ -79,9 +94,9 @@ FROM
         ON migs.group_handle = mig.index_group_handle
     INNER JOIN sys.dm_db_missing_index_details AS mid
         ON mig.index_handle = mid.index_handle
-WHERE
-    mid.[statement] LIKE '%cenMaestroFamilias%'
-ORDER BY
+
+) as a 
+where ( not InequalityColumns like '%$%' or  not EqualityColumns like '%$%'    ) 
     ImprovementMeasure DESC;
 
  
