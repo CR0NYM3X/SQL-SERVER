@@ -183,9 +183,19 @@ Indice de clúster (Clustered Index): Este tipo de índice ordena físicamente l
 Índice sin INCLUDE: El primer índice mejora el rendimiento de la consulta al filtrar y ordenar por CustomerID y OrderDate. Sin embargo, si la consulta necesita otras columnas (OrderID, TotalAmount), SQL Server tendrá que acceder a la tabla base para obtener esos datos.
 
 
-SELECT OrderID, OrderDate, TotalAmount FROM Orders WHERE CustomerID = 123 ORDER BY OrderDate;
-CREATE INDEX IDX_Orders_CustomerID_OrderDate ON Orders (CustomerID, OrderDate) INCLUDE (OrderID, OrderDate, TotalAmount);
-Índice con INCLUDE: El  índice cubre todas las columnas necesarias (OrderID, OrderDate, TotalAmount), lo que significa que SQL Server puede obtener todos los datos necesarios directamente del índice sin acceder a la tabla base, mejorando así el rendimiento.
+SELECT clm1, clm2, clm3
+FROM tb1
+WHERE col4 = 'comida'
+AND col5 != 'rojo'
+ORDER BY clm3;
+
+CREATE INDEX idx_tb1_col4_col5_clm3
+ON tb1 (col4, col5, clm3)
+INCLUDE (clm1, clm2);
+
+
+Columnas que estan en el where y order by deben de estar en el index y las columnas que se muestran con el select dentro del include del index 
+lo que significa que SQL Server puede obtener todos los datos necesarios directamente del índice sin acceder a la tabla base, mejorando así el rendimiento.
 
 ```
  
