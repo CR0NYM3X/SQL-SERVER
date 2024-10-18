@@ -67,7 +67,7 @@ wmic cpu get name, caption, maxclockspeed, numberofcores, numberoflogicalprocess
 
 ### Saber el tamaños de los discos de windows  con sql server
 ```SQL
-xp_fixeddrives
+ 
 
 /* Te muesta mas detallada la info de los discos */
 select DISTINCT  
@@ -94,6 +94,14 @@ order by Porcentaje_Usado desc
 
 /*  nombre del disco, el espacio total, el espacio libre */ 
 xp_fixeddrives
+
+SELECT 
+	fixed_drive_path
+    ,cast(free_space_in_bytes / (1024.0 * 1024.0 * 1024.0)  as decimal(10,2)) 'Free Space (GB)'
+FROM sys.dm_os_enumerate_fixed_drives;
+
+select * from DISKINFO
+ 
 
 ```
 
