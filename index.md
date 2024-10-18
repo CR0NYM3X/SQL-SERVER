@@ -97,7 +97,7 @@ FROM
 
 ) as a 
 where ( not InequalityColumns like '%$%' or  not EqualityColumns like '%$%'    ) 
- order by    ImprovementMeasure DESC;
+  order by db_name desc, ImprovementMeasure DESC;
 
  
 
