@@ -65,6 +65,13 @@ SELECT name,password_hash,default_database_name, is_expiration_checked, is_polic
 ---  
  select * from sys.syslogins
 
+
+
+ SELECT uid,name,hasdbaccess,islogin,isntname,isntgroup,isntuser,issqluser,isaliased,issqlrole,isapprole
+FROM sysusers
+
+SELECT * FROM master.sys.sysusers WHERE islogin = 1
+
 ```
 
 ### ver hash password de todos login sql, no de los windows login, para pasar a otro server
