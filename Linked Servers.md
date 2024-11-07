@@ -48,6 +48,9 @@ remoto y tener permisos apropiados para acceder a las bases de datos o tablas re
 **`sp_serveroption`**  Este procedimiento se utiliza para configurar las opciones de configuración del servidor vinculado. Se pueden establecer diferentes opciones, como habilitar la ejecución remota 
 
 ```
+--- EXEC sp_addserver @server = 'ServidorRemoto', @local = 'local';
+
+
 **************  CREANDO EL SERVER LINK **************
 EXEC master.dbo.sp_addlinkedserver 
 	@server = N'MY_LINKEO_TEST1', 
