@@ -270,55 +270,6 @@ https://www.stigviewer.com/stig/ms_sql_server_2016_instance/2018-03-09/finding/V
 
 
 
-# Ejecucion de bibliotecas de objetos de windows 
-**sp_OACreate, sp_OAMethod, sp_OAGetProperty:** Estos procedimientos almacenados están asociados con la ejecución de objetos COM externos desde SQL Server y pueden ser utilizados para realizar acciones peligrosas si no se controlan adecuadamente.
-```
-DECLARE @FileSystemObject INT;
-DECLARE @FileHandler INT;
-DECLARE @FilePath NVARCHAR(255) = 'C:\Ruta\Del\Archivo.txt';
-DECLARE @FileContent NVARCHAR(MAX) = 'Contenido del archivo';
-
--- Crear una instancia del objeto Scripting.FileSystemObject
-/*
- muchas utilidades disponibles en el entorno de scripting de Windows. Es una biblioteca de objetos utilizada para interactuar con el sistema de archivos desde scripts y aplicaciones en Windows
-*/
-EXEC sp_OACreate 'Scripting.FileSystemObject', @FileSystemObject OUTPUT;
-
--- Crear un archivo usando el objeto FileSystemObject
-EXEC sp_OAMethod @FileSystemObject, 'CreateTextFile', @FileHandler OUTPUT, @FilePath, 2, TRUE;
-
--- Escribir contenido en el archivo
-EXEC sp_OAMethod @FileHandler, 'Write', NULL, @FileContent;
-
--- Cerrar el archivo
-EXEC sp_OAMethod @FileHandler, 'Close';
-
--- Liberar la instancia del objeto FileSystemObject
-EXEC sp_OADestroy @FileSystemObject;
-```
-
-
-**Deshabilitar o Habilitar estas opciones**
-```
-********** VER SI ESTAN HABILITADOS **********
-EXEC sp_configure 'show advanced options', 1;
-RECONFIGURE;
-EXEC sp_configure 'Ole Automation Procedures'; --- si la columna config_value y run_value estan en 0 estan desabilitados, si es 1 esta habilitado
-
-
-********** HABILITADOR EL PROCEDIMIENTO **********
-EXEC sp_configure 'show advanced options', 1;
-RECONFIGURE;
-EXEC sp_configure 'Ole Automation Procedures', 1;
-RECONFIGURE;
-
-
-********** DESHABILITAR EL PROCEDIMIENTO **********
-EXEC sp_configure 'Ole Automation Procedures', 0;
-RECONFIGURE;
-```
-
-
 # Ejecuta una query asiendote pasar por un usuario 
 Estamos ejecutando una query como si estuvieramos conectados con este usuario
 ```
@@ -492,14 +443,6 @@ https://www.c-sharpcorner.com/article/using-openjson-function-in-sql-server/
 
 
 
-**Deshabilitar o Habilitar estas opciones**
-```
-REVOKE EXECUTE ON sp_addextendedproc FROM [NombreUsuario];
-```
-**link de ejemplo para agregar  procedimientos almecenados **
-https://github.com/MicrosoftDocs/sql-docs/blob/live/docs/relational-databases/extended-stored-procedures-programming/adding-an-extended-stored-procedure-to-sql-server.md
-
-
 
 
 
@@ -648,6 +591,75 @@ sp_dropextendedproc 'xp_hello', 'c:\xp_hello.dll';
 DECLARE @txt varchar(33);  
 EXEC xp_Hello @txt OUTPUT;  
 ```
+
+**Deshabilitar o Habilitar estas opciones**
+```
+REVOKE EXECUTE ON sp_addextendedproc FROM [NombreUsuario];
+```
+**link de ejemplo para agregar  procedimientos almecenados **
+https://github.com/MicrosoftDocs/sql-docs/blob/live/docs/relational-databases/extended-stored-procedures-programming/adding-an-extended-stored-procedure-to-sql-server.md
+
+
+ 
+
+#  OLE Automation - Ejecucion de bibliotecas de objetos de windows
+**la creación de objetos de automatización OLE debe estar prohibida** sugiere una medida de seguridad importante en SQL Server. OLE Automation permite a SQL Server interactuar con objetos COM (Component Object Model) fuera del motor de base de datos, lo cual puede abrir puertas a varios riesgos de seguridad.
+ 
+**Razones para Prohibir la Creación de Objetos OLE:**
+	- Seguridad: Permitir OLE Automation puede exponer el servidor a ataques, ya que se puede ejecutar código arbitrario.
+	- Estabilidad: Puede afectar la estabilidad del servidor si el objeto COM invocado tiene errores o se comporta de manera inesperada.
+ 
+**Ejemplo de uso**
+```SQL
+**sp_OACreate, sp_OAMethod, sp_OAGetProperty:** Estos procedimientos almacenados están asociados con la ejecución de objetos COM externos desde SQL Server
+ y pueden ser utilizados para realizar acciones peligrosas si no se controlan adecuadamente.
+--- Creara el archivo Archivo.txt y escribira en el archivo 
+
+DECLARE @FileSystemObject INT;
+DECLARE @FileHandler INT;
+DECLARE @FilePath NVARCHAR(255) = 'C:\Ruta\Del\Archivo.txt';
+DECLARE @FileContent NVARCHAR(MAX) = 'Contenido del archivo';
+
+-- Crear una instancia del objeto Scripting.FileSystemObject
+/*
+ muchas utilidades disponibles en el entorno de scripting de Windows. Es una biblioteca de objetos utilizada para interactuar con el sistema de archivos desde scripts y aplicaciones en Windows
+*/
+EXEC sp_OACreate 'Scripting.FileSystemObject', @FileSystemObject OUTPUT;
+
+-- Crear un archivo usando el objeto FileSystemObject
+EXEC sp_OAMethod @FileSystemObject, 'CreateTextFile', @FileHandler OUTPUT, @FilePath, 2, TRUE;
+
+-- Escribir contenido en el archivo
+EXEC sp_OAMethod @FileHandler, 'Write', NULL, @FileContent;
+
+-- Cerrar el archivo
+EXEC sp_OAMethod @FileHandler, 'Close';
+
+-- Liberar la instancia del objeto FileSystemObject
+EXEC sp_OADestroy @FileSystemObject;
+```
+
+
+**Deshabilitar o Habilitar estas opciones**
+```
+********** VER SI ESTAN HABILITADOS **********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'Ole Automation Procedures'; --- si la columna config_value y run_value estan en 0 estan desabilitados, si es 1 esta habilitado
+
+
+********** HABILITADOR EL PROCEDIMIENTO **********
+EXEC sp_configure 'show advanced options', 1;
+RECONFIGURE;
+EXEC sp_configure 'Ole Automation Procedures', 1;
+RECONFIGURE;
+
+
+********** DESHABILITAR EL PROCEDIMIENTO **********
+EXEC sp_configure 'Ole Automation Procedures', 0;
+RECONFIGURE;
+```
+
 
 
 
