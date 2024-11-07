@@ -492,17 +492,6 @@ https://www.c-sharpcorner.com/article/using-openjson-function-in-sql-server/
 
 
 
-# Agregar procedimientos almecenados extendidos desde un archivo dll
-permite agregar procedimientos almacenados extendidos a SQL Server. Estos procedimientos almacenados pueden ser archivos DLL que se registran en SQL Server y se pueden ejecutar desde consultas SQL.
-```
---Register the function (xp_hello)  
-sp_addextendedproc 'xp_hello', 'c:\xp_hello.dll';  
-  
---The following will succeed in calling xp_hello  
-DECLARE @txt varchar(33);  
-EXEC xp_Hello @txt OUTPUT;  
-```
-
 **Deshabilitar o Habilitar estas opciones**
 ```
 REVOKE EXECUTE ON sp_addextendedproc FROM [NombreUsuario];
@@ -620,8 +609,82 @@ EXEC sp_configure 'clr enabled';
 EXEC sp_configure 'clr enabled' , '0';  
 RECONFIGURE;    
 ```
+**Opción SAFE_ACCESS**
+Características Principales:
+- Permisos Limitados: Los ensamblados con SAFE_ACCESS no pueden acceder a recursos externos, como archivos del sistema o bases de datos externas.
+- Seguridad: Proporciona un nivel alto de seguridad, ya que los ensamblados no pueden realizar operaciones que podrían comprometer la integridad del sistema.
+- Recomendado: Es la configuración recomendada para ensamblados que no necesitan interactuar con recursos externos
+
+```SQL 
+CREATE ASSEMBLY MiEnsamblado
+FROM 'ruta_al_archivo.dll'
+WITH PERMISSION_SET = SAFE;  
+```
 
 https://www.mssqltips.com/sqlservertip/6104/how-to-enable-sql-server-clr-integration-using-tsql/
+
+
+
+# Agregar e un archivo dll
+permite agregar procedimientos almacenados extendidos a SQL Server. Estos procedimientos almacenados pueden ser archivos DLL que se registran en SQL Server y se pueden ejecutar desde consultas SQL.
+```sql
+--- Guardar el binario en la ruta :
+C:\ProgramFiles\Microsoft SQL server\MSSQL15.MSSQLSERVER\MSQL\Binn
+
+EXEC sp_configure 'clr enabled';  
+EXEC sp_configure 'clr enabled' , '1';  
+RECONFIGURE;    
+
+--Register the function (xp_hello)  
+sp_addextendedproc 'xp_hello', 'c:\xp_hello.dll';
+
+--- darle permisos de ejecucion en el procedimiento 
+grant execute on xp_hello to [User_test];
+
+--- elimina la extencion
+sp_dropextendedproc 'xp_hello', 'c:\xp_hello.dll';
+  
+--The following will succeed in calling xp_hello  
+DECLARE @txt varchar(33);  
+EXEC xp_Hello @txt OUTPUT;  
+```
+
+
+
+
+# cross db ownership chaining 
+Habilitar esta característica puede exponer riesgos de seguridad si no se maneja adecuadamente. es una configuración de seguridad en SQL Server que permite que las bases de datos se confíen mutuamente en términos de permisos de objetos. Cuando está habilitado, un objeto en una base de datos puede acceder a objetos en otra base de datos si existe una cadena de propiedad entre ellas
+
+**Habilitar estas opciones**
+```SQL
+USE DB1; CREATE TABLE MiTabla ( Id INT PRIMARY KEY, Nombre NVARCHAR(100);
+USE DB2; CREATE VIEW MiVista AS SELECT * FROM DB1.dbo.MiTabla;
+
+sp_configure 'cross db ownership chaining', 1;
+RECONFIGURE;
+
+ALTER DATABASE DB1 SET DB_CHAINING ON;
+ALTER DATABASE DB2 SET DB_CHAINING ON;
+
+
+USE DB2;
+SELECT * FROM MiVista;
+```
+
+**Deshabilitar estas opciones**
+¿Por qué Deshabilitarlo? 
+Deshabilitar esta configuración puede mejorar la seguridad, ya que evita que objetos en diferentes bases de datos accedan entre sí sin una relación de propiedad clara2. Esto puede prevenir ciertos tipos de ataques o accesos no autorizados. pero también puede afectar la funcionalidad de algunas aplicaciones que dependen de esta característica
+
+```SQL
+EXEC sp_configure 'show advanced options', 1;
+sp_configure 'cross db ownership chaining', 0;
+RECONFIGURE;
+
+```
+
+
+
+
 
 
 # Bibliografías 
