@@ -696,8 +696,24 @@ RECONFIGURE;
 
 
 
+# Consulta de parametros de seguridad 
+```
+SELECT *
+FROM sys.configurations
+WHERE name in( 
+'c2 audit mode'
+,'Ad Hoc Distributed Queries'
+,'clr enabled'
+,'cross db ownership chaining'
+,'Database Mail XPs'
+,'Ole Automation Procedures'
+,'remote access'
+,'remote admin connections'
+,'scan for startup procs'
+, 'default trace enabled'
+) order by name 
 
-
+```
 
 # Bibliografías 
 ```
@@ -777,3 +793,8 @@ Proteger SQL Server: https://learn.microsoft.com/es-es/sql/relational-databases/
 
 
 ```
+
+
+
+
+
