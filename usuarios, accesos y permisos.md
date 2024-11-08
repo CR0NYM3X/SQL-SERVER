@@ -42,6 +42,9 @@ select CONNECTIONPROPERTY('local_net_address') --- ver la ip que usa tu usuario
 SELECT * FROM sys.dm_exec_connections WHERE session_id = @@SPID ---  ver la ip que usa tu usuario
 
 OBJECT_NAME(major_id) AS object_name
+
+SELECT name, is_disabled FROM sys.server_principals WHERE sid = 0x01; -- Verifica el estado del usuario sa
+
 ```
 
 
