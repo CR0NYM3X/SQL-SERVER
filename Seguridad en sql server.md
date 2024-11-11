@@ -273,6 +273,15 @@ https://www.stigviewer.com/stig/ms_sql_server_2016_instance/2018-03-09/finding/V
 # Ejecuta una query asiendote pasar por un usuario 
 Estamos ejecutando una query como si estuvieramos conectados con este usuario
 ```
+
+GRANT IMPERSONATE ON DATABASE::test_db TO user_A
+
+
+USE master;  
+GRANT IMPERSONATE ON LOGIN::user_A to USER_B;  
+GRANT IMPERSONATE ON USER::user_A to USER_B;  
+
+
 EXECUTE AS USER = 'MYDOMINIO\USER_ADMINS123';
 
 	SELECT SUSER_SNAME(),DB_NAME(),entity_name,permission_name FROM fn_my_permissions(NULL, 'DATABASE') 
@@ -712,6 +721,41 @@ WHERE name in(
 ,'scan for startup procs'
 , 'default trace enabled'
 ) order by name 
+
+
+
+
+
+SELECT name, is_auto_close_on FROM sys.databases 
+
+ALTER DATABASE test_db SET AUTO_CLOSE OFF;
+
+
+--------
+
+Habilitar la función de “protección ampliada” para fortalecer la seguridad en la capa de red.
+
+----
+Los Grupos “BUILTIN” y locales de windows no deben usarse para  inicio de sesión de SQL Server, es necesario crear grupos  alternativos en AD para el inicio de sesión en SQL Server.
+
+
+------
+
+
+Después del alta de la cuenta o después de resetear la contraseña, se debe exigir al usuario actualizar su contraseña después del inicio de sesión (este punto no aplica para usuarios aplicativos), cumpliendo con el “Estándar para la Gestión de Contraseñas”.
+La autenticación de SQL Server debe heredar la política de contraseñas establecida en el sistema operativo windows.
+La autenticación de SQL debe validar la expiración de contraseñas tomando en cuenta la política de contraseñas establecidas en el sistema operativo windows.
+--------
+
+
+
+Los permisos al rol “public” deben ser basados en el principio del mínimo privilegio y no deben tener acceso al proxy de SQL Server (“SQL Agent proxies”), es importante crear cuentas alternativas en AD adecuadas para ejecutar las funciones.
+
+
+
+ select  user_name(grantee_principal_id),user_name(grantor_principal_id),* from sys.database_permissions  
+
+
 
 ```
 
