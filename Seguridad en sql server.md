@@ -94,6 +94,24 @@ EXECUTE sys.xp_cmdshell 'wmic volume get name, freespace, capacity, label'
 /* the base wmi query that does not support mount points */
 EXECUTE xp_cmdshell 'wmic logicaldisk get name,freespace,size,volumename,blocksize'
 
+
+
+---------- Esto no lo e confirmado si funciona tengo que validar
+CREATE CREDENTIAL [CmdShellCredential]
+WITH IDENTITY = 'DOMAIN\CmdShellUser', 
+SECRET = 'cmdshellpassword';
+EXEC sp_add_proxy 
+    @proxy_name = 'CmdShellProxy', 
+    @credential_name = 'CmdShellCredential';
+EXEC sp_grant_proxy_to_subsystem 
+    @proxy_name = 'CmdShellProxy', 
+    @subsystem_name = 'CmdExec';
+
+
+
+
+
+
 ```
 
 
