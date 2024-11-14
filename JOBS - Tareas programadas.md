@@ -188,6 +188,91 @@ truncate table ARTICULOS
 ```
 
 
+## PROXY EN JOBS
+**¿Qué es un Proxy?** <br>
+Un proxy permite a SQL Server Agent ejecutar un paso de trabajo usando las credenciales de un usuario de Windows específico. Esto proporciona un control más granular sobre los permisos que se otorgan para ejecutar tareas específicas.
+
+**¿Por Qué Usar Proxies?** <br>
+`Utilizar proxies tiene varios beneficios de seguridad:` Menor Privilegio: Los pasos del trabajo se ejecutan con los permisos mínimos necesarios, en lugar de usar cuentas con privilegios elevados. <BR>
+`Control Granular:` Puedes definir exactamente qué permisos necesita cada paso del trabajo.<BR>
+`Seguridad:` Reduce el riesgo de comprometer cuentas administrativas.
+
+Los proxies pueden ser asignados a varios subsistemas, Tipos de Subsistemas:
+
+- CmdExec: Ejecuta comandos de shell y scripts de Windows.
+- PowerShell: Ejecuta comandos y scripts de PowerShell.
+- TSQL: Ejecuta consultas y scripts Transact-SQL (T-SQL).
+- SSIS (SQL Server Integration Services): Ejecuta paquetes de Integration Services.
+- Replication Distributor: Ejecuta trabajos relacionados con la replicación.
+- Replication Merge: Ejecuta trabajos de replicación de tipo merge.
+- Replication Queue Reader: Ejecuta trabajos de lectura de cola de replicación.
+- ActiveScripting: Ejecuta scripts ActiveX como VBScript y JScript.
+
+
+
+Crear una Credencial:
+Primero, necesitas crear una credencial en SQL Server que almacene las credenciales de Windows.
+
+```sql
+USE master;
+GO
+CREATE CREDENTIAL [MyCredential]
+WITH IDENTITY = 'MYDOMAIN\MyUser', 
+SECRET = 'mypassword';
+
+
+```
+
+
+Crear el Proxy:
+Luego, creas un proxy en SQL Server Agent que utiliza esta credencial.
+
+
+```sql
+USE msdb;
+GO
+EXEC sp_add_proxy 
+    @proxy_name = 'MyProxy', 
+    @credential_name = 'MyCredential';
+
+```
+
+
+
+Asignar el Proxy a un Subsistema:
+Asigna el proxy a un subsistema específico, como PowerShell, CmdExec, etc.
+
+
+```sql
+EXEC sp_grant_proxy_to_subsystem 
+    @proxy_name = 'MyProxy', 
+    @subsystem_name = 'PowerShell';
+
+
+```
+
+
+
+Asignar el Proxy a un Job Step:
+Finalmente, asigna el proxy a un paso de trabajo específico.
+
+
+```sql
+USE msdb;
+GO
+EXEC sp_add_jobstep 
+    @job_name = 'MyJob', 
+    @step_name = 'MyStep',
+    @subsystem = 'PowerShell', 
+    @command = 'Write-Output "Hello, World!"', 
+    @proxy_name = 'MyProxy';
+
+
+```
+
+
+
+
 ###### Transferir jobs 
 ```sql
 --- Jobs Task in SSIS package  
