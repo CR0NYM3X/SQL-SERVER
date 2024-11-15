@@ -713,6 +713,8 @@ Habilitar esta característica puede exponer riesgos de seguridad si no se manej
 
 **Habilitar estas opciones**
 ```SQL
+https://www.mssqltips.com/sqlservertip/1782/understanding-cross-database-ownership-chaining-in-sql-server/
+
 USE DB1; CREATE TABLE MiTabla ( Id INT PRIMARY KEY, Nombre NVARCHAR(100);
 USE DB2; CREATE VIEW MiVista AS SELECT * FROM DB1.dbo.MiTabla;
 
