@@ -725,6 +725,11 @@ ALTER DATABASE DB2 SET DB_CHAINING ON;
 
 USE DB2;
 SELECT * FROM MiVista;
+
+--- validar las db
+SELECT name, is_db_chaining_on
+FROM sys.databases
+
 ```
 
 **Deshabilitar estas opciones**
