@@ -715,25 +715,139 @@ Habilitar esta característica puede exponer riesgos de seguridad si no se manej
 ```SQL
 https://www.mssqltips.com/sqlservertip/1782/understanding-cross-database-ownership-chaining-in-sql-server/
 
-USE DB1; CREATE TABLE MiTabla ( Id INT PRIMARY KEY, Nombre NVARCHAR(100);
-USE DB2; CREATE VIEW MiVista AS SELECT * FROM DB1.dbo.MiTabla;
+# Objetivo : En el ejemplo de Cross-Database Ownership Chaining (CDOC), configuramos las bases de datos DB1 y DB2 de manera que un procedimiento almacenado y  una vusta  en DB1 puede acceder a una tabla en DB2 
 
---- Activarlo a nivel instancia 
-sp_configure 'cross db ownership chaining', 1;
-RECONFIGURE;
 
-select name,value_in_use from sys.configurations where name =  'cross db ownership chaining'
+--- Crear dbs de pruebas 
+CREATE DATABASE DB1;
+CREATE DATABASE DB2;
 
--- o activarlo a nivel db 
+
+
+--- Activar el Cross db a nivel DB 
+--- [Nota] para que funcione las 2 tienen que estar activadas el DB_CHAINING o lo activan a nivel instancia 
 ALTER DATABASE DB1 SET DB_CHAINING ON;
 ALTER DATABASE DB2 SET DB_CHAINING ON;
 
 
-USE DB2;
-SELECT * FROM MiVista;
+-- validar que se cambio la configuracion a nivel DB 
+SELECT name, is_db_chaining_on FROM sys.databases where is_db_chaining_on =1 ;
 
---- validar las db que tiene habilitado el cross
-SELECT name, is_db_chaining_on FROM sys.databases where is_db_chaining_on = 1;
+
+--- Activar el cross db a nivel instancia
+sp_configure 'cross db ownership chaining', 1;
+RECONFIGURE;
+
+
+-- validar que se cambio la configuracion a nivel instancia 
+select name,value_in_use from sys.configurations where name =  'cross db ownership chaining'
+
+
+
+
+-- Crear el login 
+USE [master]
+GO
+CREATE LOGIN [user_cross] WITH PASSWORD=N'123123', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+ 
+ 
+-- Crear el usauri en la DB1
+USE [DB1]
+GO
+CREATE USER [user_cross] FOR LOGIN [user_cross]
+
+ 
+-- Crear el usauri en la DB2 
+USE [DB2]
+GO
+CREATE USER [user_cross] FOR LOGIN [user_cross]
+ 
+
+
+
+
+
+
+USE DB2;
+GO
+
+--- Crear tabla 
+CREATE TABLE TableDB2 (
+    ID INT PRIMARY KEY,
+    Description NVARCHAR(50)
+);
+
+
+-- Insertamos algunos datos en TableDB2
+INSERT INTO TableDB2 (ID, Description) VALUES (1, 'Description1');
+INSERT INTO TableDB2 (ID, Description) VALUES (2, 'Description2');
+
+
+--- corroborar datos 
+select * from TableDB2 ; 
+
+
+
+USE DB1;
+
+--- Crear Procedimiento 
+CREATE PROCEDURE GetDataFromDB2
+AS
+BEGIN
+    SELECT * FROM DB2.dbo.TableDB2;
+END;
+
+
+--- Crear vista 
+CREATE VIEW ViewDB1 AS SELECT * FROM DB2.dbo.TableDB2;
+
+
+
+---- Darle permisos al usuario user_cross para que pueda usar la vista y el Proc
+grant execute on dbo.GetDataFromDB2 to user_cross
+GRANT SELECT ON dbo.ViewDB1 TO user_cross;
+
+
+ 
+
+
+ ############ TEST ############
+ 
+ --- [Nota]: se conectan con el usuario user_cross 
+ 
+
+use db2;
+select * from TableDB2 ;  --> Msg 229, Level 14, State 5, Line 3  The SELECT permission was denied on the object 'TableDB2', database 'DB2', schema 'dbo'.
+
+ 
+
+USE DB1;
+EXEC GetDataFromDB2; --- retorna los datos exitosamente 
+select * from ViewDB1; --- retorna los datos exitosamente  
+
+
+-- Se conectan con el usuario syadmin y Elimin el usuario de la db2 para validar si le permite 
+use db2 
+DROP USER [user_cross]
+
+-- se conectan co el usuario user_cross 
+select * from ViewDB1; -->  Msg 916, Level 14, State 2, Line 11 The server principal "user_cross" is not able to access the database "DB2" under the current security context.
+
+
+############ Eliminar todo el test ############
+
+############ Eliminar todo el test ############
+ 
+drop database db1;
+drop database db2;
+
+
+sp_who user_cross  
+kill PID
+DROP LOGIN [user_cross];
+
+
+
 
 ```
 
@@ -745,6 +859,9 @@ Deshabilitar esta configuración puede mejorar la seguridad, ya que evita que ob
 EXEC sp_configure 'show advanced options', 1;
 sp_configure 'cross db ownership chaining', 0;
 RECONFIGURE;
+
+ALTER DATABASE DB1 SET DB_CHAINING OFF;
+ALTER DATABASE DB2 SET DB_CHAINING OFF;
 
 ```
 
