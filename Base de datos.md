@@ -580,6 +580,40 @@ SELECT * FROM ARTICULOS(NOLOCK) where precio=29
 ```
 
 
+## Ver los files 
+```sql
+
+select* from sys.sysfiles
+select * from sys.master_files   
+select * from sys.database_files 
+SELECT * FROM  sys.sysaltfiles;
+
+
+SELECT 
+   vfs.*
+FROM 
+    sys.master_files AS mf
+CROSS APPLY 
+    fn_virtualfilestats(mf.database_id, mf.file_id) AS vfs;
+
+SELECT 
+    vs.*
+FROM 
+    sys.master_files AS mf
+CROSS APPLY 
+    sys.dm_os_volume_stats(mf.database_id, mf.file_id) AS vs
+JOIN 
+    sys.databases db
+ON 
+    mf.database_id = db.database_id;
+	 
+
+ 
+
+```
+
+
+
 ### Bibliografía 
 ```
 2) Crear una base de datos:
