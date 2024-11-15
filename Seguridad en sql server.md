@@ -573,6 +573,23 @@ go
 ### Desactivar CLR   Common Language Runtime 
 Estaba destinado a ser tanto una mejora como un reemplazo futuro de los procedimientos almacenados extendidos, que son un tipo especial de procedimiento almacenado escrito en lenguaje C y compilado en código de máquina como una biblioteca dll.
 
+
+
+ ## Ver los proc ensamblados con clr 
+```SQL 
+  SELECT 
+    name AS NombreEnsamblado,
+    assembly_id AS IDEnsamblado,
+    permission_set_desc AS ConjuntoDePermisos,
+    create_date AS FechaCreacion,
+    modify_date AS FechaModificacion
+FROM 
+    sys.assemblies
+-- WHERE    name LIKE '%.dll'; -- Filtra por archivos DLL, típicos de ensamblados CLR
+```
+	 
+
+## Habilitar el parámetro 
 ```SQL 
 ---- Desactivar  
 EXEC sp_configure 'clr enabled';  
