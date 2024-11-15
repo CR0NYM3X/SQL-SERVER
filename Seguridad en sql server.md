@@ -718,9 +718,13 @@ https://www.mssqltips.com/sqlservertip/1782/understanding-cross-database-ownersh
 USE DB1; CREATE TABLE MiTabla ( Id INT PRIMARY KEY, Nombre NVARCHAR(100);
 USE DB2; CREATE VIEW MiVista AS SELECT * FROM DB1.dbo.MiTabla;
 
+--- Activarlo a nivel instancia 
 sp_configure 'cross db ownership chaining', 1;
 RECONFIGURE;
 
+select name,value_in_use from sys.configurations where name =  'cross db ownership chaining'
+
+-- o activarlo a nivel db 
 ALTER DATABASE DB1 SET DB_CHAINING ON;
 ALTER DATABASE DB2 SET DB_CHAINING ON;
 
