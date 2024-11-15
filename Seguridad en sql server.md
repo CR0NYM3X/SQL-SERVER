@@ -728,9 +728,8 @@ ALTER DATABASE DB2 SET DB_CHAINING ON;
 USE DB2;
 SELECT * FROM MiVista;
 
---- validar las db
-SELECT name, is_db_chaining_on
-FROM sys.databases
+--- validar las db que tiene habilitado el cross
+SELECT name, is_db_chaining_on FROM sys.databases where is_db_chaining_on = 1;
 
 ```
 
