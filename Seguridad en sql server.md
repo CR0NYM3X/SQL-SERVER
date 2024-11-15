@@ -605,7 +605,7 @@ Características Principales:
 ```SQL 
 CREATE ASSEMBLY MiEnsamblado
 FROM 'ruta_al_archivo.dll'
-WITH PERMISSION_SET = SAFE;  
+WITH PERMISSION_SET = SAFE;    --- SAFE, EXTERNAL_ACCESS, UNSAFE
 ```
 
 https://www.mssqltips.com/sqlservertip/6104/how-to-enable-sql-server-clr-integration-using-tsql/
