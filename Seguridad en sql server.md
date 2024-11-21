@@ -886,27 +886,14 @@ WHERE name in(
 
 
 
-
-
-SELECT name, is_auto_close_on FROM sys.databases 
-
-ALTER DATABASE test_db SET AUTO_CLOSE OFF;
-
-
 --------
 
 Habilitar la función de “protección ampliada” para fortalecer la seguridad en la capa de red.
 
 ----
 Los Grupos “BUILTIN” y locales de windows no deben usarse para  inicio de sesión de SQL Server, es necesario crear grupos  alternativos en AD para el inicio de sesión en SQL Server.
+ 
 
-
-------
-
-
-Después del alta de la cuenta o después de resetear la contraseña, se debe exigir al usuario actualizar su contraseña después del inicio de sesión (este punto no aplica para usuarios aplicativos), cumpliendo con el “Estándar para la Gestión de Contraseñas”.
-La autenticación de SQL Server debe heredar la política de contraseñas establecida en el sistema operativo windows.
-La autenticación de SQL debe validar la expiración de contraseñas tomando en cuenta la política de contraseñas establecidas en el sistema operativo windows.
 --------
 
 
@@ -916,6 +903,81 @@ Los permisos al rol “public” deben ser basados en el principio del mínimo p
 
 
  select  user_name(grantee_principal_id),user_name(grantor_principal_id),* from sys.database_permissions  
+
+ 
+```
+
+
+
+
+## Cerrado automatico a DB AUTO_CLOSE 
+Cierra automáticamente cuando el último usuario se desconecta. Cuando se habilita AUTO_CLOSE, la base de datos se cierra y se liberan todos sus recursos, lo que puede ahorrar memoria y otros recursos del servidor. Sin embargo, esto también puede tener un impacto significativo en el rendimiento
+ 
+ **Recomendaciones** 
+ -	Usarlo en entornos de desarrollo o servidores donde la base de datos se utiliza duranto un gran periodo de tiempo
+ -	No usarlo en produccion o en servidores donde las bases de datos se usan muy fecuentemente ya que  requieren un acceso rápido y eficiente y puede tener un impacto negativo significativo en el rendimiento 
+
+```SQL
+
+-- Validar las DB que tienen activado esta opcion 
+SELECT name, is_auto_close_on FROM sys.databases  where  is_auto_close_on = 1 ;
+
+
+--- Desactivar el auto cerrado 
+ALTER DATABASE test_db SET AUTO_CLOSE OFF;
+
+--- Activar el auto cerrado 
+ALTER DATABASE test_db SET AUTO_CLOSE OFF;
+
+
+
+```
+
+
+# Recomendaciones de autenticación 
+
+```
+Después del alta de la cuenta o después de resetear la contraseña, se debe exigir al usuario actualizar su contraseña después del inicio de sesión (este punto no aplica para usuarios aplicativos), cumpliendo con el “Estándar para la Gestión de Contraseñas”.
+La autenticación de SQL Server debe heredar la política de contraseñas establecida en el sistema operativo windows.
+La autenticación de SQL debe validar la expiración de contraseñas tomando en cuenta la política de contraseñas establecidas en el sistema operativo windows.
+```
+
+# Denys que se pudieran considerar realizar 
+
+```
+
+DENY SELECT ON sys.tables TO usuario_soporte;
+DENY SELECT ON sys.views TO usuario_soporte;
+DENY SELECT ON sys.procedures TO usuario_soporte;
+DENY SELECT ON sys.columns TO usuario_soporte;
+DENY SELECT ON sys.sql_logins TO usuario_soporte;
+DENY EXECUTE ON sp_configure TO usuario_soporte;
+DENY EXECUTE ON sp_addlogin TO usuario_soporte;
+DENY EXECUTE ON sp_droplogin TO usuario_soporte;
+DENY EXECUTE ON sp_addsrvrolemember TO usuario_soporte;
+DENY EXECUTE ON sp_dropsrvrolemember TO usuario_soporte;
+DENY EXECUTE ON fn_helpcollations TO usuario_soporte;
+DENY EXECUTE ON fn_dblog TO usuario_soporte;
+DENY SELECT ON sys.database_permissions TO rol_restringido;
+DENY SELECT ON sys.server_principals TO rol_restringido;
+DENY SELECT ON sys.server_role_members TO rol_restringido;
+DENY EXECUTE ON sp_addrolemember TO rol_restringido;
+DENY EXECUTE ON sp_droprolemember TO rol_restringido;
+DENY EXECUTE ON sp_changedbowner TO rol_restringido;
+DENY EXECUTE ON fn_trace_getinfo TO rol_restringido;
+DENY EXECUTE ON fn_virtualfilestats TO rol_restringido;
+DENY SELECT ON sys.dm_exec_sessions TO rol_restringido;
+DENY SELECT ON sys.dm_exec_requests TO rol_restringido;
+DENY SELECT ON sys.dm_exec_query_stats TO rol_restringido;
+DENY SELECT ON sys.dm_os_performance_counters TO rol_restringido;
+DENY SELECT ON sys.dm_db_index_physical_stats TO rol_restringido;
+DENY EXECUTE ON sp_who TO rol_restringido;
+DENY EXECUTE ON sp_who2 TO rol_restringido;
+DENY EXECUTE ON sp_lock TO rol_restringido;
+DENY EXECUTE ON sp_msforeachdb TO rol_restringido;
+DENY EXECUTE ON sp_msforeach_worker TO rol_restringido;
+DENY EXECUTE ON fn_virtualservernodes TO rol_restringido;
+
 
 
 
