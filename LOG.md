@@ -19,6 +19,11 @@ LOG.TRC  --- captura la informacion de tracer
 
 ```
 
+# Saber si esta habilitado los logs
+```
+select top 10 * from sys.dm_os_server_diagnostics_log_configurations;
+```
+
 
 # Usando el Visor de Eventos:
 ```
