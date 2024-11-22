@@ -749,6 +749,8 @@ DEALLOCATE @dbRoleMembers
 ```SQL
 /* ASIGNAR EL OWNER */
 EXEC sp_changedbowner 'NuevoPropietario';
+EXEC sp_changeobjectowner 'My_Object', 'My_user';
+
 
 alter AUTHORIZATION ON OBJECT::CatPersona TO [test2]
 ALTER AUTHORIZATION ON DATABASE::AdventureWorks2019 TO [testt];
