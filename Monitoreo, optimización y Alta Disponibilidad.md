@@ -97,6 +97,7 @@ Configuración recomendada: La práctica recomendada es tener un archivo de dato
 **`sys.dm_io_virtual_file_stats:`** Proporciona estadísticas de E/S a nivel de archivo, lo que es esencial para monitorear la actividad de E/S en el servidor. <br>
 **`sys.dm_os_wait_stats:`** Ofrece estadísticas sobre los tipos de espera que están afectando el rendimiento del servidor. <br>
 **`sys.dm_os_sys_info:`** Contiene información sobre la configuración del sistema y los recursos del servidor. <br>
+sys.dm_os_host_info
 **`sys.dm_os_buffer_descriptors:`** Proporciona información sobre los bloques de memoria que se están utilizando actualmente en la memoria caché del búfer. <br>
 **`sys.dm_os_ring_buffers:`** Registros de eventos del sistema. <br>
 **`sys.dm_os_tasks:`** Detalles de las tareas en el sistema operativo. <br>
