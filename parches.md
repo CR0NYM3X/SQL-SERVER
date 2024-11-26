@@ -23,6 +23,20 @@ LIFE CYCLES ORACLE		https://www.oracle.com/us/assets/lifetime-support-technology
 LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
+
+# Version ejemplo : "10.28.228.180"
+```
+Desglose del Número de Versión
+10: Número de versión principal. Representa la versión mayor del software (por ejemplo, SQL Server 2008 es versión 10).
+
+28: Número de actualización menor (minor release). Indica actualizaciones menores o service packs.
+
+228: Build number. Refleja la compilación específica del software, que puede incluir correcciones y mejoras de rendimiento.
+
+180: Revisión. Normalmente, este número representa actualizaciones muy específicas, correcciones de bugs o parches de seguridad.
+```
+
+
 ### LOGS de instalacion
 Si no permite instalar puedes validar los log que guarda 
 ```
