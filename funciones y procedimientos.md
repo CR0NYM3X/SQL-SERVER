@@ -127,13 +127,15 @@ SELECT dbo.AddNumbers(10, 20) AS Resultado
 Asegura que el procedimiento se ejecute con los permisos del propietario, cuando creeas un objeto no se asigna automaticamente un propietario, tienes que agregarlo de manera manual , en caso de no asignarlo , este tomara  el usuario owner de la DB donde esta el objeto y usara sus permisos 
 ```sql
 
+
+
+/*********** CREAMOS LAS BASE DE DATOS ***********\
 USE [master]
 GO
 create database test_owner_db
 
 
-
-
+/*********** CREAMOS LOS USUARIOS ***********\
 USE [master]
 GO
 CREATE LOGIN [user_test_a] WITH PASSWORD=N'123123', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
@@ -153,32 +155,78 @@ GO
 CREATE USER [user_test_b] FOR LOGIN [user_test_b]
 GO
 
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [user_test_b]
+GO
 
+USE [master]
+GO
+CREATE LOGIN [user_owner_db] WITH PASSWORD=N'123123', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+GO
+USE [test_owner_db]
+GO
+CREATE USER [user_owner_db] FOR LOGIN [user_owner_db]
+GO
+
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [user_owner_db]
+GO
+
+
+
+
+/*********** COLOCAMOS EL DUEÑO DE LA DB ***********\
+
+-- @ nos conectamos a la db 
+use test_owner_db 
+
+--- @ No se puede asignar un dueño que tiene un USER en la DB 
 ALTER AUTHORIZATION ON DATABASE::[test_owner_db] TO [user_owner_db]  ---> Msg 15110, Level 16, State 1, Line 45 The proposed new database owner is already a user or aliased in the database.
 
+-- @ Eliminamos el user
 drop user user_owner_db --> Commands completed successfully.
 
+
+--@ Volvemos hacer dueño al usuario y si permite
 ALTER AUTHORIZATION ON DATABASE::[test_owner_db] TO [user_owner_db]  --> Commands completed successfully.
 
+-- @ Validamos y tampo deja crearle el usuario si ya lo hicimos dueño al usuario
 CREATE USER [user_owner_db] FOR LOGIN [user_owner_db] ---> Msg 15063, Level 16, State 1, Line 52 The login already has an account under a different user name.
 
+
+-- @ Validamos los usuarios en la base de datos , aqui solo debe de estar : user_test_a, user_test_b
 select name from sys.database_principals where name in('user_owner_db','user_test_a','user_test_b')
 
  
 
+
+
 ####### CREAMOS EL PROCEDIMIENTO #######
 
----	drop  PROCEDURE dbo.ObtenerEmpleados 
-CREATE PROCEDURE dbo.ObtenerEmpleados
-WITH EXECUTE AS OWNER
+
+--- tiene que estar activado si no va usar funcionaria el "WITH EXECUTE AS", no marca error solo no marca ejecuta las accciones 
+ALTER DATABASE test_owner_db SET TRUSTWORTHY ON;
+
+
+--- Validar si se activo 
+select name,is_trustworthy_on from sys.databases where name = 'test_owner_db'
+
+
+---	drop  PROCEDURE dbo.GetDisk 
+CREATE PROCEDURE dbo.GetDisk
+WITH EXECUTE AS OWNER -- al colocar el owner , este ejecutara el codigo con los permisos del owner del procedimiento , en caso de que no tenga owner, se ejecutara con los permisos del owner de la db 
+-- WITH EXECUTE AS 'user_test_b'  -- Tambien puedes especificar el usuario, en caso de que no quieres que sea el owner de la del procedimiento o db  
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- Consulta para obtener los empleados
     SELECT SUSER_SNAME() AS USER_NAME,DB_NAME() AS DB_NAME ;
+
+    exec xp_fixeddrives;
 END;
 GO 
+
+-- Otorgamos  permisos a los usuarios  
+grant execute on dbo.GetDisk to  user_test_a;
 
 
 ####### VALIDAMOS QUIEN ES EL PROPIETARIO #######
@@ -195,11 +243,8 @@ LEFT JOIN
     sys.database_principals dp ON o.principal_id = dp.principal_id
 WHERE 
     o.type = 'P'
-	and o.name = 'ObtenerEmpleados'; ---> ObtenerEmpleados	,dbo	,NULL
-
-
-####### OTORGAMOS PERMISO #######  
-grant execute on  dbo.ObtenerEmpleados to user_test_a;
+	and o.name = 'GetDisk'; --->  esto retorna : [ nombre_procedimiento GetDisk	, Esquema: dbo	, Propietario : NULL]
+ 
 
 
 ####### CAMBIAMOS DE USUARIO #######
@@ -207,18 +252,21 @@ grant execute on  dbo.ObtenerEmpleados to user_test_a;
 
 EXECUTE AS USER = 'user_test_a';
 
-	SELECT SUSER_SNAME() AS USER_NAME,DB_NAME() AS DB_NAME ;  ---> user_test_a	test_owner_db 
-	EXEC dbo.ObtenerEmpleados;   ---> user_owner_db	,test_owner_db 
+ 
+	EXEC dbo.GetDisk;   ---> retorna : ( username: user_owner_db	, db_name test_owner_db ) y tambien retorna los discos drive , MB Free 
+	
 	
 	
 ####### NOS REGRESAMOS AL USUARIO ORIGINAL #######
 REVERT;
 
-####### NOS REGRESAMOS AL USUARIO ORIGINAL #######
-ALTER AUTHORIZATION ON OBJECT::dbo.ObtenerEmpleados TO  user_test_b
+
+
+####### Cambiamos de propietarios  #######
+ALTER AUTHORIZATION ON OBJECT::dbo.GetDisk TO  user_test_b
 
 -- Volvemos a darle permisos al usuario user_test_a ya que se quitan los permisos 
-grant execute on  dbo.ObtenerEmpleados to user_test_a
+grant execute on  dbo.GetDisk to user_test_a
 
 
 ####### VALIDAMOS QUIEN ES EL PROPIETARIO #######
@@ -235,18 +283,56 @@ LEFT JOIN
     sys.database_principals dp ON o.principal_id = dp.principal_id
 WHERE 
     o.type = 'P'
-	and o.name = 'ObtenerEmpleados'; ---> ObtenerEmpleados,	dbo	,user_test_b
+	and o.name = 'GetDisk'; ---> GetDisk,	dbo	,user_test_b
 
 
 
 
 ####### Validamos  #######
 EXECUTE AS USER = 'user_test_a';
-	EXEC dbo.ObtenerEmpleados; ---> user_test_b,	test_owner_db
+	EXEC dbo.GetDisk; ---> user_test_b,	test_owner_db
 
 
-####### nos regresamos ####### 
+
+####### nos regresamos, al usuario original ####### 
 REVERT; 
+
+
+
+####### AHORA DESACTIVAMOS EL TRUSTWORTHY ####### 
+ALTER DATABASE test_owner_db SET TRUSTWORTHY off;
+
+
+[nota]--- con esto vamos a validar que si desactivas el TRUSTWORTHY , el Proc GetDisk no podra ejecutar el Proc xp_fixeddrives ya que requiere sysadmin
+
+
+####### Validamos  #######
+EXECUTE AS USER = 'user_test_a';
+	EXEC dbo.GetDisk; ---> user_test_b,	test_owner_db
+
+
+####### nos regresamos, al usuario original ####### 
+REVERT; 
+
+
+
+####### Extra si quieres usarlo en el procedimiento ####### 
+
+
+CREATE TABLE Empleados (
+    ID INT PRIMARY KEY,
+    Nombre NVARCHAR(100),
+    Cargo NVARCHAR(100),
+    Salario DECIMAL(10, 2),
+    FechaContratacion DATE
+);
+
+INSERT INTO Empleados (ID, Nombre, Cargo, Salario, FechaContratacion)
+VALUES 
+(1, 'Juan Pérez', 'Gerente', 75000.00, '2021-01-15'),
+(2, 'Ana Gómez', 'Desarrolladora', 55000.00, '2020-03-22'),
+(3, 'Carlos López', 'Analista', 60000.00, '2019-07-30'),
+(4, 'Marta Sánchez', 'Recursos Humanos', 50000.00, '2018-11-10');
 
 
 ---- Eliminar los objetos 
