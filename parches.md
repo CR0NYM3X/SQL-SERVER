@@ -24,16 +24,48 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
 
-# Version ejemplo : "10.28.228.180"
+# Explicacion de "SELECT @@VERSION "
+
 ```
-Desglose del Número de Versión
-10: Número de versión principal. Representa la versión mayor del software (por ejemplo, SQL Server 2008 es versión 10).
 
-28: Número de actualización menor (minor release). Indica actualizaciones menores o service packs.
 
-228: Build number. Refleja la compilación específica del software, que puede incluir correcciones y mejoras de rendimiento.
+Microsoft SQL Server 2019 (RTM-CU15) (KB5008996) - 15.0.4198.1 (X64) 
+Dec 1 2021 15:02:08 
+Copyright (C) 2019 Microsoft Corporation Enterprise Edition (64-bit) 
+on Windows Server 2019 Datacenter 10.0 <X64> (Build 17763: )
 
-180: Revisión. Normalmente, este número representa actualizaciones muy específicas, correcciones de bugs o parches de seguridad.
+
+
+1.- Nombre de producto y version principal:  Microsoft SQL Server 2019
+	Microsoft SQL Server: Identifica el producto.
+	2019: Año de la versión principal de SQL Server.
+
+
+
+2.- Fecha de la compilación : Dec 1 2021 15:02:08
+	Muestra cuándo se compiló la versión específica del servidor.	
+	
+3.- Número de compilación (Build):  (RTM-CU15) (KB5008996) - 15.0.4198.1
+	RTM: Significa Release to Manufacturing y representa la primera versión liberada oficialmente.
+	CU15: Es la Cumulative Update (actualización acumulativa) número 15. Esto indica un parche o mejora aplicada.
+	KB5008996: Es el identificador de la base de conocimiento (Knowledge Base) asociado con el parche aplicado.
+	15.0.4198.1: Este es el número de versión completo (Build), donde:
+		15: Versión mayor (2019).
+		0: Versión menor (minor release).
+		4198: Número de compilación específica.(Build number)
+		1: Nivel de revisión. correcciones de bugs o parches de seguridad.
+
+
+4.- Edición del producto:  Copyright (C) 2019 Microsoft Corporation Enterprise Edition (64-bit) 
+	Enterprise Edition: Indica la edición (puede ser Standard, Express, Developer, etc.).
+	(64-bit): Arquitectura del sistema (64 bits o 32 bits).
+
+	
+
+5.- Nombre del sistema operativo y procesador: Copyright (C) 2019 Microsoft Datacenter. All rights reserved.
+	Muestra el año de derechos de autor y la empresa responsable.
+
+ 
 ```
 
 
