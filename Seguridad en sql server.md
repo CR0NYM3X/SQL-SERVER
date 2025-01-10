@@ -933,11 +933,20 @@ ALTER DATABASE test_db SET AUTO_CLOSE OFF;
 
 ```
 
+
 ### hide instance 
-```
 "ocultar" una instancia para que no aparezca en la lista de servidores disponibles cuando los clientes utilizan la opción de "Explorar servidores" en aplicaciones como SQL Server Management Studio (SSMS).
-Ve a la pestaña "Flags" y cambia la propiedad HideInstance a Yes
 ```
+Ve a la pestaña "Sql Server Network Configuration" > "Protocols for MSSQLSERVER*" > click derecho  propiedad >  HideInstance a Yes
+```
+
+### Force Encryption
+Ofrece seguridad contra ciertos tipos de ataques de retransmisión de autenticación, Cuando te conectas al motor de base de datos con protección ampliada, se utilizan técnicas adicionales para asegurar que las credenciales de autenticación no puedan ser interceptadas y reutilizadas por un atacante.
+```
+Ve a la pestaña "Sql Server Network Configuration" > "Protocols for MSSQLSERVER*" > click derecho  propiedad >  Force Encryption a Yes
+```
+
+
 
 # Recomendaciones de autenticación 
 
