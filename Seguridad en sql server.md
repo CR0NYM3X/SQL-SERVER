@@ -933,6 +933,11 @@ ALTER DATABASE test_db SET AUTO_CLOSE OFF;
 
 ```
 
+### hide instance 
+```
+"ocultar" una instancia para que no aparezca en la lista de servidores disponibles cuando los clientes utilizan la opción de "Explorar servidores" en aplicaciones como SQL Server Management Studio (SSMS).
+Ve a la pestaña "Flags" y cambia la propiedad HideInstance a Yes
+```
 
 # Recomendaciones de autenticación 
 
@@ -1061,6 +1066,8 @@ Proteger SQL Server: https://learn.microsoft.com/es-es/sql/relational-databases/
 
 
 ```
+
+
 
 
 
