@@ -24,6 +24,32 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
 
+Diferencia entre el soporte principal y el soporte extendido:
+
+1. **Soporte Principal:**
+   - **Duración:** Normalmente dura cinco años a partir de la fecha de lanzamiento.
+   - **Características:**
+     - Microsoft proporciona actualizaciones de seguridad y no seguridad.
+     - Incluye nuevas funcionalidades, mejoras y actualizaciones de rendimiento.
+     - También ofrece soporte gratuito, incluidas solicitudes de cambio y actualizaciones regulares.
+
+2. **Soporte Extendido:**
+   - **Duración:** Comienza después del fin del soporte principal y dura otros cinco años.
+   - **Características:**
+     - Microsoft sigue proporcionando actualizaciones de seguridad sin costo adicional.
+     - No se incluyen nuevas funcionalidades ni mejoras, solo correcciones de seguridad.
+     - El soporte técnico puede estar disponible, pero a menudo implica un costo adicional.
+     - No se aceptan solicitudes de cambios de diseño o nuevas características.
+
+Aquí hay un resumen en una tabla para mayor claridad:
+
+| **Tipo de Soporte** | **Duración** | **Características** |
+|---------------------|--------------|---------------------|
+| Soporte Principal   | 5 años       | - Actualizaciones de seguridad y no seguridad.<br>- Nuevas funcionalidades y mejoras.<br>- Soporte gratuito y solicitudes de cambio. |
+| Soporte Extendido   | 5 años       | - Solo actualizaciones de seguridad.<br>- No hay nuevas funcionalidades.<br>- Soporte técnico disponible, pero usualmente con costo. |
+
+ 
+
 # Explicacion de "SELECT @@VERSION "
 
 ```
