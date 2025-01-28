@@ -327,4 +327,168 @@ y llene el txt con los physical_name de las base de datos, obtenida esta info de
 ```
 
 
+# Error \#3 - Se queda en NTLM en la columna auth_scheme 
+
+```
+
+
+
+1.- Validacion de kerberos habilitados  
+
+
+	 el valor de la columna auth_scheme, que será KERBEROS si Kerberos está habilitado.
+	https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/register-a-service-principal-name-for-kerberos-connections?view=sql-server-ver16
+ 
+
+	SELECT net_transport, auth_scheme FROM sys.dm_exec_connections WHERE session_id = @@SPID;
+
+	**Resultado esperado:**  
+	`KERBEROS` (si la autenticación es exitosa).  
+	Si muestra `NTLM`, hay un problema con Kerberos.
+
+
+
+
+2.- **Validar la Cuenta de Servicio de SQL Server:**
+  - El servicio de SQL Server   debe ejecutarse bajo una **cuenta de dominio** o **cuenta de servicio gestionada (gMSA)**.
+  
+ 
+  EXEC xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\MSSQLSERVER', 
+    N'ObjectName';
+  
+  -- Confirmar si SQL Server reconoce su unión al dominio
+  SELECT DEFAULT_DOMAIN() AS Dominio;	 
+
+
+ 
+
+3.- **Verificar LOGS Intentos de Registro de SPN**
+	EXEC xp_readerrorlog 0, 1, N'SPN';
+	**Resultado esperado:**  
+		Mensajes como `The SPN ... for SQL Server registration succeeded`.  
+		Si hay errores como `Cannot generate SSPI context`, el SPN está mal configurado.
+ 
+
+		
+4.- ** Validar la Autenticación de Cuentas de Dominio**
+	Probar si SQL Server reconoce una cuenta de dominio existente.
+	
+	-- Intentar crear un login temporal de dominio (solo para prueba)
+		CREATE LOGIN [DOMINIO\UsuarioDePrueba] FROM WINDOWS 
+
+
+
+
+5.- **Verificar la Unión al Dominio:** 
+   Debe mostrar el nombre del dominio 
+
+    systeminfo | findstr /B /C:"Nombre de dominio"
+   
+
+
+6.- **Comprobar la Configuración de DNS:**
+Los servidores DNS deben apuntar a los controladores de dominio de la empresa
+
+	-- validar server 
+	nslookup diminio.com
+	
+	-- validar si estan configurados los dns 
+	ipconfig /all
+   
+ 
+ nltest /dsgetdc:tu_dominio.com
+ nslookup -type=srv _ldap._tcp.dc._msdcs.tu_dominio.com
+
+  
+7.- **Verificar SPN (Service Principal Name):**
+ Los SPN son críticos para Kerberos. Si están mal configurados, se producirán errores de autenticación.
+ Debes ver un SPN como: `MSSQLSvc/nombre_equipo.dominio.com:1433`
+	 setspn -L NOMBRE_EQUIPO_SQL
+	 
+	 
+	 
+	 
+
+8.- **Verificar fuente de tiempo:**
+	
+		 ---- Indicadores de Problemas de Sincronización:
+
+		1. **Leap Indicator**: Si el valor no es 0.
+		   - **Valor esperado**: `0 (no warning)`
+		   - **Valor problemático**: Cualquier valor diferente de 0.
+
+		2. **Stratum**: Si el valor es demasiado alto (idealmente debe estar entre 1 y 4). Indica la proximidad del servidor a la fuente de tiempo original. Un valor más bajo indica una mayor proximidad. Un valor de 1 es ideal, mientras que valores mayores indican mayor distancia.
+		   - **Valor esperado**: `1 a 4`
+		   - **Valor problemático**: Valores superiores a 4.
+
+		3. **Diferencia de Tiempo (Offset)**: Si la diferencia de tiempo es significativa (más de ±1 segundo).
+		   - **Valor esperado**: Dentro de ±1 segundo.
+		   - **Valor problemático**: Más de ±1 segundo.
+
+
+
+	 -- Verificar fuente de tiempo: 
+		w32tm /query /peers
+		w32tm /query /status	
+	  
+		 - **Resultado esperado:**  
+		 `Fuente de tiempo: dominio.com` (ej: `dc01.dominio.com`).
+	 
+	 . **Forzar sincronización manual:**
+		w32tm /resync /force
+		
+		
+9.- **Verificar diferencia de tiempo con el controlador de dominio:**
+ 
+		net time \\nombre_dc /set
+		w32tm /stripchart /computer:dominio.com /samples:10 /period:10 /dataonly
+
+ 
+   - Si hay un desfase mayor a 5 minutos, ajusta la hora automáticamente:
+ 
+		w32tm /config /syncfromflags:domhier /update	 
+	 
+	 
+	 
+ 
+10. **Firewall y Puertos:**
+   - Asegúrate de que los puertos necesarios para Active Directory/Kerberos estén abiertos:
+     - **Kerberos**: Puerto **88** (TCP/UDP).
+     - **LDAP**: Puerto **389** (TCP/UDP).
+     - **Global Catalog**: Puerto **3268** (TCP).
+     - **DNS**: Puerto **53** (TCP/UDP).
+
+
+Test-NetConnection -ComputerName 192.168.5.100 -Port  1433
+
+ 
+11.- **Reiniciar el Servicio de SQL Server:**
+    - Después de cambiar la cuenta de servicio o SPN, reinicia el servicio de SQL Server.
+	
+	
+	
+	
+ 
+12.- 
+https://dba.stackexchange.com/questions/296040/cannot-connect-to-mssql-using-kerberos-auth
+ipconfig /flushdns
+
+		
+
+----
+klist tickets
+
+		
+		
+		
+Fuentes : 
+https://www.mssqltips.com/sqlservertip/6772/kerberos-configuration-manager-for-sql-server/
+		
+		
+		
+
+```
+
 
