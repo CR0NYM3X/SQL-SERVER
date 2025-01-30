@@ -1044,7 +1044,7 @@ Dependiendo del valor de log_reuse_wait_desc, aquí hay algunas acciones que pod
 
 
 ```SQL
-
+-- Esta es una vista y no se puede cambiar
 SELECT 
     name AS database_name,
     log_reuse_wait_desc
