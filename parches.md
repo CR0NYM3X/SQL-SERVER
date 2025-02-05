@@ -24,6 +24,7 @@ LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
 ```
 
+
 Diferencia entre el soporte principal y el soporte extendido:
 
 1. **Soporte Principal:**
@@ -191,6 +192,7 @@ No es necesario instalar un Service Pack anterior antes de instalar el Service P
 
 
 # Liciencia de MSSQL: 
+https://download.microsoft.com/download/9/3/d/93d32de6-f268-45ed-ba25-2f9a6756b6af/SQL_Server_2022_Licensing_guide.pdf
 ```SQL
 
 Bibliografía : https://licendi.com/es/blog/cal-y-el-sql-server-para-empresas-como-funcionan-cuantas-necesito-y-que-son-licencias-de-2-nucleos/
