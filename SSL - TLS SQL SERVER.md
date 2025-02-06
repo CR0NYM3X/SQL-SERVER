@@ -226,6 +226,8 @@ EXEC xp_instance_regread
  
 ### BibliografÍas : 
 ```sql
+https://bigdatansql.com/2020/08/30/certificate-based-server-logins-sql-server/
+
 https://help.synergetic.net.au/s/article/kb-2297987775-sql-server-network-traffic-encryption-tls
 
 https://www.youtube.com/watch?v=DAsN57lyVFg
