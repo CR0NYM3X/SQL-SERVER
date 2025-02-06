@@ -152,6 +152,9 @@ EXEC xp_instance_regread
 	LEFT JOIN sys.dm_exec_sessions as b on a.session_id = b.session_id 
 	WHERE a.net_transport <> 'Shared memory'  
 	order by encrypt_option;  -- Si `encrypt_option` muestra **TRUE**, TLS está activo.
+
+
+	SELECT * FROM sys.certificates;
 ```
 
 **Herramientas externas**:
