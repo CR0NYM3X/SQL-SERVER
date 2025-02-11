@@ -854,12 +854,9 @@ ALTER USER antiguo_usuario WITH NAME = nuevo_usuario;
 
 ```
 
-
-#### Pendientes por actualizar este documento :
-```SQL
-1- especificar para que sirve cada permiso
-2.- agregar una query para eliminar el usuario de cada base de datos ya que no se elimina el permiso en todos
-3.- poder hacer que se ejecuten los reportes con sp_executesql
-4.- ver que permisos tienen los roles
-5.- agregar una query para que elimine el usuario por completo y no se quede en la base de datos el registro del usuario
+### Asignar un hash de contraseña existente a un login ya creado en SQL Server
 ```
+-- Ejemplo
+	ALTER LOGIN [UsuarioEjemplo] WITH PASSWORD = '0x0200C6FAAFFE9C6BAA377C6E74DF8FC9819860E54B31EAE9F4D326D10B8707C36F030DE5826577B676E2F8CB02FDB31BD829691FD55E1C616F87122D926B9C27FB13356A63D6' HASHED;
+```
+
