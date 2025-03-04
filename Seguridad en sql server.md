@@ -172,6 +172,11 @@ sp_configure 'show advanced options', 1; --- cambia la configuración de sql ser
 
 **xp_regread, xp_regwrite:** Estas funciones permiten leer y escribir en el registro /regedit del sistema. Si se usan sin restricciones, podrían abrir la puerta a cambios no autorizados en la configuración del servidor.
 ```SQL
+
+-- Te dice la llave  de registro y te indica el valor de cada llave 
+SELECT *  FROM sys.dm_server_registry
+
+
 ********** procedimientos **********
 xp_regaddmultistring
 xp_regdeletekey
