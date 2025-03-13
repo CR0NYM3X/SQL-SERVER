@@ -6,6 +6,37 @@ EXEC xp_servicecontrol 'QUERYSTATE', 'SQLBrowser'
 EXEC xp_servicecontrol 'QUERYSTATE', 'MSSQLServer'
   
 SELECT * FROM sys.dm_server_services
+
+---
+
+
+EXEC master.sys.xp_instance_regread
+N'HKEY_LOCAL_MACHINE',
+N'SYSTEM\CurrentControlSet\Services\SQLBrowser',
+N'Start' 
+
+------------
+
+DECLARE @RegistryPath NVARCHAR(255)
+DECLARE @ValueName NVARCHAR(255)
+DECLARE @Value INT
+
+SET @RegistryPath = 'SYSTEM\CurrentControlSet\Services\SQLBrowser'
+SET @ValueName = 'Start'
+
+EXEC xp_instance_regread
+    @rootkey = 'HKEY_LOCAL_MACHINE',
+    @key = @RegistryPath,
+    @value_name = @ValueName,
+    @value = @Value OUTPUT
+
+SELECT CASE @Value
+    WHEN 2 THEN 'Automático'
+    WHEN 3 THEN 'Manual'
+    WHEN 4 THEN 'Deshabilitado'
+    ELSE 'Desconocido'
+END AS SQLBrowserStatus
+
 ```
 
 
