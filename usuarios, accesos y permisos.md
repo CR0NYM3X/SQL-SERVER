@@ -860,3 +860,18 @@ ALTER USER antiguo_usuario WITH NAME = nuevo_usuario;
 	ALTER LOGIN [UsuarioEjemplo] WITH PASSWORD = '0x0200C6FAAFFE9C6BAA377C6E74DF8FC9819860E54B31EAE9F4D326D10B8707C36F030DE5826577B676E2F8CB02FDB31BD829691FD55E1C616F87122D926B9C27FB13356A63D6' HASHED;
 ```
 
+
+# tipos de autenticación de usuarios 
+https://learn.microsoft.com/en-us/sql/relational-databases/system-catalog-views/sys-database-principals-transact-sql?view=sql-server-ver16
+```
+
+select name,authentication_type,authentication_type_desc from sys.database_principals
+
+
+0 : No authentication
+1 : Instance authentication
+2 : Database authentication
+3 : Windows authentication
+4 : Microsoft Entra authentication
+
+```
