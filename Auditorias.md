@@ -1,4 +1,35 @@
+## Ver como esta configurado las auditorias (Login Auditing y Server Authentication)
+```SQL
+--- https://learn.microsoft.com/en-us/sql/relational-databases/system-stored-procedures/xp-loginconfig-transact-sql?view=sql-server-ver16
+--- https://stackoverflow.com/questions/11367886/how-to-get-sql-server-login-audit-setting-using-t-sql-or-sys-view
+EXEC xp_loginconfig 'default domain';
+EXEC xp_loginconfig 'default login';
+EXEC xp_loginconfig 'map $';
 
+
+EXEC xp_loginconfig 'login mode';
+ 
+EXEC xp_loginconfig 'audit level'; 
+
+declare @AuditLevel int
+exec master..xp_instance_regread 
+    @rootkey='HKEY_LOCAL_MACHINE',
+    @key='SOFTWARE\Microsoft\MSSQLServer\MSSQLServer',
+    @value_name='AuditLevel',
+    @value=@AuditLevel output
+select @AuditLevel
+
+/*
+None = 0
+Successful Logins Only = 1
+Failed Logins Only = 2
+Both Failed and Successful Logins = 3
+*/
+
+```
+
+
+## Otros 
 
 ```SQL
 SELECT * FROM   SYS.SERVER_FILE_AUDITS
