@@ -1,3 +1,13 @@
+Ver el estus de los servicios 
+```
+https://stackoverflow.com/questions/11682700/how-to-track-the-sql-services-in-ssms
+
+EXEC xp_servicecontrol 'QUERYSTATE', 'SQLBrowser'
+EXEC xp_servicecontrol 'QUERYSTATE', 'MSSQLServer'
+  
+SELECT * FROM sys.dm_server_services
+```
+
 
 **SQL server Agent**
 
