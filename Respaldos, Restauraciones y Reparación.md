@@ -23,7 +23,7 @@ usage: bcp {dbtable | query} {in | out | queryout | format} datafile
   [-d database name]
 ```
 
-**SQLCMD.exe / OSQL.exe** (Structured Query Language  Command-line) Es una herramienta de línea de comandos que permite ejecutar scripts de Transact-SQL (T-SQL) y comandos SQL en instancias de SQL Server.
+**SQLCMD.exe(Nueva) / OSQL.exe(Antigua)** (Structured Query Language  Command-line) Es una herramienta de línea de comandos que permite ejecutar scripts de Transact-SQL (T-SQL) y comandos SQL en instancias de SQL Server.
 ```
 Microsoft (R) SQL Server Command Line Tool
 Version 10.50.6000.34 NT x64
