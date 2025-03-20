@@ -48,7 +48,7 @@ https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/certific
 # Implementación
 
 ```sql
-
+Server Autentication 1.3.6.1.5.5.7.3.1. El OID es un valor numérico  (Key usage) que identifica el propósito de un certificado.   
 
 	1. **Generar o Obtener Certificados**:
 	   - MSSQL puede usar certificados autofirmados (generados automáticamente) o certificados emitidos por una **CA (Autoridad de Certificación)**.
@@ -226,6 +226,8 @@ EXEC xp_instance_regread
  
 ### BibliografÍas : 
 ```sql
+https://4sysops.com/archives/enable-tls-on-sql-server/
+
 https://bigdatansql.com/2020/08/30/certificate-based-server-logins-sql-server/
 
 https://help.synergetic.net.au/s/article/kb-2297987775-sql-server-network-traffic-encryption-tls
