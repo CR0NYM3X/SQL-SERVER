@@ -1,4 +1,71 @@
 
+
+### Funcionamiento de TLS en SQL Server
+
+1. **Cifrado por Defecto**: Cuando configuras `Encrypt=true` en tu cadena de conexión, SQL Server intenta cifrar la conexión utilizando TLS. Si no has instalado un certificado de servidor, SQL Server genera un certificado autofirmado (certificado de reserva) durante el inicio y lo usa para cifrar las credenciales.
+
+2. **Opción `TrustServerCertificate`**: Cuando `TrustServerCertificate=true`, el cliente confía en el certificado del servidor sin validar su autenticidad. Esto es útil en entornos de prueba o cuando se usa un certificado autofirmado. 
+
+3. **Opción `TrustServerCertificate`**: Cuando `TrustServerCertificate=false`
+	1. **Mayor Seguridad**: Al validar el certificado, se asegura que la conexión es segura y que no está siendo interceptada por un atacante (ataque de hombre en el medio).
+	2. **Errores de Conexión**: Si el certificado no es válido, está expirado, o no es emitido por una autoridad de certificación confiable, la conexión fallará .
+	 
+
+4. **Columna `encrypt_option`**: Esta columna en la vista `sys.dm_exec_connections` indica si la conexión está cifrada. Si `Encrypt=true`, esta columna debería mostrar `true`, independientemente de si el certificado es autofirmado o emitido por una autoridad de certificación.
+
+### Por qué ves `encrypt_option=true` sin haber instalado un certificado
+
+- **Certificado Autofirmado**: SQL Server está utilizando un certificado autofirmado para cifrar la conexión. Esto es suficiente para que la columna `encrypt_option` muestre `true` cuando `Encrypt=true`.
+
+- **Validación del Certificado**: Cuando configuras `TrustServerCertificate=false`, el cliente no confía en el certificado autofirmado y, por lo tanto, la conexión no se cifra, resultando en `encrypt_option=false` .
+
+
+
+### Certificado Autofirmado
+Cuando configuras `Encrypt=true` y no has instalado un certificado específico, SQL Server utiliza un certificado autofirmado para cifrar las conexiones. Este certificado autofirmado se genera una vez
+ y se reutiliza para todas las conexiones hasta que se reinicie el servidor o se cambie la configuración ..
+
+### Almacenamiento de Certificados
+Los certificados, incluidos los autofirmados, se almacenan en el **almacén de certificados del equipo local** o en el **almacén de certificados de la cuenta de servicio de SQL Server** .
+
+### Reutilización de Certificados
+El certificado autofirmado no se genera para cada conexión nueva. En lugar de eso, se reutiliza el mismo certificado para todas las conexiones mientras el servidor esté en funcionamiento . Esto significa que cuando te desconectas y te vuelves a conectar,
+ SQL Server sigue utilizando el mismo certificado autofirmado.
+
+ 
+
+### Recomendaciones
+
+Para un entorno de producción, es recomendable instalar un certificado emitido por una autoridad de certificación de confianza. Aquí tienes los pasos básicos:
+
+1. **Obtener un Certificado**: Solicita un certificado de una autoridad de certificación.
+2. **Instalar el Certificado**: Instala el certificado en el servidor SQL utilizando el Administrador de configuración de SQL Server ..
+3. **Configurar SQL Server**: Configura SQL Server para usar el certificado instalado.
+ 
+
+
+
+
+
+
+
+
+
+# cadena de conexión SQL Server Management Studio 
+```sql
+Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Encrypt=True;TrustServerCertificate=True;
+```
+
+# CliperSuites
+```sql
+# TLS 1.3 
+TLS_AES_256_GCM_SHA384
+
+# TLS 1.2 
+ECDHE-RSA-AES256-GCM-SHA384
+```
+
+
 # INFO TLS EN SQL SERVER
 
  **SSL** significa [**Secure Sockets Layer**] y **TLS** significa [**Transport Layer Security**]
@@ -226,6 +293,39 @@ EXEC xp_instance_regread
  
 ### BibliografÍas : 
 ```sql
+
+
+
+# Configuración del Motor de base de datos de SQL Server para cifrar conexiones
+    https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/configure-sql-server-encryption?view=sql-server-ver16#sql-server-generated-self-signed-certificates
+    
+
+# Requisitos de certificado para SQL Server
+    https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/certificate-requirements?view=sql-server-ver16
+
+
+
+# Configuración del cliente para el cifrado
+	https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption?view=sql-server-ver16
+
+
+# Conexión con cifrad
+	https://learn.microsoft.com/es-es/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16
+	
+	
+# Características obsoletas del motor de base de datos en SQL Server 2016 (13.x)
+	https://learn.microsoft.com/en-us/sql/database-engine/deprecated-database-engine-features-in-sql-server-2016?view=sql-server-ver16
+	
+	
+# SQL Server 2016 y versiones anteriores utilizan el algoritmo SHA1, que ya no se considera seguro.
+	https://support.microsoft.com/en-us/topic/kb4053407-fix-sql-server-2017-cannot-decrypt-data-encrypted-by-earlier-versions-of-sql-server-by-using-the-same-symmetric-key-a33f8bc7-e01a-55c6-72db-b851334df3dd
+	
+
+# Create and Install a Self-Signed SSL/TLS Certificate for SQL Server
+	https://codekabinett.com/rdumps.php?Lang=2&targetDoc=create-install-ssl-tls-certificate-sql-server
+
+
+
 https://4sysops.com/archives/enable-tls-on-sql-server/
 
 https://bigdatansql.com/2020/08/30/certificate-based-server-logins-sql-server/
