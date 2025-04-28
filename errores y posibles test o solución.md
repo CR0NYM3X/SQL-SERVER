@@ -492,3 +492,348 @@ https://www.mssqltips.com/sqlservertip/6772/kerberos-configuration-manager-for-s
 ```
 
 
+
+
+# Error \#5 []JAVA-  Algorithm constraints check failed on signature algorithm: SHA1withRSA
+```
+---------------------------------------- LOG ERROR ----------------------------------------
+
+10:11  INFO 1 --- [ppel-connection] c.c.connections.CoppelConnectionProxy    : Error al obtener conexion: jdbc:sqlserver://192.168.1.100;databaseName=db_test;Encrypt=True;TrustServerCertificate=True
+com.microsoft.sqlserver.jdbc.SQLServerException: "encrypt" property is set to "true" and "trustServerCertificate" property is set to "true" but the driver could not establish a secure connection to SQL Server by using Secure Sockets Layer (SSL) encryption: Error: Certificates do not conform to algorithm constraints. ClientConnectionId:1c60bdfd-5dc5-4bb3-8659-c03457433fda
+	at com.microsoft.sqlserver.jdbc.SQLServerConnection.terminate(SQLServerConnection.java:4271) ~[mssql-jdbc-12.8.1.jre11.jar!/:na]
+	Caused by: javax.net.ssl.SSLHandshakeException: Certificates do not conform to algorithm constraints
+	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:130) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:383) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:647) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.onCertificate(CertificateMessage.java:467) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.consume(CertificateMessage.java:363) ~[na:na]
+	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:393) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:476) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:447) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:206) ~[na:na]
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:426) ~[na:na]
+	at com.microsoft.sqlserver.jdbc.TDSChannel.enableSSL(IOBuffer.java:1854) ~[mssql-jdbc-12.8.1.jre11.jar!/:na]
+	... 13 common frames omitted
+Caused by: java.security.cert.CertificateException: Certificates do not conform to algorithm constraints
+	at java.base/sun.security.ssl.AbstractTrustManagerWrapper.checkAlgorithmConstraints(SSLContextImpl.java:1557) ~[na:na]
+	at java.base/sun.security.ssl.AbstractTrustManagerWrapper.checkAdditionalTrust(SSLContextImpl.java:1484) ~[na:na]
+	at java.base/sun.security.ssl.AbstractTrustManagerWrapper.checkServerTrusted(SSLContextImpl.java:1431) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:631) ~[na:na]
+	... 25 common frames omitted
+Caused by: java.security.cert.CertPathValidatorException: Algorithm constraints check failed on signature algorithm: SHA1withRSA
+	at java.base/sun.security.provider.certpath.AlgorithmChecker.check(AlgorithmChecker.java:231) ~[na:na]
+	at java.base/sun.security.ssl.AbstractTrustManagerWrapper.checkAlgorithmConstraints(SSLContextImpl.java:1553) ~[na:na]
+	... 28 common frames omitted
+
+10:11  WARN 1 --- [qtp739971314-43] o.s.b.f.support.DisposableBeanAdapter    : Invocation of close method failed on bean with name 'scopedTarget.getTransactionInfo': com.coppel.exceptions.RetrievableException: La conexion se ha cerrado o es invalida.
+
+---------------------------------------- LOG ERROR ----------------------------------------
+
+
+---------------------------------------- INVESTIGACIÓN ----------------------------------------
+
+
+Conclusión Revisar  lo siguiente :
+
+1.- modificar el java.security para eliminar el sha1 de la variable  jdk.certpath.disabledAlgorithms=
+
+2.-  Cree su imagen modificando el Dockerfile para anular la política de cifrado 
+
+3.- Actualizar el JDBC a 12.10 
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+### Funcionamiento de TLS en SQL Server
+
+1. **Cifrado por Defecto**: Cuando configuras `encrypt_connection=true` en tu cadena de conexión, SQL Server intenta cifrar la conexión utilizando TLS. Si no has instalado un certificado de servidor, SQL Server genera un certificado autofirmado (certificado de reserva) durante el inicio y lo usa para cifrar las credenciales .
+
+2. **Opción `trust_server_certificate`**: Cuando `trust_server_certificate=true`, el cliente confía en el certificado del servidor sin validar su autenticidad. Esto es útil en entornos de prueba o cuando se usa un certificado autofirmado. Si `trust_server_certificate=false`, el cliente intentará validar el certificado del servidor contra una autoridad de certificación de confianza .
+
+3. **Columna `encrypt_option`**: Esta columna en la vista `sys.dm_exec_connections` indica si la conexión está cifrada. Si `encrypt_connection=true`, esta columna debería mostrar `true`, independientemente de si el certificado es autofirmado o emitido por una autoridad de certificación.
+
+### Por qué ves `encrypt_option=true` sin haber instalado un certificado
+
+- **Certificado Autofirmado**: SQL Server está utilizando un certificado autofirmado para cifrar la conexión. Esto es suficiente para que la columna `encrypt_option` muestre `true` cuando `encrypt_connection=true`.
+
+- **Validación del Certificado**: Cuando configuras `trust_server_certificate=false`, el cliente no confía en el certificado autofirmado y, por lo tanto, la conexión no se cifra, resultando en `encrypt_option=false` .
+
+### Recomendaciones
+
+Para un entorno de producción, es recomendable instalar un certificado emitido por una autoridad de certificación de confianza. Aquí tienes los pasos básicos:
+
+1. **Obtener un Certificado**: Solicita un certificado de una autoridad de certificación.
+2. **Instalar el Certificado**: Instala el certificado en el servidor SQL utilizando el Administrador de configuración de SQL Server ..
+3. **Configurar SQL Server**: Configura SQL Server para usar el certificado instalado.
+ 
+
+
+### Certificado Autofirmado
+Cuando configuras `encrypt_connection=true` y no has instalado un certificado específico, SQL Server utiliza un certificado autofirmado para cifrar las conexiones. Este certificado autofirmado se genera una vez y se reutiliza para todas las conexiones hasta que se reinicie el servidor o se cambie la configuración [1](https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/certificate-requirements?view=sql-server-ver16).
+
+### Almacenamiento de Certificados
+Los certificados, incluidos los autofirmados, se almacenan en el **almacén de certificados del equipo local** o en el **almacén de certificados de la cuenta de servicio de SQL Server**Se recomienda el almacén de certificados del equipo local para evitar problemas de configuración cuando se cambia la cuenta de inicio de SQL Server [1](https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/certificate-requirements?view=sql-server-ver16).
+
+### Reutilización de Certificados
+El certificado autofirmado no se genera para cada conexión nueva. En lugar de eso, se reutiliza el mismo certificado para todas las conexiones mientras el servidor esté en funcionamiento. Esto significa que cuando te desconectas y te vuelves a conectar, SQL Server sigue utilizando el mismo certificado autofirmado.
+
+
+
+### Consecuencias de `TrustServerCertificate=false`
+1. **Mayor Seguridad**: Al validar el certificado, se asegura que la conexión es segura y que no está siendo interceptada por un atacante (ataque de hombre en el medio).
+2. **Errores de Conexión**: Si el certificado no es válido, está expirado, o no es emitido por una autoridad de certificación confiable, la conexión fallará .
+
+ 
+REF : 
+
+
+# Configuración del Motor de base de datos de SQL Server para cifrar conexiones
+    https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/configure-sql-server-encryption?view=sql-server-ver16#sql-server-generated-self-signed-certificates
+    
+     
+
+# Requisitos de certificado para SQL Server
+    https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/certificate-requirements?view=sql-server-ver16
+	
+	
+	
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+### 3. **Configuración del Almacén de Confianza**
+Aunque `trustServerCertificate=true` permite conexiones sin validar el certificado, es recomendable verificar la configuración del **almacén de confianza** (trustStore) en tu JVM para evitar problemas futuros . Si decides usar un trustStore, asegúrate de especificar las propiedades `trustStore` y `trustStorePassword` en tu cadena de conexión:
+
+java
+String connectionUrl = "jdbc:sqlserver://localhost:1433;"
+    + "databaseName=tuBaseDeDatos;"
+    + "encrypt=true;trustServerCertificate=false;"
+    + "trustStore=path/to/truststore;trustStorePassword=tuPassword;";
+
+
+ 
+### ¿Qué es un TrustStore?
+Un **trustStore** almacena certificados que identifican a otros servidores o entidades con las que tu aplicación se comunica de manera segura . Cuando tu aplicación se conecta a un servidor, verifica el certificado del servidor contra los certificados almacenados en el trustStore. Si el certificado del servidor está en el trustStore, la conexión se considera segura.
+
+### ¿Cómo se usa un TrustStore?
+Para usar un trustStore en Java, debes especificar su ubicación y contraseña mediante propiedades del sistema. Aquí tienes un ejemplo de cómo configurar un trustStore:
+
+java
+System.setProperty("javax.net.ssl.trustStore", "ruta/al/truststore.jks");
+System.setProperty("javax.net.ssl.trustStorePassword", "tuContraseña");
+
+
+### Creación y Gestión de un TrustStore
+Puedes crear y gestionar un trustStore utilizando la herramienta **keytool** de Java. Aquí tienes algunos comandos útiles:
+
+1. **Crear un TrustStore**:
+   bash
+   keytool -genkey -alias miAlias -keyalg RSA -keystore truststore.jks -storepass tuContraseña
+   
+
+2. **Importar un Certificado**:
+   bash
+   keytool -import -alias miAlias -file certificado.crt -keystore truststore.jks -storepass tuContraseña
+   
+
+### Consideraciones al Usar un TrustStore
+- **Ubicación del TrustStore**: Asegúrate de que el trustStore esté accesible para tu aplicación y que la ruta especificada sea correcta.
+- **Contraseña**: Protege tu trustStore con una contraseña segura y no la compartas públicamente.
+- **Certificados**: Mantén tu trustStore actualizado con los certificados necesarios para las conexiones seguras .
+
+### Ejemplo de Uso en una Aplicación
+Aquí tienes un ejemplo de cómo configurar una conexión segura utilizando un trustStore en Java:
+
+java
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class SecureConnection {
+    public static void main(String[] args) {
+        System.setProperty("javax.net.ssl.trustStore", "ruta/al/truststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "tuContraseña");
+
+        String connectionUrl = "jdbc:sqlserver://localhost:1433;databaseName=tuBaseDeDatos;encrypt=true;trustServerCertificate=false;";
+        try (Connection con = DriverManager.getConnection(connectionUrl, "tuUsuario", "tuContraseña")) {
+            System.out.println("Conexión segura establecida.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+ 
+
+### TrustStore
+El **TrustStore** es un almacén de confianza que contiene los certificados de las autoridades de certificación (CA) en las que confía tu aplicación.Este almacén se utiliza para verificar la autenticidad de los servidores con los que tu aplicación se comunica. Puedes configurar un TrustStore personalizado especificando su ubicación y contraseña mediante propiedades del sistema Java:
+
+java
+-Djavax.net.ssl.trustStore=/ruta/a/tu/truststore
+-Djavax.net.ssl.trustStorePassword=tuContraseña
+
+
+### cacerts
+El archivo **cacerts** es el TrustStore predeterminado que viene con la instalación de Java. Este archivo, ubicado generalmente en `lib/security/cacerts` dentro del directorio de instalación de Java, contiene certificados de muchas CA conocidas.Cuando no se especifica un TrustStore personalizado, Java utiliza el archivo cacerts para autenticar servidores.
+
+### Relación entre TrustStore y cacerts
+- **TrustStore predeterminado**: Si no configuras un TrustStore personalizado, Java utilizará el archivo cacerts como su TrustStore predeterminado .
+- **Personalización**: Puedes crear y utilizar un TrustStore personalizado si necesitas incluir certificados específicos que no están en el archivo cacerts .
+- **Compatibilidad**: Al migrar a una nueva versión de Java, como Java 21, es importante asegurarte de que cualquier TrustStore personalizado que estés utilizando sea compatible y esté correctamente configurado.
+
+
+
+
+
+ El **TrustStore** y el archivo **cacerts** pueden utilizarse tanto para certificados emitidos por una entidad certificadora (CA) como para certificados autofirmados. Aquí te explico cómo funcionan en cada caso:
+
+### Certificados Emitidos por una CA
+- **TrustStore**: Cuando utilizas certificados emitidos por una CA reconocida, estos certificados se almacenan en el TrustStore. Java utiliza el TrustStore para verificar la autenticidad del servidor durante las conexiones SSL/TLS.
+- **cacerts**: El archivo cacerts, que es el TrustStore predeterminado de Java, ya contiene muchos certificados de CA reconocidas. Si tu certificado está emitido por una CA incluida en cacerts, no necesitas hacer ninguna configuración adicional .
+
+### Certificados Autofirmados
+- **TrustStore**: Para certificados autofirmados, debes agregar manualmente el certificado al TrustStore para que Java pueda confiar en él. Esto es necesario porque los certificados autofirmados no están emitidos por una CA reconocida .
+- **cacerts**: Puedes agregar certificados autofirmados al archivo cacerts para que Java los reconozca como confiables. Esto se hace utilizando herramientas como `keytool` .
+
+### Ejemplo de Configuración
+Para agregar un certificado autofirmado al TrustStore o cacerts, puedes usar el siguiente comando `keytool`:
+
+sh
+keytool -import -alias miCertificado -file ruta/al/certificado.cer -keystore ruta/al/truststore.jks
+
+
+Este comando importa el certificado al TrustStore especificado. Si quieres agregarlo al cacerts, reemplaza `ruta/al/truststore.jks` por la ruta al archivo cacerts.
+
+### Consideraciones
+- **Entornos de Desarrollo**: Los certificados autofirmados son comunes en entornos de desarrollo y pruebas.
+- **Entornos de Producción**: En producción, es recomendable utilizar certificados emitidos por una CA reconocida para garantizar la seguridad y confianza de las conexiones .
+ 
+
+
+
+Cuando utilizas la propiedad `trustServerCertificate=true` en tu cadena de conexión, **Java no utiliza el archivo cacerts** para verificar el certificado del servidor [. Esta propiedad indica que tu aplicación debe confiar en el certificado del servidor sin realizar una verificación completa contra el TrustStore (incluyendo cacerts) .
+
+### ¿Qué significa esto?
+- **Sin verificación**: Al establecer `trustServerCertificate=true`, estás indicando que tu aplicación debe aceptar el certificado del servidor tal como está, sin importar si está firmado por una autoridad de certificación conocida ..
+- **Uso de cacerts**: Si `trustServerCertificate=false`, entonces Java utilizará el TrustStore (que puede ser el archivo cacerts predeterminado) para verificar la autenticidad del certificado del servidor .
+
+### Ejemplo de cadena de conexión
+java
+String connectionUrl = "jdbc:sqlserver://localhost:1433;"
+    + "databaseName=tuBaseDeDatos;"
+    + "encrypt=true;trustServerCertificate=true;"
+    + "user=tuUsuario;password=tuContraseña;";
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+# Recomendaciones 
+
+1. Actualizar el controlador JDBC
+
+    Aun que en la página oficial de SQL Server indica que la version de JDBC 12.8 es compatible con SQL Server 2016 y JRE 21 de igual forma no es una mala idea actualizar.
+
+        Ref: https://learn.microsoft.com/es-es/sql/connect/jdbc/microsoft-jdbc-driver-for-sql-server-support-matrix?view=sql-server-ver16
+
+2. Actualizar los certificados SSL
+    El error indica que los certificados no cumplen con las restricciones de algoritmos, específicamente SHA1withRSA hay que actualizar los certificados.
+    
+    
+    "Caused by: java.security.cert.CertPathValidatorException: Algorithm constraints check failed on signature algorithm: SHA1withRSA"
+    
+    
+    Ref: 
+        https://learn.microsoft.com/en-us/answers/questions/1199915/certificates-do-not-conform-to-algorithm
+        https://stackoverflow.com/questions/75697268/keycloak-on-azure-to-postgresql-certificates-do-not-conform-to-algorithm-constr
+        https://learn.microsoft.com/en-us/sql/connect/jdbc/configuring-the-client-for-ssl-encryption?view=sql-server-ver16
+        https://learn.microsoft.com/es-es/sql/connect/jdbc/connecting-with-ssl-encryption?view=sql-server-ver16
+        
+
+3. Características obsoletas del motor de base de datos en SQL Server 2016
+
+     SQL Server 2016 y versiones anteriores utilizan el algoritmo SHA1, que ya no se considera seguro.
+     El uso de MD2, MD4, MD5, SHA y SHA1 Utilice SHA2_256 o SHA2_512 en su lugar. 
+
+    Ref: https://learn.microsoft.com/en-us/sql/database-engine/deprecated-database-engine-features-in-sql-server-2016?view=sql-server-ver16
+    Ref: https://support.microsoft.com/en-us/topic/kb4053407-fix-sql-server-2017-cannot-decrypt-data-encrypted-by-earlier-versions-of-sql-server-by-using-the-same-symmetric-key-a33f8bc7-e01a-55c6-72db-b851334df3dd
+
+4. Validacion de connexion string 
+    "jdbc:sqlserver://192.168.10.101;databaseName=pruebas_db;Encrypt=True;TrustServerCertificate=True";
+	
+
+5. Actualizar el cacert 
+
+    Comando: 
+        $JAVA_HOME/keytool -import -alias <server_name> -keystore $JAVA_HOME/lib/security/cacerts -file CERTIFICATE_FILE_NAME 
+
+    Ref: 
+        https://support.atlassian.com/bitbucket-data-center/kb/ssl-algorithm-constraints-check-failed/
+        https://learn.microsoft.com/en-us/answers/questions/2125449/ssl-error-connection-into-sql-server-2016-standar
+
+6.-  Alternativas para la implementación de contenedores Docker
+
+    Cree su imagen modificando el Dockerfile para anular la política de cifrado
+
+    Comando: 
+        RUN update-crypto-policies --set DEFAULT:SHA1
+
+
+
+7.- Validación de código Java en parámetros
+
+    Comando: 	
+		private static final String[] protocols = new String[]{"TLSv1.3"}; private static final String[] cipher_suites = new String[]{"TLS_AES_128_GCM_SHA256"};
+ 
+    Ref: 
+		https://snyk.io/es/blog/implementing-tls-in-java/
+
+
+Ref Adicionales : 
+
+    # especificación java.security para su JDK y permitir el algoritmo SHA1
+        https://stackoverflow.com/questions/78576008/java-security-cert-certpathvalidatorexception-algorithm-constraints-check-faile
+        
+
+    # Java TLS Handshake fails 
+        https://access.redhat.com/solutions/6992400
+        
+        
+     
+    # Create and Install a Self-Signed SSL/TLS Certificate for SQL Server
+        https://codekabinett.com/rdumps.php?Lang=2&targetDoc=create-install-ssl-tls-certificate-sql-server
+		
+		
+	# Nombres de algoritmos del estándar de seguridad de Java
+		https://docs.oracle.com/en/java/javase/21/docs/specs/security/standard-names.html
+	
+	
+	# clipersuite   --- TLS 1.3  (TLS_AES_256_GCM_SHA384)  ---  TLS 1.2  (ECDHE-RSA-AES256-GCM-SHA384)
+		https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=java-tls-cipherspecs-ciphersuites-in-mq-classes
+		
+		
+
+
+
+
+```
