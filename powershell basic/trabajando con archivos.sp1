@@ -19,9 +19,12 @@ Write-Host "Direcciones IP:"
 
 foreach ($ip in $ipList) {
     Write-Host $ip
+
+    # agrega al final del archivo el valor 
+    Add-Content -Path $outputFilePath -Value "$ip - Realizado" 
 }
 
 # Guardar las direcciones IP en el archivo de salida
-$ipList | Out-File -FilePath $outputFilePath
+# $ipList | Out-File -FilePath $outputFilePath
 
 Write-Host "Las direcciones IP se han guardado en $outputFilePath "
