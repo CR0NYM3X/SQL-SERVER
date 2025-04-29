@@ -1,0 +1,15 @@
+
+$usuario = Read-Host "Ingrese el nombre de usuario"
+$contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
+
+# Convertir la contraseña segura a texto sin formato
+#$contraseñaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña))
+
+
+# Convertir SecureString a cadena normal
+$ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña)
+$contraseñaDesencriptada = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+
+
+# Imprimir la contraseña en texto claro
+Write-Host "La contraseña ingresada es: $contraseñaDesencriptada"
