@@ -1,5 +1,20 @@
+clear
  # Solicitar las credenciales al usuario desde una ventana de windows esto evita exponer las credenciales 
-$credenciales = Get-Credential
+# Nombre de usuario predeterminado
+$usuarioPredeterminado = "user_Predeterminado_test"
+
+# Solicitar el nombre de usuario con un valor predeterminado
+$usuario = Read-Host "Ingrese el nombre de usuario de lo contrario presionar ENTER (predeterminado: $usuarioPredeterminado)"
+if ([string]::IsNullOrWhiteSpace($usuario)) {
+    $usuario = $usuarioPredeterminado
+}
+
+# solicitar la contraseña de forma segurda
+$contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
+
+# Convertir SecureString a cadena normal
+$ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña)
+$contraseñaDesencriptada = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
 
 # Definir el servidor y la base de datos
 $servidor = "192.168.1.100"
@@ -7,7 +22,7 @@ $puerto = "1433"
 $baseDeDatos = "master"
 
 # Crear la cadena de conexión
-$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$($credenciales.UserName);Password=$($credenciales.GetNetworkCredential().Password);"
+$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$usuario;Password=$contraseñaDesencriptada;"
 
 # Crear la consulta SQL
 $query = "SELECT @@VERSION"
@@ -31,6 +46,10 @@ try {
     
     # Ejecutar el comando y obtener un lector de datos (SqlDataReader) para leer los resultados
     $reader = $command.ExecuteReader()
+
+   
+    # Ejecutar el comando, se usa este en caso de unicamente ejecutar algo que no esperara resultados 
+    #$command.ExecuteNonQuery()
 
     # Leer los resultados de la consulta
     while ($reader.Read()) {
