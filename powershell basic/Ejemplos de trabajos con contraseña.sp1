@@ -1,8 +1,26 @@
 
-$usuario = Read-Host "Ingrese el nombre de usuario"
+clear
 
+########################################################################################
 # Solicitar las credenciales al usuario , si utilizas esta opcion en el usuario no puedes colocar caracteres especiales
-#$credenciales = Get-Credential
+########################################################################################
+
+# Obtener las credenciales del usuario
+$credenciales = Get-Credential
+
+# Obtener el nombre de usuario
+$usuario = $credenciales.UserName
+
+# Obtener la contraseña (desencriptada)
+$contraseña = $credenciales.GetNetworkCredential().Password
+
+# Imprimir el nombre de usuario y la contraseña
+Write-Host "Usuario: $usuario y Contraseña: $contraseña"
+ 
+
+########################################################################################
+# Agregando contraseña por una ventana predeterminada, el problema que no se puede pegar las contraseñas
+########################################################################################
 
 # hay que tener en cuenta que esta forma no permite pegar contraseñas
 $contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
@@ -10,11 +28,51 @@ $contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
 # Convertir la contraseña segura a texto sin formato
 #$contraseñaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña))
 
-
 # Convertir SecureString a cadena normal
 $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña)
 $contraseñaDesencriptada = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
 
-
 # Imprimir la contraseña en texto claro
 Write-Host "La contraseña ingresada es: $contraseñaDesencriptada"
+
+
+########################################################################################
+###### Con ventana personalizada 
+########################################################################################
+Add-Type -AssemblyName System.Windows.Forms
+
+# Crear el cuadro de diálogo
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Ingrese la contraseña"
+$form.Width = 400
+$form.Height = 150
+
+# Crear el cuadro de texto
+$textBox = New-Object System.Windows.Forms.TextBox
+$textBox.Width = 350
+$textBox.Top = 20
+$textBox.Left = 20
+$textBox.UseSystemPasswordChar = $true
+$form.Controls.Add($textBox)
+
+# Crear el botón de aceptar
+$buttonOK = New-Object System.Windows.Forms.Button
+$buttonOK.Text = "Aceptar"
+$buttonOK.Top = 60
+$buttonOK.Left = 150
+$buttonOK.Add_Click({
+    $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.Close()
+})
+$form.Controls.Add($buttonOK)
+
+# Mostrar el cuadro de diálogo
+$result = $form.ShowDialog()
+
+# Obtener la contraseña
+if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+    $contraseña = $textBox.Text
+    Write-Host "Contraseña ingresada: $contraseña"
+} else {
+    Write-Host "Operación cancelada."
+}
