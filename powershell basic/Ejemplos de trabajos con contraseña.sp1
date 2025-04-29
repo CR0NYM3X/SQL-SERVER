@@ -1,5 +1,10 @@
 
 $usuario = Read-Host "Ingrese el nombre de usuario"
+
+# Solicitar las credenciales al usuario , si utilizas esta opcion en el usuario no puedes colocar caracteres especiales
+#$credenciales = Get-Credential
+
+# hay que tener en cuenta que esta forma no permite pegar contraseñas
 $contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
 
 # Convertir la contraseña segura a texto sin formato
