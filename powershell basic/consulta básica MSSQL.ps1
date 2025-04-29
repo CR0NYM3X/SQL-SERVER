@@ -96,7 +96,11 @@ try {
 } catch {
     # Capturar cualquier error que ocurra durante la ejecución de la consulta y imprimirlo
     Write-Output "Error: $_"
+}  finally {
+    # Cerrar la conexión
+    $connection.Close()
 }
+
 
 
  
