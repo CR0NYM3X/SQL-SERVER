@@ -1,20 +1,54 @@
 clear
  # Solicitar las credenciales al usuario desde una ventana de windows esto evita exponer las credenciales 
 # Nombre de usuario predeterminado
-$usuarioPredeterminado = "user_Predeterminado_test"
+$usuarioPredeterminado = "usuario_predeterminado"
 
 # Solicitar el nombre de usuario con un valor predeterminado
 $usuario = Read-Host "Ingrese el nombre de usuario de lo contrario presionar ENTER (predeterminado: $usuarioPredeterminado)"
 if ([string]::IsNullOrWhiteSpace($usuario)) {
     $usuario = $usuarioPredeterminado
+}else {
+	$usuario = $usuario
 }
 
-# solicitar la contraseña de forma segurda
-$contraseña = Read-Host "Ingrese la contraseña" -AsSecureString
+Add-Type -AssemblyName System.Windows.Forms
 
-# Convertir SecureString a cadena normal
-$ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($contraseña)
-$contraseñaDesencriptada = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+# Crear el cuadro de diálogo
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Ingrese la contraseña"
+$form.Width = 400
+$form.Height = 150
+
+# Crear el cuadro de texto
+$textBox = New-Object System.Windows.Forms.TextBox
+$textBox.Width = 350
+$textBox.Top = 20
+$textBox.Left = 20
+$textBox.UseSystemPasswordChar = $true
+$form.Controls.Add($textBox)
+
+# Crear el botón de aceptar
+$buttonOK = New-Object System.Windows.Forms.Button
+$buttonOK.Text = "Aceptar"
+$buttonOK.Top = 60
+$buttonOK.Left = 150
+$buttonOK.Add_Click({
+    $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.Close()
+})
+$form.Controls.Add($buttonOK)
+
+# Mostrar el cuadro de diálogo
+$result = $form.ShowDialog()
+
+# Obtener la contraseña
+if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+    $contraseña = $textBox.Text
+    #Write-Host "Contraseña ingresada: $contraseña"
+} else {
+    Write-Host "Operación cancelada."
+}
+
 
 # Definir el servidor y la base de datos
 $servidor = "192.168.1.100"
@@ -22,7 +56,7 @@ $puerto = "1433"
 $baseDeDatos = "master"
 
 # Crear la cadena de conexión
-$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$usuario;Password=$contraseñaDesencriptada;"
+$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$usuario;Password=$contraseña"
 
 # Crear la consulta SQL
 $query = "SELECT @@VERSION"
@@ -63,3 +97,6 @@ try {
     # Capturar cualquier error que ocurra durante la ejecución de la consulta y imprimirlo
     Write-Output "Error: $_"
 }
+
+
+ 
