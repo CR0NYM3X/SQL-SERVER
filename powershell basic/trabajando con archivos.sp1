@@ -1,0 +1,27 @@
+clear
+# Formas de concatenar 
+#$resultado = $variable1 + " " + $variable2
+#$resultado = "$variable1 $variable2"
+
+# guardar la salida en la misma ruta donde se ejecuta el script, puedes usar la variable $PSScriptRoot, que contiene la ruta del directorio del script en ejecución
+#$outputFilePath = "$PSScriptRoot\output.txt"
+
+
+# Definir las rutas de los archivos
+$inputFilePath = "C:\Users\usertemp\Desktop\ips.txt"
+$outputFilePath = "C:\Users\usertemp\Desktop\output.txt"
+
+# Leer las direcciones IP desde el archivo de entrada
+$ipList = Get-Content -Path $inputFilePath
+
+# Imprimir las direcciones IP en la consola
+Write-Host "Direcciones IP:"
+
+foreach ($ip in $ipList) {
+    Write-Host $ip
+}
+
+# Guardar las direcciones IP en el archivo de salida
+$ipList | Out-File -FilePath $outputFilePath
+
+Write-Host "Las direcciones IP se han guardado en $outputFilePath "
