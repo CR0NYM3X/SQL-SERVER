@@ -1,9 +1,9 @@
 podemos aprender hacer script para sql basico en powershell
 
-### clase SqlConnection
+### Forma #1  de conexión usando clase SqlConnection
 script utiliza la clase SqlConnection de .NET Framework y no de un módulo específico de PowerShell, que permite establecer una conexión con una base de datos SQL Server
 
-### Module SqlServer
+### Forma #2  de conexión usando Module SqlServer
 El comando Import-Module SqlServer se utiliza para importar el módulo de PowerShell SqlServer como  Invoke-Sqlcmd, que proporciona cmdlets adicionales para trabajar con SQL Server. Este módulo facilita la ejecución de comandos y la administración de SQL Server directamente desde PowerShell 
 
 
@@ -49,7 +49,17 @@ El comando Import-Module SqlServer se utiliza para importar el módulo de PowerS
 ### Verificar si tienes la clase SqlConnection:
 	[System.Data.SqlClient.SqlConnection]
 
- 
+### Instalar el módulo SqlServer
+Install-Module -Name SqlServer -Scope CurrentUser
+
+### Verificar comando Invoke-Sqlcmd
+```
+if (Get-Command -Name Invoke-Sqlcmd -ErrorAction SilentlyContinue) {
+    Write-Host "Invoke-Sqlcmd está disponible."
+} else {
+    Write-Host "Invoke-Sqlcmd no está disponible."
+}
+```
 
 ```
 https://medium.com/@rivera5656/connect-and-query-a-sql-server-database-from-powershell-f264e73941f5
