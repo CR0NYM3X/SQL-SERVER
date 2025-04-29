@@ -1,4 +1,9 @@
+
+
 podemos aprender hacer script para sql basico en powershell
+
+# Abrir powershell desde ejecutar 
+	powershell_ise
 
 ### Forma #1  de conexión usando clase SqlConnection
 script utiliza la clase SqlConnection de .NET Framework y no de un módulo específico de PowerShell, que permite establecer una conexión con una base de datos SQL Server
