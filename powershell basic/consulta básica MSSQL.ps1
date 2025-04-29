@@ -56,7 +56,7 @@ $puerto = "1433"
 $baseDeDatos = "master"
 
 # Crear la cadena de conexión
-$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$usuario;Password=$contraseña"
+$connectionString = "Server=$servidor,$puerto;Database=$baseDeDatos;User Id=$usuario;Password=$contraseña" # ,Encrypt=True;TrustServerCertificate=True;
 
 # Crear la consulta SQL
 $query = "SELECT @@VERSION"
