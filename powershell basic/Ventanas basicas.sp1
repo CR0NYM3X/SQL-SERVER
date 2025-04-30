@@ -12,7 +12,8 @@ $textBox.Multiline = $true
 $textBox.Width = 250
 $textBox.Height = 100
 $textBox.Text = "Texto inicial"
-$textBox.Location = New-Object System.Drawing.Point(20, 20)
+$textBox.Location = New-Object System.Drawing.Point(20, 20) # Posición (x, y)
+
 
 # Crear el botón para borrar texto
 $buttonClear = New-Object System.Windows.Forms.Button
