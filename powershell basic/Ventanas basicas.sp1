@@ -1,0 +1,49 @@
+Add-Type -AssemblyName System.Windows.Forms
+
+# Crear la ventana
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Ventana de Cuadrado"
+$form.Width = 500
+$form.Height = 500
+
+# Crear el cuadro de texto
+$textBox = New-Object System.Windows.Forms.TextBox
+$textBox.Multiline = $true
+$textBox.Width = 250
+$textBox.Height = 100
+$textBox.Text = "Texto inicial"
+$textBox.Location = New-Object System.Drawing.Point(20, 20)
+
+# Crear el botón para borrar texto
+$buttonClear = New-Object System.Windows.Forms.Button
+$buttonClear.Text = "Borrar Texto"
+$buttonClear.Width = 100
+$buttonClear.Height = 30
+$buttonClear.Location = New-Object System.Drawing.Point(20, 130)
+
+# Crear el botón para pegar texto aleatorio
+$buttonRandom = New-Object System.Windows.Forms.Button
+$buttonRandom.Text = "Texto Aleatorio"
+$buttonRandom.Width = 100
+$buttonRandom.Height = 30
+$buttonRandom.Location = New-Object System.Drawing.Point(140, 130)
+
+# Agregar el evento de clic del botón para borrar texto
+$buttonClear.Add_Click({
+    $textBox.Clear()
+})
+
+# Agregar el evento de clic del botón para pegar texto aleatorio
+$buttonRandom.Add_Click({
+    $randomTexts = @("Texto 1", "Texto 2", "Texto 3", "Texto 4", "Texto 5")
+    $randomIndex = Get-Random -Minimum 0 -Maximum $randomTexts.Length
+    $textBox.Text = $randomTexts[$randomIndex]
+})
+
+# Agregar controles a la ventana
+$form.Controls.Add($textBox)
+$form.Controls.Add($buttonClear)
+$form.Controls.Add($buttonRandom)
+
+# Mostrar la ventana
+$form.ShowDialog()
