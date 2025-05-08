@@ -591,7 +591,11 @@ https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/remote-a
 https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/diagnostic-connection-for-database-administrators?view=sql-server-ver16
 https://www.sqlshack.com/sql-server-dedicated-admin-connection-dac-how-to-enable-connect-and-use/
 
+--- Validar si esta activado
 
+EXEC sp_configure 'remote admin connections' -- si la columna config_value esta en 1 esta activado si es 0 esta desactivado
+
+-----
 
 sqlcmd -A -S 127.0.0.1,1434
 
