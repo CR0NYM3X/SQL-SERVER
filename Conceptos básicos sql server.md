@@ -1,4 +1,9 @@
 
+## Conexion string 
+```
+Server=192.28.230.122;Database=master;User Id=sys_usert;Password=A138AFB73ECD5B64F6;Encrypt=True;TrustServerCertificate=True;
+```
+
 ### Diferencia de DDL Y DML 
 **Lenguaje de Definición de Datos (DDL):**
 
