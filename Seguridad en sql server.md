@@ -603,11 +603,34 @@ GO
 
 
 
-/********  SQL Managment **********/
-Se conecta  con : ADMIN:MSSQLSERVER
-admin:<nombre_instancia>
-admin:<nombre_instancia>\<nombre_instancia>
+ 
+### Ventajas del DAC
+1. **Acceso en Situaciones Críticas**: Permite a los administradores conectarse y ejecutar consultas de diagnóstico cuando el servidor está bajo una carga extrema o no responde a conexiones normales.
+2. **Resolución de Problemas**: Facilita la identificación y terminación de consultas de larga duración que pueden estar causando problemas de rendimiento.
+3. **Seguridad**: La conexión DAC admite cifrado y otras características de seguridad de SQL Server.
 
+### Requisitos para Conectarse
+1. **Permisos**: Solo los miembros del rol `sysadmin` pueden conectarse utilizando la DAC.
+2. **Configuración**: Por defecto, la conexión solo está permitida desde un cliente que se ejecute en el servidor. Para permitir conexiones remotas, se debe configurar mediante el procedimiento almacenado `sp_configure` con la opción `remote admin connections`.
+3. **Herramientas**: La DAC está disponible a través de la utilidad de línea de comandos `sqlcmd` usando el modificador especial `-A`, o prefijando `admin:` al nombre de la instancia en SQL Server Management Studio (SSMS).
+
+### Cómo Conectarse
+1. **Desde SSMS**:
+   - Desconecta todas las conexiones a la instancia de SQL Server.
+   - Selecciona `Archivo > Nuevo > Consulta de motor de base de datos`.
+   - En el cuadro de diálogo de conexión, escribe `admin:<server_name>` para la instancia predeterminada o `admin:<server_name>\<instance_name>` para una instancia con nombre.
+
+2. **Desde `sqlcmd`**:
+   ```plaintext
+   sqlcmd -S admin:<instance_name> -A
+   ```
+
+### Limitaciones o Desventajas
+1. **Conexión Única**: Solo se permite una conexión DAC por cada instancia de SQL Server.
+2. **Recursos Limitados**: SQL Server Express no escucha en el puerto DAC a menos que se inicie con una marca de seguimiento 7806.
+3. **Uso Restricto**: La DAC está diseñada únicamente para diagnóstico y resolución de problemas, no para operaciones regulares.
+
+ 
 
 ```
 
