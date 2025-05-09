@@ -666,6 +666,9 @@ create login [myuser_test] with password = '12345.aA'
 go
 alter server role [sysadmin] add member [myuser_test]
 go
+
+NOTA: si es por instancia se coloca MSSQL$MSSQLSERVER+numeroinstancia
+
 ```
 
 
