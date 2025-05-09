@@ -657,8 +657,10 @@ para esto puedes desde ingresar al **SQL server configuration manager** después
 
 o puedes realizar esto desde el cmd 
  ```SQL
-net stop mssqlserver
-net start mssqlserver \m 
+NOTA: si es por instancia se coloca MSSQL$NOMBREINSTANCIA
+
+net start MSSQL$mssqlserver
+net start MSSQL$mssqlserver \m 
 
 sqlcmd -S 127.0.0.1
 
@@ -667,7 +669,7 @@ go
 alter server role [sysadmin] add member [myuser_test]
 go
 
-NOTA: si es por instancia se coloca MSSQL$MSSQLSERVER+numeroinstancia
+
 
 ```
 
