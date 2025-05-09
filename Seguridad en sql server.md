@@ -591,9 +591,28 @@ https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/remote-a
 https://learn.microsoft.com/es-es/sql/database-engine/configure-windows/diagnostic-connection-for-database-administrators?view=sql-server-ver16
 https://www.sqlshack.com/sql-server-dedicated-admin-connection-dac-how-to-enable-connect-and-use/
 
---- Validar si esta activado
-
+### Validar si esta activado
 EXEC sp_configure 'remote admin connections' -- si la columna config_value esta en 1 esta activado si es 0 esta desactivado
+
+ 
+### Consideraciones al usar DAC:
+1. **Acceso limitado**: Solo los miembros del rol `sysadmin` pueden conectarse utilizando la DAC.
+2. **Conexión única**: Solo se permite una conexión DAC por instancia de SQL Server. Si ya hay una conexión DAC activa, cualquier solicitud nueva será denegada.
+3. **Configuración predeterminada**: Por defecto, la DAC solo permite conexiones desde el servidor local. Para habilitar conexiones remotas, debes configurar la opción `remote admin connections`.
+
+### Configuración de la DAC para conexiones remotas:
+
+-- Habilitar conexiones remotas para DAC
+EXEC sp_configure 'remote admin connections', 1;
+RECONFIGURE;
+
+
+### Conexión a una instancia con un puerto diferente:
+Marcara el siguiente error "cloud not establish dedicated administrator connection (DAC) on default port"
+por lo que se tiene que colocar el puerto 1433 o intentar con el 1434 
+
+
+ 
 
 -----
 
@@ -603,10 +622,6 @@ EXEC sp_configure 'remote admin connections', 1;
 GO
 RECONFIGURE;
 GO
-
-
-
-
  
 ### Ventajas del DAC
 1. **Acceso en Situaciones Críticas**: Permite a los administradores conectarse y ejecutar consultas de diagnóstico cuando el servidor está bajo una carga extrema o no responde a conexiones normales.
@@ -622,11 +637,13 @@ GO
 1. **Desde SSMS**:
    - Desconecta todas las conexiones a la instancia de SQL Server.
    - Selecciona `Archivo > Nuevo > Consulta de motor de base de datos`.
-   - En el cuadro de diálogo de conexión, escribe `admin:<server_name>` para la instancia predeterminada o `admin:<server_name>\<instance_name>` para una instancia con nombre.
+   - En el cuadro de diálogo de conexión, escribe `admin:localhost,PUERTO` para la instancia predeterminada o `admin:localhost\NOMBRE_INSTANCIA,PUERTO` para una instancia con nombre.
 
 2. **Desde `sqlcmd`**:
    ```plaintext
    sqlcmd -S admin:<instance_name> -A
+
+En este comando, `-A` indica que estás utilizando la DAC, `localhost` es el nombre del servidor y `PUERTO` es el número de puerto específico de tu instancia.
    ```
 
 ### Limitaciones o Desventajas
