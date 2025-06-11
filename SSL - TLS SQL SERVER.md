@@ -277,7 +277,7 @@ EXEC xp_instance_regread
 
 
 
-### Extra info 
+### Instlar el Thumbprint desde SQL Server 
 ```sql
 	2. Configuración de Bindings
 	-- Configurar puerto para TLS
@@ -286,7 +286,7 @@ EXEC xp_instance_regread
 		N'Software\Microsoft\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQLServer\SuperSocketNetLib', 
 		N'Certificate', 
 		REG_SZ, 
-		N'Thumbprint_del_Certificado'
+		N'OID_del_Thumbprint_del_Certificado'
  ```
 
 
