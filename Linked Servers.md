@@ -24,6 +24,7 @@ SELECT  * FROM sys.servers  WHERE is_linked = 1;
 ### Ejemplo usando un linkeo
 ```
 SELECT * FROM [Nobre_linkeo].[NombreBaseDatos].[NombreEsquema].[NombreTabla];
+SELECT * FROM OPENQUERY(LINKEO_TEST, 'SELECT * FROM CAT_SERVIDORES LIMIT 10');
 ```
 
 ### ver los linkeos que existen
