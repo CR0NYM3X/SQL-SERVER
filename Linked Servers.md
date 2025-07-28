@@ -97,6 +97,114 @@ ALTER SERVICE MASTER KEY FORCE REGENERATE;
 --- EXEC sp_addserver @server = 'ServidorRemoto', @local = 'local';
 ```
 
+
+--- 
+
+### 🎭 ¿Qué hace la casilla de **"Suplantar"**?
+
+- **Permite que el usuario local actúe como si fuera el usuario remoto especificado**, **usando su propio contexto de seguridad**, en lugar de enviar explícitamente un usuario y contraseña.
+ 
+### 🔍 ¿Cómo funciona?
+
+- Cuando **activas "Suplantar"**, SQL Server **no envía usuario y contraseña** al servidor remoto.
+- En su lugar, **intenta delegar el contexto de seguridad del usuario local** (por ejemplo, `DOMAIN\jose`) al servidor remoto.
+- Esto **solo funciona si estás usando autenticación de Windows** y tienes **Kerberos y delegación configurados correctamente**.
+
+--- 
+
+### ✅ Recomendación de Mejores Prácticas
+
+| Escenario | Opción recomendada | Seguridad |
+|----------|--------------------|-----------|
+| Entorno con Active Directory y Kerberos | **Opción 3** | 🔒 Alta |
+| Entorno sin Kerberos pero con control de acceso centralizado | **Opción 4** (con cuenta de servicio segura) | 🔐 Media |
+| Pruebas o desarrollo sin datos sensibles | **Opción 4 o 1** | 🧪 Baja |
+| Nunca usar | **Opción 2** | 🚫 Muy baja |
+
+ 
+
+### 🔐 Opción 1: **NO SE ESTABLECERÁN**
+
+- **Descripción**: No se define ningún mapeo de usuario. SQL Server no intentará autenticar al usuario local en el servidor vinculado.
+- **Seguridad**: Alta (si se configura correctamente)
+- **Motivo de seguridad**: No se permite el acceso a menos que se configure explícitamente un inicio de sesión predeterminado o se use otro método de autenticación.
+- **Método de conexión al servidor remoto**: No se conecta automáticamente. Requiere que se configure un inicio de sesión predeterminado en la pestaña de seguridad del Linked Server.
+- **Ventajas**:
+  - Evita accesos accidentales o no autorizados.
+  - Obliga a definir reglas claras de acceso.
+- **Desventajas**:
+  - No funcional por sí sola; requiere configuración adicional.
+  - Puede generar errores si no se entiende bien su propósito.
+- **Recomendado**: Para entornos donde se desea un control estricto de acceso y se planea usar autenticación personalizada o delegación controlada.
+- **¿Permite mapeo de usuarios?** ✅ Sí, pero solo si defines un inicio de sesión predeterminado.
+- **¿Permite suplantar?** ❌ No aplica.
+- **¿Requiere usuario y contraseña en el mapeo?** ✅ Solo si defines un inicio de sesión predeterminado.
+**NOTA:** Al intentar mapear el usuario posiblemente te aparezca el mensaje "Access to the remote server is denied because no login-mapping exists. (Microsoft SQL Server, Error: 7416)" pero si permitira, no le hagas caso al mensaje 
+---
+
+### 🔐 Opción 2: **SE ESTABLECERÁN SIN USAR UN CONTEXTO DE SEGURIDAD**
+
+- **Descripción**: Permite el acceso al servidor vinculado sin pasar credenciales. Es equivalente a un acceso anónimo.
+- **Seguridad**: Muy baja
+- **Motivo de seguridad**: Cualquier usuario puede acceder al servidor remoto sin autenticación, lo que representa un riesgo crítico.
+- **Método de conexión al servidor remoto**: SQL Server intenta conectarse sin enviar credenciales. Depende de que el servidor remoto permita conexiones anónimas.
+- **Ventajas**:
+  - Fácil de configurar.
+  - Útil para pruebas rápidas sin restricciones.
+- **Desventajas**:
+  - No hay trazabilidad de quién accede.
+  - Riesgo de exposición de datos sensibles.
+  - No cumple con estándares de seguridad corporativa.
+- **Recomendado**: **Nunca** en producción. Solo para pruebas locales muy controladas y sin datos sensibles.
+- **¿Permite mapeo de usuarios?** ❌ No. No se puede mapear porque no se usan credenciales.
+- **¿Permite suplantar?** ❌ No.
+- **¿Requiere usuario y contraseña en el mapeo?** ❌ No.
+
+---
+
+### 🔐 Opción 3: **SE ESTABLECERÁN USANDO EL CONTEXTO DE SEGURIDAD ACTUAL DE INICIO DE SESIÓN**
+
+- **Descripción**: Se utiliza el contexto del usuario que inició sesión en SQL Server para autenticarse en el servidor vinculado. Requiere Kerberos y delegación configurada.
+- **Seguridad**: Muy alta
+- **Motivo de seguridad**: Se mantiene la identidad del usuario a través de los servidores, permitiendo auditoría y control de acceso granular.
+- **Método de conexión al servidor remoto**: SQL Server usa el **usuario de Windows** con el que se conectó el cliente (ej. `jose`) y lo delega al servidor remoto mediante **Kerberos**. No se usan credenciales fijas.
+- **Ventajas**:
+  - Trazabilidad completa de accesos.
+  - Cumple con políticas de seguridad basadas en identidad.
+  - Ideal para entornos con Active Directory.
+- **Desventajas**:
+  - Requiere configuración avanzada (SPN, delegación, Kerberos).
+  - Puede ser complejo de mantener.
+- **Recomendado**: En entornos empresariales con infraestructura de seguridad bien definida (AD + Kerberos). Ideal para producción.
+- **¿Permite mapeo de usuarios?** ❌ No. No se usa mapeo porque se delega el contexto directamente.
+- **¿Permite suplantar?** ✅ Sí, si el servidor remoto lo permite y Kerberos está bien configurado.
+- **¿Requiere usuario y contraseña en el mapeo?** ❌ No.
+
+---
+
+### 🔐 Opción 4: **SE ESTABLECERÁN USANDO ESTE CONTEXTO DE SEGURIDAD**
+
+- **Descripción**: Se define un usuario y contraseña fijos para conectarse al servidor remoto, independientemente del usuario local.
+- **Seguridad**: Media a baja (dependiendo de cómo se protejan las credenciales)
+- **Motivo de seguridad**: Todos los usuarios usan las mismas credenciales, lo que puede permitir accesos no autorizados si no se controla adecuadamente.
+- **Método de conexión al servidor remoto**: SQL Server se conecta **siempre** con el usuario y contraseña especificados en esta opción, por ejemplo: `usuario = postgres`, `contraseña = 123`.
+- **Ventajas**:
+  - Fácil de implementar.
+  - No requiere configuración de Kerberos.
+  - Útil cuando se necesita acceso constante con una cuenta de servicio.
+- **Desventajas**:
+  - No hay trazabilidad por usuario.
+  - Riesgo si las credenciales se filtran.
+  - Puede violar políticas de seguridad si no se protege adecuadamente.
+- **Recomendado**: Para entornos de desarrollo, QA o cuando no se puede usar delegación. Asegúrate de usar una cuenta de servicio con permisos mínimos y rotación de contraseñas.
+- **¿Permite mapeo de usuarios?** ✅ Sí. Puedes mapear usuarios locales a un usuario remoto específico.
+- **¿Permite suplantar?** ✅ Sí, puedes activar la casilla de suplantar para que un usuario local actúe como otro.
+- **¿Requiere usuario y contraseña en el mapeo?** ✅ Sí, debes especificarlos en cada mapeo o usar un inicio de sesión predeterminado.
+
+
+---
+
+
 - Para conectar el linkeo a  POSTGRESQL se coloca en provider
 ```
 En Provider:  Microsoft OLE DB Provider for ODBC  Drivers
