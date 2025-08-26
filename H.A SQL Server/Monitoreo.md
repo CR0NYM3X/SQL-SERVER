@@ -1,7 +1,9 @@
 Para saber si estás conectado a una **instancia principal (maestro)** o a una **réplica (secundaria)** en SQL Server, puedes ejecutar la siguiente consulta:
 
 ```sql
-SELECT 
+SELECT
+    CONNECTIONPROPERTY('client_net_address') AS ClientIP,
+    CONNECTIONPROPERTY('local_net_address') AS ServerIP,
     DATABASEPROPERTYEX(DB_NAME(), 'Updateability') AS Updateability,
     DATABASEPROPERTYEX(DB_NAME(), 'IsSubscribed') AS IsSubscribed,
     DATABASEPROPERTYEX(DB_NAME(), 'IsMergePublished') AS IsMergePublished,
