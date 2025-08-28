@@ -4,6 +4,35 @@
 Server=192.28.230.122;Database=master;User Id=sys_usert;Password=A138AFB73ECD5B64F6;Encrypt=True;TrustServerCertificate=True;
 ```
 
+
+### 🔐 Usuarios comunes en SQL Server
+
+#### 1. **`dbo` (Database Owner)**
+- Es el **propietario de la base de datos**.
+- Tiene **todos los permisos** sobre todos los objetos de la base de datos.
+- Normalmente, cualquier usuario que sea dueño de la base de datos o tenga el rol `db_owner` se considera `dbo`.
+- Si un objeto es creado por `dbo`, se puede acceder como `dbo.NombreObjeto`.
+
+#### 2. **`guest`**
+- Permite que los usuarios que **no tienen un usuario explícito en la base de datos** puedan acceder a ella **si el usuario `guest` tiene permisos**.
+- Es útil para accesos públicos o compartidos, pero **no se recomienda** habilitarlo en bases de datos sensibles.
+- Si no se le asignan permisos, los usuarios sin usuario en la base de datos **no podrán acceder**.
+
+#### 3. **`public`**
+- Es un **rol especial** que **todos los usuarios** de la base de datos heredan automáticamente.
+- Los permisos asignados al rol `public` se aplican a **todos los usuarios**, incluso si no tienen permisos específicos.
+- Se usa para definir permisos **mínimos o comunes**.
+
+---
+
+### 🧠 ¿Por qué aparecen en `sys.database_permissions`?
+
+Porque SQL Server permite asignar permisos directamente a estos roles o usuarios especiales. Por ejemplo:
+
+- Si ves que `public` tiene permiso `SELECT` sobre una tabla, **todos los usuarios** podrán hacer `SELECT` en esa tabla.
+- Si `guest` tiene permiso `CONNECT`, entonces usuarios sin usuario en la base de datos podrán conectarse.
+- Si `dbo` tiene permisos sobre un objeto, es porque es el propietario o tiene privilegios elevados.
+
 ### Diferencia de DDL Y DML 
 **Lenguaje de Definición de Datos (DDL):**
 
