@@ -1,3 +1,28 @@
+### 🔐 Usuarios comunes en SQL Server
+
+#### 1. **`dbo` (Database Owner)**
+- Es el **propietario de la base de datos**.
+- Tiene **todos los permisos** sobre todos los objetos de la base de datos.
+- Normalmente, cualquier usuario que sea dueño de la base de datos o tenga el rol `db_owner` se considera `dbo`.
+- Si un objeto es creado por `dbo`, se puede acceder como `dbo.NombreObjeto`.
+
+#### 2. **`guest`**
+- Permite que los usuarios que **no tienen un usuario explícito en la base de datos** puedan acceder a ella **si el usuario `guest` tiene permisos**.
+- Es útil para accesos públicos o compartidos, pero **no se recomienda** habilitarlo en bases de datos sensibles.
+- Si no se le asignan permisos, los usuarios sin usuario en la base de datos **no podrán acceder**.
+
+#### 3. **`public`**
+- Es un **rol especial** que **todos los usuarios** de la base de datos heredan automáticamente.
+- Los permisos asignados al rol `public` se aplican a **todos los usuarios**, incluso si no tienen permisos específicos.
+- Se usa para definir permisos **mínimos o comunes**.
+
+### Ver los permisos de esos roles
+```
+select USER_NAME(grantee_principal_id), OBJECT_NAME(major_id) , * from sys.database_permissions
+where USER_NAME(grantee_principal_id) in('public','guest','dbo')
+order by USER_NAME(grantee_principal_id),permission_name,OBJECT_NAME(major_id) 
+ ```
+
 
 ### Mayor seguridad de monitoreo
 ```
