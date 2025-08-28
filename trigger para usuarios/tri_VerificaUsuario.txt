@@ -51,9 +51,11 @@ GO
 
 
 
-
-
+ 
 ----------------------------------------     OPCION 2 LOGIN SAVE -------------------------------------------------------------------------------------
+
+
+*********** CREAR TABLA ***********
 
 CREATE TABLE LoginAttempts (
     LoginAttemptID INT PRIMARY KEY IDENTITY(1,1),
@@ -66,46 +68,90 @@ CREATE TABLE LoginAttempts (
     LoginType NVARCHAR(50),
     EventType NVARCHAR(128) -- Nueva columna para almacenar el tipo de evento
 );
-  
-alter TRIGGER LoginAttemptTrigger
+GO
+
+*********** CREAR PROCEDURE ***********
+
+USE master;
+GO
+
+alter PROCEDURE dbo.sp_RegistrarLogin
+    @userName NVARCHAR(100),
+    @eventType NVARCHAR(128),
+    @ipAddress NVARCHAR(100),
+    @appName NVARCHAR(128),
+    @hostName NVARCHAR(128),
+    @databaseName NVARCHAR(128),
+    @loginType NVARCHAR(100)
+WITH EXECUTE AS OWNER
+AS
+BEGIN
+    INSERT INTO [Master].[dbo].[LoginAttempts]
+    (UserName, AttemptDateTime, IPAddress, ApplicationName, HostName, DatabaseName, LoginType, EventType)
+    VALUES (@userName, GETDATE(), @ipAddress, @appName, @hostName, @databaseName, @loginType, @eventType);
+END
+GO
+
+
+
+*********** CREAR TRIGGER ***********
+
+--- DROP TRIGGER [LoginAttemptTrigger] ON ALL SERVER
+
+CREATE TRIGGER [LoginAttemptTrigger]
 ON ALL SERVER
 FOR LOGON
 AS
 BEGIN
+    DECLARE @appName NVARCHAR(500) = APP_NAME();
 
-    DECLARE @eventType NVARCHAR(128)
-    SET @eventType = EVENTDATA().value('(/EVENT_INSTANCE/EventType)[1]', 'NVARCHAR(128)')
- 
+    IF LOWER(@appName) LIKE '%management%'
+    BEGIN
+        DECLARE @eventType NVARCHAR(128) = EVENTDATA().value('(/EVENT_INSTANCE/EventType)[1]', 'NVARCHAR(128)');
+        DECLARE @userName NVARCHAR(100) = EVENTDATA().value('(/EVENT_INSTANCE/LoginName)[1]', 'NVARCHAR(100)');
+        DECLARE @ipAddress NVARCHAR(100) = EVENTDATA().value('(/EVENT_INSTANCE/ClientHost)[1]', 'NVARCHAR(100)');
+    
+        DECLARE @hostName NVARCHAR(128) = HOST_NAME();
+        DECLARE @databaseName NVARCHAR(128) = DB_NAME();
+        DECLARE @loginType NVARCHAR(100) = EVENTDATA().value('(/EVENT_INSTANCE/LoginType)[1]', 'NVARCHAR(100)');
 
-		DECLARE @userName NVARCHAR(50)
-		DECLARE @ipAddress NVARCHAR(50)
-		DECLARE @appName NVARCHAR(128)
-		DECLARE @hostName NVARCHAR(128)
-		DECLARE @databaseName NVARCHAR(128)
-		DECLARE @loginType NVARCHAR(50)
-    
-		SET @userName = EVENTDATA().value('(/EVENT_INSTANCE/LoginName)[1]', 'NVARCHAR(100)')
-		SET @ipAddress = EVENTDATA().value('(/EVENT_INSTANCE/ClientHost)[1]', 'NVARCHAR(100)')
-		SET @appName = APP_NAME()
-		SET @hostName = HOST_NAME()
-		SET @databaseName = DB_NAME()
-		SET @loginType = EVENTDATA().value('(/EVENT_INSTANCE/LoginType)[1]', 'NVARCHAR(100)')
-    
-		INSERT INTO LoginAttempts (UserName, AttemptDateTime, IPAddress, ApplicationName, HostName, DatabaseName, LoginType, EventType)
-		VALUES (@userName, GETDATE(), @ipAddress, @appName, @hostName, @databaseName, @loginType, @eventType)
- 
+        EXEC master.dbo.sp_RegistrarLogin
+            @userName = @userName,
+            @eventType = @eventType,
+            @ipAddress = @ipAddress,
+            @appName = @appName,
+            @hostName = @hostName,
+            @databaseName = @databaseName,
+            @loginType = @loginType;
+    END
+
 END
  
-
-disable TRIGGER [LoginAttemptTrigger] ON ALL SERVER
-enable TRIGGER [LoginAttemptTrigger] ON ALL SERVER 
  
-select * from LoginAttempts ; 
+GO
 
-truncate  table LoginAttempts
+
+*********** Otorgar permisos y habilitar trigger ***********
+  
+  
+GRANT EXECUTE ON OBJECT::master.dbo.sp_RegistrarLogin TO public;
+
+-- disable TRIGGER [LoginAttemptTrigger] ON ALL SERVER
+ENABLE TRIGGER [LoginAttemptTrigger] ON ALL SERVER
+GO
+  
+
+*********** Validaciones ***********
+
+  
+select * from [Pruebas].[dbo].[LoginAttempts] ; -- truncate  table [Pruebas].[dbo].[LoginAttempts]
+
+select * from [Master].[dbo].[LoginAttempts] -- truncate  table [Master].[dbo].[LoginAttempts]
+
 
 EXEC sp_readerrorlog 0, 1, 'Login failed'
 
--- https://www.mssqltips.com/sqlservertip/1750/automate-collection-and-saving-of-failed-logins-for-sql-server/ 
+
+-- https://www.mssqltips.com/sqlservertip/1750/automate-collection-and-saving-of-failed-logins-for-sql-server/
 
 
