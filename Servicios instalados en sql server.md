@@ -133,3 +133,73 @@ Sin embargo, ten en cuenta que si en el futuro agregas más instancias o necesit
 **Data quality services (DQS)**  <br>
 **Master Data services** <br>
 **Reporting services**
+
+## Validación de servicios 
+```
+-- 1. Servicio principal de SQL Server (Motor de base de datos)
+DECLARE @ServiceAccountSQL NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\MSSQLSERVER', 
+    N'ObjectName', 
+    @ServiceAccountSQL OUTPUT;
+SELECT 
+    'Motor de SQL Server' AS Servicio,
+    @ServiceAccountSQL AS Cuenta;
+
+-- 2. Servicio SQL Server Agent (Agente)
+DECLARE @ServiceAccountAgent NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\SQLSERVERAGENT', 
+    N'ObjectName', 
+    @ServiceAccountAgent OUTPUT;
+SELECT 
+    'SQL Server Agent' AS Servicio,
+    @ServiceAccountAgent AS Cuenta;
+
+-- 3. Servicio Full-Text Search (Búsqueda de texto completo)
+DECLARE @ServiceAccountFullText NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\MSSQLFDLauncher', 
+    N'ObjectName', 
+    @ServiceAccountFullText OUTPUT;
+SELECT 
+    'Full-Text Search' AS Servicio,
+    @ServiceAccountFullText AS Cuenta;
+
+-- 4. Servicio Integration Services (SSIS)
+DECLARE @ServiceAccountSSIS NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\MsDtsServer160', 
+    N'ObjectName', 
+    @ServiceAccountSSIS OUTPUT;
+SELECT 
+    'Integration Services (SSIS)' AS Servicio,
+    @ServiceAccountSSIS AS Cuenta;
+
+-- 5. Servicio Analysis Services (SSAS) - Si está instalado
+DECLARE @ServiceAccountSSAS NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\MSOLAP$MSSQLSERVER', 
+    N'ObjectName', 
+    @ServiceAccountSSAS OUTPUT;
+SELECT 
+    'Analysis Services (SSAS)' AS Servicio,
+    @ServiceAccountSSAS AS Cuenta;
+
+-- 6. Servicio Reporting Services (SSRS) - Si está instalado
+DECLARE @ServiceAccountSSRS NVARCHAR(256);
+EXEC master.dbo.xp_instance_regread 
+    N'HKEY_LOCAL_MACHINE', 
+    N'SYSTEM\CurrentControlSet\Services\ReportServer$MSSQLSERVER', 
+    N'ObjectName', 
+    @ServiceAccountSSRS OUTPUT;
+SELECT 
+    'Reporting Services (SSRS)' AS Servicio,
+    @ServiceAccountSSRS AS Cuenta;
+
+```
