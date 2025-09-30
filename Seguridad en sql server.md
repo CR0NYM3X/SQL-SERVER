@@ -1,3 +1,6 @@
+
+[MFA - Tutorial: Set up Microsoft Entra authentication for SQL Server with app registration](https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/azure-ad-authentication-sql-server-setup-tutorial?view=sql-server-ver17)
+
 ### 🔐 Usuarios comunes en SQL Server
 
 #### 1. **`dbo` (Database Owner)**
@@ -22,6 +25,8 @@ select USER_NAME(grantee_principal_id), OBJECT_NAME(major_id) , * from sys.datab
 where USER_NAME(grantee_principal_id) in('public','guest','dbo')
 order by USER_NAME(grantee_principal_id),permission_name,OBJECT_NAME(major_id) 
  ```
+
+
 
 
 ### Mayor seguridad de monitoreo
