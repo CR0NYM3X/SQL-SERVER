@@ -135,7 +135,7 @@ grant de administrador, como por ejemplo "ADMINISTER BULK OPERATIONS" ,
 no se puede dar permisos granulares como los select o update */
 CREATE SERVER ROLE testers 
 
-/* Asignarle permisos basicos al rol*/ 
+/* Asignarle permisos lectura a toda la base de datps */ 
 GRANT select    TO test_role;
 
 /* Asignar un usuario a un rol  */ 
