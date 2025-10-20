@@ -9,8 +9,14 @@ https://www.connectionstrings.com/sql-server/
 https://www.connectionstrings.com/all-sql-server-connection-string-keywords/
 ```
 
+## Conexion string 
+```
+--- SQL Server Configuration Manager 
+C:\Windows\SysWOW64\mmc.exe /32 C:\Windows\SysWOW64\SQLServerManager15.msc
 
-
+--- SQL Server Profiler 
+C:\Program Files (x86)\Microsoft SQL Server\<versión>\Tools\Binn\profiler.exe
+```
 ---
 
 ### 🧠 ¿Por qué aparecen en `sys.database_permissions`?
