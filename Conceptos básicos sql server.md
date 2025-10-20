@@ -9,7 +9,7 @@ https://www.connectionstrings.com/sql-server/
 https://www.connectionstrings.com/all-sql-server-connection-string-keywords/
 ```
 
-## Conexion string 
+## Accesos directos
 ```
 --- SQL Server Configuration Manager 
 C:\Windows\SysWOW64\mmc.exe /32 C:\Windows\SysWOW64\SQLServerManager15.msc
