@@ -1,7 +1,7 @@
 clear
 
 # Definir las rutas de los archivos
-$Ruta_IPs =  "C:\Users\user_local\Desktop\Execute script masivo SQL Server\ips.txt"
+$inputFilePath =  "C:\Users\user_local\Desktop\Execute script masivo SQL Server\ips.txt"
 $outputFilePath = "C:\Users\user_local\Desktop\Execute script masivo SQL Server\output.txt"
 
 # Leer las direcciones IP desde el archivo de entrada
