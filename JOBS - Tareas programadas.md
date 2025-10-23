@@ -7,6 +7,37 @@
 Es importante configurar esto para que lleguen las notificaciones al correo
 ```
 
+### Ver JOBS y cuando se ejecutan
+```
+SELECT
+    j.name AS JobName,
+    CASE s.freq_type
+        WHEN 1 THEN 'Una vez'
+        WHEN 4 THEN 'Diariamente'
+        WHEN 8 THEN 'Semanalmente'
+        WHEN 16 THEN 'Mensualmente'
+        WHEN 32 THEN 'Mensualmente relativo'
+        WHEN 64 THEN 'Al inicio del Agente SQL Server'
+        WHEN 128 THEN 'Al estar la CPU ociosa'
+        ELSE CAST(s.freq_type AS VARCHAR)
+    END AS Frecuencia,
+    -- Convierte el formato de hora de 6 dígitos (e.g., 143000) a un formato legible (HH:MM:SS)
+    STUFF(STUFF(RIGHT('000000' + CAST(s.active_start_time AS VARCHAR), 6), 3, 0, ':'), 6, 0, ':') AS HoraInicioProgramada,
+    s.active_start_date AS FechaInicio,
+    s.active_end_date AS FechaFin
+FROM
+    msdb.dbo.sysjobs j
+INNER JOIN
+    msdb.dbo.sysjobschedules js ON j.job_id = js.job_id
+INNER JOIN
+    msdb.dbo.sysschedules s ON js.schedule_id = s.schedule_id
+WHERE
+    j.enabled = 1 -- Opcional: Solo muestra Jobs habilitados
+	--and j.name  like '%ups%'
+ORDER BY
+    Frecuencia,HoraInicioProgramada;
+```
+
 ### Configurar ruta 
 ```SQL
 
@@ -280,5 +311,8 @@ EXEC sp_add_jobstep
 https://learn.microsoft.com/en-us/sql/integration-services/control-flow/transfer-jobs-task?view=sql-server-ver16
 https://www.sqlshack.com/transfer-sql-jobs-between-sql-server-instances-using-ssdt-2017/
 
+-- copiar todos los jobs
+https://learn.microsoft.com/en-us/answers/questions/1038738/using-tsql-how-to-script-all-sql-server-agent-jobs
+https://gist.github.com/jzabroski/407ac2f64aaee97f903ac4f252e37cff
 ```
 
