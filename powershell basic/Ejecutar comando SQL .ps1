@@ -24,6 +24,9 @@ $part2_user = ''
 $part3_user = ''
 $user_final = ''
 
+        # Juntando el usuario ejemplo : jose.pedro@dominio.cloud#cpl@admin_user@192.168.1.100#network_name
+        #$user_final = "$part1_user$part2_user$ip_clean$part3_user"
+
 # Definir el servidor y la base de datos
 $servidor = "cpl.mssql.cyberark.cloud"
 $puerto = "1433"
@@ -52,7 +55,7 @@ foreach ($ip in $ipList) {
         Write-Host "$ip_clean " -NoNewline -ForegroundColor DarkYellow 
 
         # Juntando el usuario ejemplo : jose.pedro@dominio.cloud#cpl@admin_user@192.168.1.100#network_name
-        $user_final = "$part1_user$part2_user$ip_clean$part4_user"
+        $user_final = "$part1_user$part2_user$ip_clean$part3_user"
 
         #Write-Host "Trabajando con la $user_final  " -ForegroundColor Yellow  
 
