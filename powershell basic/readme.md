@@ -5,10 +5,11 @@ podemos aprender hacer script para sql basico en powershell
 # Abrir powershell desde ejecutar 
 	powershell_ise
 
-### Forma #1  de conexión usando clase SqlConnection
-script utiliza la clase SqlConnection de .NET Framework y no de un módulo específico de PowerShell, que permite establecer una conexión con una base de datos SQL Server
+# Forma #1  de conexión usando clase SqlConnection
+script utiliza la clase SqlConnection de .NET Framework y no de un módulo específico de PowerShell, que permite establecer una conexión con una base de datos SQL Server,
+SqlConnection es parte de ADO.NET, y se usa para conectarse a una base de datos SQL Server y ejecutar consultas o comandos.
 
-### Forma #2  de conexión usando Module SqlServer
+# Forma #2  de conexión usando Module SqlServer
 El comando Import-Module SqlServer se utiliza para importar el módulo de PowerShell SqlServer como  Invoke-Sqlcmd, que proporciona cmdlets adicionales para trabajar con SQL Server. Este módulo facilita la ejecución de comandos y la administración de SQL Server directamente desde PowerShell 
 
 
@@ -66,6 +67,33 @@ if (Get-Command -Name Invoke-Sqlcmd -ErrorAction SilentlyContinue) {
 }
 ```
 
+
+# Forma #3
+`Microsoft.SqlServer.Smo` es un **namespace** (espacio de nombres) de .NET que forma parte de la **SQL Server Management Objects (SMO)**. Es una colección de clases que permiten **administrar y automatizar tareas de SQL Server** mediante programación, especialmente con PowerShell o C#.
+
+### ¿Para qué sirve `Microsoft.SqlServer.Smo`?
+
+Sirve para:
+
+- **Administrar instancias de SQL Server** (crear, modificar, eliminar).
+- **Gestionar bases de datos** (crear, respaldar, restaurar, eliminar).
+- **Automatizar tareas** como:
+  - Generar scripts de objetos (tablas, procedimientos, funciones).
+  - Configurar seguridad (usuarios, roles, permisos).
+  - Monitorear el estado del servidor.
+  - Realizar operaciones de mantenimiento.
+
+
+### ¿Dónde se usa?
+
+Principalmente en:
+
+- **PowerShell**: para automatizar tareas administrativas de SQL Server.
+- **Aplicaciones .NET**: que necesitan interactuar con SQL Server de forma programática.
+- **Herramientas personalizadas**: para migraciones, auditorías, generación de documentación, etc.
+
+
+# Links 
 ```
 https://medium.com/@rivera5656/connect-and-query-a-sql-server-database-from-powershell-f264e73941f5
 https://www.sqlshack.com/connecting-powershell-to-sql-server/
