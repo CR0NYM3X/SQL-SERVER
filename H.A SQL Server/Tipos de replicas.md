@@ -78,3 +78,17 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
 | Configuración                  | Más compleja                   | Más sencilla                     |
 | Pérdida de datos potencial     | Mínima                         | Puede haber entre envíos de log |
 | Ideal para                     | Alta disponibilidad            | Recuperación ante desastres     |
+
+
+
+## 👂 ¿Para qué sirve el Listener?
+
+El Listener es crucial para la alta disponibilidad y la continuidad del negocio porque:
+
+* **Abstracción de la Instancia Primaria:** Permite que las aplicaciones cliente se conecten a las bases de datos del Availability Group utilizando un **nombre de red virtual (VNN)** y una dirección IP virtual (VIP) fijos, en lugar de los nombres de instancia de SQL Server físicos.
+* **Facilita el Failover (Conmutación por Error):** Cuando ocurre una conmutación por error y una réplica secundaria toma el rol de principal, el Listener **redirige automáticamente** las conexiones de los clientes a la nueva réplica principal. Esto significa que la cadena de conexión de la aplicación **no necesita ser modificada** después de un failover.
+* **Enrutamiento de Conexiones:** El Listener se encarga de dirigir el tráfico:
+    * Todas las conexiones de lectura/escritura (por defecto) se envían a la **réplica principal**.
+    * Si se configura el **enrutamiento de solo lectura** (`read-only routing`), el Listener puede dirigir las conexiones con intención de solo lectura (`ApplicationIntent=ReadOnly`) a una de las **réplicas secundarias** configuradas para permitir lecturas.
+
+En esencia, el Listener actúa como un **proxy** o un **intermediario** que garantiza que siempre puedas acceder a la base de datos, aunque el servidor subyacente que la aloja cambie debido a un evento de alta disponibilidad.
