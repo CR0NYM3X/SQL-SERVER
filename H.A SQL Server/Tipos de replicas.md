@@ -39,10 +39,42 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
 - **Requiere**: SQL Server Enterprise Edition y configuración de clúster de Windows.
 
 ---
+### 🟢 **Always On Availability Groups (AGs)**
 
-### 🧩 5. **Log Shipping**
-- **Uso típico**: Copia de seguridad de logs y restauración en otro servidor.
-- **Características**:
-  - No es una replicación en tiempo real.
-  - Puede haber desfase significativo.
-- **Ideal para**: Recuperación ante desastres con bajo costo.
+- **Propósito:** Alta disponibilidad y recuperación ante desastres con réplicas en tiempo real.
+- **Requiere:** Windows Server Failover Clustering (WSFC).
+- **Funcionamiento:** Replica grupos de bases de datos entre múltiples nodos. Las réplicas pueden ser *sincrónicas* (alta disponibilidad) o *asincrónicas* (recuperación ante desastres).
+- **Ventajas:**
+  - Failover automático.
+  - Réplicas de solo lectura para balanceo de carga.
+  - Sincronización casi inmediata.
+- **Ideal para:** Entornos críticos que requieren alta disponibilidad y mínima pérdida de datos.
+
+ 
+### 🟡 **Log Shipping**
+
+- **Propósito:** Recuperación ante desastres con replicación diferida.
+- **Requiere:** Configuración manual entre servidores.
+- **Funcionamiento:** Copia y restaura periódicamente los *logs de transacciones* desde el servidor principal al secundario.
+- **Ventajas:**
+  - Fácil de configurar.
+  - No requiere clustering.
+  - Buena opción para sitios remotos.
+- **Limitaciones:**
+  - No hay failover automático.
+  - Hay pérdida de datos entre cada envío de log.
+- **Ideal para:** Entornos donde se tolera cierto retraso en la recuperación y se busca simplicidad.
+
+ 
+
+### 🧠 **Resumen comparativo**
+
+| Característica                  | Always On AGs                  | Log Shipping                     |
+|--------------------------------|--------------------------------|----------------------------------|
+| Tipo de replicación            | Sincrónica / Asincrónica       | Asincrónica                      |
+| Failover automático            | Sí                             | No                               |
+| Requiere WSFC                  | Sí                             | No                               |
+| Réplicas de solo lectura       | Sí                             | No                               |
+| Configuración                  | Más compleja                   | Más sencilla                     |
+| Pérdida de datos potencial     | Mínima                         | Puede haber entre envíos de log |
+| Ideal para                     | Alta disponibilidad            | Recuperación ante desastres     |
