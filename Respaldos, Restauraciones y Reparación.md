@@ -349,8 +349,10 @@ CREATE TABLE #TempFileInfo (
     TDEThumbprint VARBINARY(32)
 );
 -- Insertar la información en la tabla temporal
+-- RESTORE FILELISTONLY para ver qué archivos contiene un respaldo de base de datos
 INSERT INTO #TempFileInfo
 EXEC('RESTORE FILELISTONLY FROM DISK=''0b82922f-421e-4125-be8a-d6249f971e63''');
+
 
 -- Consulta para verificar los datos en la tabla temporal
 SELECT * FROM #TempFileInfo;
