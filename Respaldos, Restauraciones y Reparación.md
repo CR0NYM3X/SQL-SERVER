@@ -366,7 +366,7 @@ DROP TABLE #TempFileInfo;
 ```
 
 
-### VER LA VERSION DE SQL SERVER LOS ARCHIVOS .MDF O .BAK
+### VER LA VERSION Y STATUS LOS ARCHIVOS .MDF O .BAK
 ```SQL
 
 --------- PARA VER LA VERSION DE ARCHIVO UN .BAK -----
@@ -401,6 +401,12 @@ https://www.enmimaquinafunciona.com/pregunta/3544/hay-alguna-manera-de-determina
 
 CHECKPRIMARYFILE: 
 https://www.mssqltips.com/sqlservertip/3342/how-to-us
+
+--- verificar la integridad de un archivo de respaldo (.bak) sin restaurar la base de datos.
+--- Es una forma rápida de asegurarte de que el archivo no está dañado y que SQL Server podrá restaurarlo si es necesario.
+RESTORE VERIFYONLY
+FROM DISK = 'C:\ruta\al\archivo.bak';
+
 ```
 
 ### USAR ATTACH PARA AGREGAR ARCHIVOS .MDF Y LDF  O NDF A UNA INSTANCIA 
