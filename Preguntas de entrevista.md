@@ -211,7 +211,7 @@
     Usando el *Execution Plan*, *Query Store*, *DMVs* y herramientas como *SQL Profiler*.
 
 12. **¿Qué herramientas usas para hacer tuning de consultas?**  
-    *Execution Plan*, *Query Store*, *Database Engine Tuning Advisor*, *DMVs* y *Extended Events*, sentryone plan explorer
+    *Execution Plan*, *Query Store*, *Database Engine Tuning Advisor*, *DMVs* y *Extended Events*, sentryone plan explorer, sql querystrees
 
 13. **¿Qué tipos de índices existen en SQL Server y cuándo usarías cada uno?**  
     *Clustered* para ordenar físicamente los datos, *Non-Clustered* para búsquedas rápidas, *Full-Text* para texto libre, *Columnstore* para grandes volúmenes.
