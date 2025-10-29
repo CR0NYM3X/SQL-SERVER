@@ -158,6 +158,47 @@ Se utilizan para:
 
 ---
 
+# [**Optimizando SQL Server - Tipos de datos**](https://www.youtube.com/watch?v=FYdu5id05_w&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=10)
+
+**Contexto**  
+La elección correcta de tipos de datos en SQL Server impacta directamente en el rendimiento y el uso de espacio en disco. Un tipo de dato inadecuado puede generar consultas más costosas y mayor consumo de recursos.
+
+ 
+
+**Pruebas y hallazgos**  
+- **Tipos numéricos**: Entero, bigint y decimal tienen diferentes tamaños en bytes. Enteros ocupan menos espacio que bigint y decimal.  
+- **Espacio en disco**: Tras insertar 1 millón de registros en tablas con distintos tipos, se observan diferencias significativas en el tamaño ocupado.  
+- **Impacto en performance**: Tipos más grandes implican más lecturas/escrituras y mayor uso de CPU, afectando los planes de ejecución.  
+
+ 
+
+**Índices y consultas**  
+- Se crean índices en columnas de cada tabla y se ejecutan consultas idénticas.  
+- El costo de ejecución varía según el tipo de dato: columnas con tipos más pesados generan planes más costosos.  
+
+ 
+**Comparación CHAR vs VARCHAR**  
+- **CHAR**: Espacio fijo, mayor costo en consultas.  
+- **VARCHAR**: Espacio variable, menor uso de disco y mejor rendimiento.  
+- Pruebas con 1 millón de registros confirman que VARCHAR es más eficiente en tiempo y espacio.  
+
+ 
+**Pruebas de estrés**  
+- Con SQL Query Stress, las consultas sobre VARCHAR se ejecutan más rápido que las de CHAR, evidenciando el impacto en escenarios de alta carga.  
+
+ 
+
+**Recomendaciones clave**  
+- Elegir tipos de datos que minimicen el espacio sin comprometer la precisión.  
+- Preferir VARCHAR sobre CHAR para datos de longitud variable.  
+- Analizar el impacto en índices y planes de ejecución antes de definir el esquema.  
+- Realizar pruebas de carga para validar decisiones en entornos críticos.
+
+
+
+
+---
+
 # Cosas extras 
 ```
 Herramientas gratuitas sql -> https://blogs.triggerdb.com/herramientas-gratuitas-sql/
