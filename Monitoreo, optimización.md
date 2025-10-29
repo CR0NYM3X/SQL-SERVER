@@ -646,10 +646,11 @@ CROSS APPLY sys.dm_exec_sql_text( /*ER.sql_handle*/ b.most_recent_sql_handle ) a
 ```
 
 
-
-
-
-
+### DBCC
+```
+Evita que una operación con muchas filas termine bloqueando toda la tabla.
+DBCC TRACEON(1224) -- solo aplica en la session
+```
 
 
 ### Query para ver que transaccion tiene mas de 2 min ejecutandose
@@ -1208,3 +1209,9 @@ EXEC sp_query_store_clear_hints @query_id = 123;
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
 monitorear: https://sqlperformance.com/2015/03/io-subsystem/monitoring-read-write-latency
+
+
+
+
+
+
