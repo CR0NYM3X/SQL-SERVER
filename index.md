@@ -156,7 +156,7 @@ INSERT INTO Clientes (Nombre, Apellido, Email, Telefono) VALUES
 6.- no usar SET NOCOUNT ON <br>
 7.-  usar Database Tuning Advisor (DETA) 
 
-### Forzar a un cliente usar index 
+### Forzar el uso de un indice
 ```sql
 select *from Clientes  
  WITH (INDEX(IX_Clientes_Email))
