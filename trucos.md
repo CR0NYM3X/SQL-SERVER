@@ -366,3 +366,224 @@ https://sql-listo.com/t-sql/exec-vs-sp_executesql/
 
 
 
+
+
+
+---
+
+### ✅ **Opciones más usadas en la cláusula `OPTION` de SQL Server**
+
+
+
+#### **1. RECOMPILE**
+- **¿Para qué sirve?**  
+  Fuerza la recompilación del plan de ejecución cada vez que se ejecuta la consulta.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WHERE Fecha > '2025-01-01'
+  OPTION (RECOMPILE);
+  ```
+
+
+
+#### **2. OPTIMIZE FOR (@param = valor)**
+- **¿Para qué sirve?**  
+  Indica al optimizador que genere el plan como si el parámetro tuviera un valor específico.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Clientes WHERE ClienteID = @ClienteID
+  OPTION (OPTIMIZE FOR (@ClienteID = 100));
+  ```
+
+
+
+#### **3. OPTIMIZE FOR UNKNOWN**
+- **¿Para qué sirve?**  
+  Ignora el valor real del parámetro y usa estadísticas genéricas.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Clientes WHERE ClienteID = @ClienteID
+  OPTION (OPTIMIZE FOR UNKNOWN);
+  ```
+
+
+
+#### **4. FAST n**
+- **¿Para qué sirve?**  
+  Prioriza devolver las primeras *n* filas lo más rápido posible.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas ORDER BY Fecha DESC
+  OPTION (FAST 10);
+  ```
+
+
+
+#### **5. MAXDOP n**
+- **¿Para qué sirve?**  
+  Limita el número de procesadores usados en la consulta paralela.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas
+  OPTION (MAXDOP 4);
+  ```
+
+
+
+#### **6. FORCE ORDER**
+- **¿Para qué sirve?**  
+  Obliga al optimizador a respetar el orden de los JOINs tal como están en la consulta.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM A INNER JOIN B ON A.id = B.id
+  OPTION (FORCE ORDER);
+  ```
+
+
+
+#### **7. LOOP JOIN / HASH JOIN / MERGE JOIN**
+- **¿Para qué sirve?**  
+  Fuerza el tipo de algoritmo de unión.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM A INNER JOIN B ON A.id = B.id
+  OPTION (LOOP JOIN);
+  ```
+
+
+
+#### **8. KEEP PLAN**
+- **¿Para qué sirve?**  
+  Evita recompilaciones frecuentes por cambios en estadísticas.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas
+  OPTION (KEEP PLAN);
+  ```
+
+
+
+#### **9. KEEPFIXED PLAN**
+- **¿Para qué sirve?**  
+  Evita cualquier recompilación del plan, incluso por cambios en estadísticas.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas
+  OPTION (KEEPFIXED PLAN);
+  ```
+
+
+
+#### **10. USE HINT('FORCE_LEGACY_CARDINALITY_ESTIMATION')**
+- **¿Para qué sirve?**  
+  Fuerza el uso del estimador de cardinalidad antiguo.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas
+  OPTION (USE HINT('FORCE_LEGACY_CARDINALITY_ESTIMATION'));
+  ```
+
+
+
+#### **11. USE HINT('FORCE ORDER')**
+- **¿Para qué sirve?**  
+  Similar a `FORCE ORDER`, pero usando el nuevo formato de hints.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas
+  OPTION (USE HINT('FORCE ORDER'));
+  ```
+
+
+
+#### **12. INDEX Hint (en FROM, no en OPTION)**
+- **¿Para qué sirve?**  
+  Obliga a usar un índice específico en una tabla.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (INDEX(idx_Ventas_Fecha));
+  ```
+
+*(Este no va en `OPTION`, sino en la cláusula `FROM` con `WITH`.)*
+
+
+ 
+### ✅ **Hints para bloqueo y lectura sucia (NOLOCK, HOLDLOCK, etc.)**
+
+#### **1. NOLOCK**
+- **¿Para qué sirve?**  
+  Permite leer datos sin respetar bloqueos, incluso si están siendo modificados (*lectura sucia*).
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (NOLOCK);
+  ```
+
+
+
+#### **2. HOLDLOCK**
+- **¿Para qué sirve?**  
+  Mantiene el bloqueo compartido hasta que termine la transacción (similar a `SERIALIZABLE`).
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (HOLDLOCK);
+  ```
+
+
+
+#### **3. TABLOCK**
+- **¿Para qué sirve?**  
+  Bloquea toda la tabla en lugar de filas o páginas.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (TABLOCK);
+  ```
+
+
+
+#### **4. TABLOCKX**
+- **¿Para qué sirve?**  
+  Bloqueo exclusivo sobre toda la tabla.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (TABLOCKX);
+  ```
+
+
+
+#### **5. UPDLOCK**
+- **¿Para qué sirve?**  
+  Usa bloqueos de actualización en lugar de compartidos, para evitar deadlocks.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (UPDLOCK);
+  ```
+
+
+
+#### **6. ROWLOCK / PAGLOCK**
+- **¿Para qué sirve?**  
+  Fuerza bloqueos a nivel de fila (`ROWLOCK`) o página (`PAGLOCK`).
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (ROWLOCK);
+  ```
+
+
+
+#### **7. READPAST**
+- **¿Para qué sirve?**  
+  Omite filas bloqueadas por otras transacciones.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (READPAST);
+  ```
+
+
+
+#### **8. XLOCK**
+- **¿Para qué sirve?**  
+  Bloqueo exclusivo sobre filas o páginas.
+- **Ejemplo:**  
+  ```sql
+  SELECT * FROM Ventas WITH (XLOCK);
+  ```
