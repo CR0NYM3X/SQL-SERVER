@@ -210,3 +210,184 @@ Operaciones que requieren múltiples accesos a los mismos datos.
 
 SQL Assessment en SQL Server es una funcionalidad (API y herramientas) diseñada para evaluar la configuración de una instancia de SQL Server y verificar si cumple con las mejores prácticas recomendadas por Microsoft.
 ```
+
+
+---
+
+# [Analizando planes de ejecución con Plan Explorer](https://www.youtube.com/watch?v=FYdu5id05_w&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=10)
+ 
+# **Introducción**
+Este tutorial presenta una herramienta gratuita diseñada para **analizar planes de ejecución en SQL Server** y mejorar el rendimiento de las consultas.  
+Los planes de ejecución pueden ser complejos de interpretar, y esta herramienta facilita la optimización del código de manera más eficiente.  
+Se invita a los usuarios a suscribirse al canal para recibir más contenido sobre **SQL Server** y plataformas de datos de Microsoft.
+
+ 
+
+## **Presentación de SQL Server Plan Explorer**
+- Herramienta: **SQL Server Plan Explorer** (SolarWinds).  
+- **Gratuita** y compatible con sistemas operativos Windows.  
+- Permite:
+  - Importar planes de ejecución.
+  - Integrarse con **SQL Server Management Studio (SSMS)** para ejecutar y visualizar planes directamente.
+
+
+
+## **Uso de la Herramienta**
+- Se muestra cómo abrir un plan de ejecución desde SSMS en **Plan Explorer**.  
+- Diferencias clave:
+  - Visualización gráfica más clara y detallada.
+  - Operaciones más costosas se destacan en **rojo**, facilitando la identificación de cuellos de botella.
+- Vista en formato **grilla**:
+  - Permite ordenar operaciones por criterios como:
+    - Cantidad de registros.
+    - Consumo de CPU.
+    - Uso de disco.
+
+ 
+
+## **Análisis Detallado**
+- Posibilidad de cambiar el enfoque del análisis:
+  - **Costo acumulado**.
+  - **CPU**.
+  - **Disco**.
+- Esto ayuda a optimizar consultas específicas según las necesidades del sistema.
+ 
+
+## **Compartir y Guardar Planes**
+- Los planes de ejecución se pueden guardar desde SSMS en archivos con extensión **.sqlplan** (formato XML).  
+- Estos archivos se pueden abrir en **Plan Explorer** para análisis detallado.  
+- Permite abrir planes generados por otros usuarios, facilitando la colaboración.
+
+ 
+## **Análisis de Interbloqueos**
+- **Plan Explorer** también permite analizar interbloqueos:
+  - Identificación de operaciones involucradas.
+  - Determinar el ejecutor, el causante y la víctima del bloqueo.
+- Simplifica el análisis frente a la revisión manual de archivos XML.
+
+ 
+## **Conclusión**
+**SQL Server Plan Explorer** es una herramienta esencial para:
+- Analizar planes de ejecución.
+- Detectar cuellos de botella.
+- Resolver interbloqueos de manera eficiente.
+
+---
+
+
+ 
+ 
+[SQL 2019 optimizar tiempos de Rollback](https://www.youtube.com/watch?v=qXw3EdDIOkY&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=15)
+ 
+### **¿De qué trata el video?**
+- Es un video del canal de **Maxi Acoto** sobre **SQL Server 2019**.
+- El tema principal es una funcionalidad llamada **ADR (Accelerated Database Recovery)**.
+- **¿Por qué es importante?** Porque normalmente, cuando haces un **rollback** (deshacer una transacción), puede tardar tanto como la transacción original. Esto es un problema en bases de datos grandes.
+
+
+
+### **¿Qué hace ADR?**
+- **ADR** acelera el proceso de recuperación y rollback.
+- Con ADR activado, el rollback es **casi instantáneo**, en lugar de tardar segundos o minutos.
+
+
+
+### **¿Cómo lo demuestra el video?**
+1. **Sin ADR**:
+   - Crea una base de datos y hace una transacción (inserta datos).
+   - Mide el tiempo: la inserción tarda unos **6000 ms**.
+   - Hace rollback: tarda casi lo mismo (**4724 ms**).
+   - Conclusión: rollback es lento.
+
+2. **Con ADR activado**:
+   - Activa ADR en la base de datos.
+   - Repite la prueba.
+   - El rollback ahora es **instantáneo**.
+   - Conclusión: mejora enorme en rendimiento.
+
+
+
+### **Detalles importantes**:
+- ADR se activa **por base de datos**, no globalmente.
+- No funciona con **mirroring**.
+- Se recomienda crear un **filegroup** para optimizar aún más.
+- Aunque ADR nació en SQL Server 2019, también se puede usar en versiones posteriores (y mejorará en SQL Server 2022).
+
+
+
+### **Cierre del video**:
+- El presentador agradece y pide suscribirse.
+- Anuncia que habrá más videos sobre SQL Server.
+
+
+
+
+# [Usando el asistente de índices en SQL Server](https://www.youtube.com/watch?v=ZrRh6YSTkXc&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=14)
+
+
+# [Monitoreando Timeout en SQL](https://www.youtube.com/watch?v=4RuUz86MS7k&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=17 )
+
+
+Recomienda usar query_store esta dispinible desde sql 2016 o eventos extendidos para monitorear los TimeOut 
+
+
+
+# [Cómo optimizar consultas SQL usando Columnas Calculadas e índices](https://www.youtube.com/watch?v=h2aMBZbQYas&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=18)
+
+
+En **SQL Server** también puedes crear índices sobre expresiones, pero la forma es diferente a PostgreSQL. Aquí se llaman **índices en columnas calculadas**.
+
+### ✅ ¿Cómo se hace?
+1. **Crear una columna calculada** que aplique la función (por ejemplo, `LOWER` en PostgreSQL equivale a `LOWER()` en SQL Server).
+2. **Crear un índice sobre esa columna calculada**.
+
+ 
+
+### **Ejemplo práctico**
+```sql
+-- Paso 1: Crear la tabla
+CREATE TABLE Clientes (
+    Id INT PRIMARY KEY,
+    Nombre NVARCHAR(100)
+);
+
+-- Paso 2: Agregar columna calculada con LOWER
+ALTER TABLE Clientes
+ADD NombreLower AS LOWER(Nombre);
+
+-- Paso 3: Crear índice sobre la columna calculada
+CREATE INDEX idx_NombreLower ON Clientes(NombreLower);
+```
+
+ 
+
+### **Puntos importantes en SQL Server**:
+- La columna calculada debe ser **persistente** si quieres indexarla:
+```sql
+ALTER TABLE Clientes
+ADD NombreLower AS LOWER(Nombre) PERSISTED;
+```
+- Si no la marcas como `PERSISTED`, SQL Server no permite crear el índice.
+- El índice se usará cuando la consulta aplique la misma función:
+```sql
+SELECT * FROM Clientes WHERE LOWER(Nombre) = 'juan';
+```
+
+
+
+# [Comparando planes de ejecución](https://www.youtube.com/watch?v=9HwqhYWSf9Y&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=21)
+
+
+
+# [CUIDADO con los índices mellizos en SQLServer](https://www.youtube.com/watch?v=9Lx_eSGNTKc&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=35)
+
+
+- Eliminar los  indices mellizos ya que el ix3 sirve para cumplir la misma funcion ix1 y ix2
+- Tener cuidado con indices duplicados, 
+- indices que no se utilizan
+- generar mas indices que la cantidad de columnas  
+```
+CREATE INDEX ix1 ON test_table(c1);
+CREATE INDEX ix2 ON test_table(c1, c2);
+CREATE INDEX ix3 ON test_table(c1, c2, c3);
+```
