@@ -181,7 +181,7 @@ BACKUP DATABASE [MY_DBA_TEST]
 TO  DISK = N'C:\respaldo_nuevo_1.bak',
     DISK = N'C:\respaldo_nuevo_2.bak',
     DISK = N'C:\respaldo_nuevo_3.bak' 
-WITH NOFORMAT, NOINIT, NAME = N'new_dba_test2-Full Database Backup',SKIP, NOREWIND, NOUNLOAD,  STATS = 10
+WITH NOFORMAT, NOINIT, NAME = N'new_dba_test2-Full Database Backup',SKIP, NOREWIND, NOUNLOAD,  STATS = 10, BUFFERCOUNT = 50, BLOCKSIZE = 65536
 GO
 
 ******* PARÁMETROS *******
@@ -197,6 +197,9 @@ SKIP -- se utiliza para saltar los dispositivos de respaldo que ya están abiert
 RETAINDAYS = 11 --- colocar dias de expiracion 
 EXPIREDATE = N'12/01/2023 00:00:00'  -- colocar fecha de expiracion del respaldo
 COMPRESSION --- comprimir el backup
+
+BUFFERCOUNT = 50 -> Ajusta el número de buffers usados para el backup (más buffers = más rendimiento).
+BLOCKSIZE = 65536 -> Tamaño del bloque en bytes (64 KB). Ajustar esto puede mejorar la velocidad dependiendo del hardware.
 
 ```
 
