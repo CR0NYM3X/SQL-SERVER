@@ -89,3 +89,57 @@ Checkpoints automáticos, indirectos o manuales. Escriben páginas sucias al dis
 *   Activar **Snapshot Isolation** requiere configuración en la base de datos.
 *   El tamaño del **Transaction Log** debe ser monitoreado para evitar crecimiento excesivo.
 *   El rendimiento de *tempdb* afecta directamente al versionado en SQL Server.
+
+
+
+---
+
+
+### ✅ **Escenario en PostgreSQL**
+- **PC1**:  
+  - `BEGIN;`  
+  - `UPDATE clientes SET ... WHERE id = 1;`  
+  - No hace `COMMIT` ni `ROLLBACK`.  
+  - Resultado: PostgreSQL coloca un **bloqueo exclusivo (row-level lock)** sobre la fila `id = 1` en la tabla `clientes`.
+
+- **PC2**:  
+  - `BEGIN;`  
+  - `SELECT * FROM clientes WHERE id = 1;`  
+    - Este `SELECT` se ejecuta sin problema porque PostgreSQL permite lectura bajo **MVCC (Multi-Version Concurrency Control)**. PC2 ve el estado **antes del UPDATE** (snapshot consistente).
+  - `UPDATE clientes SET ... WHERE id = 1;`  
+    - Aquí PC2 **queda bloqueado** esperando que PC1 libere el lock (es decir, que haga `COMMIT` o `ROLLBACK`).  
+    - Si PC1 tarda mucho, PC2 puede entrar en **deadlock detection** o timeout según configuración (`lock_timeout`).
+
+**Conclusión en PostgreSQL:**  
+- Lecturas no bloquean escrituras gracias a MVCC.  
+- Escrituras sobre la misma fila sí se bloquean (espera activa).  
+- No hay lectura sucia, porque PC2 nunca ve el cambio no confirmado.
+
+
+
+### ✅ **Escenario en SQL Server**
+- **PC1**:  
+  - `BEGIN TRAN;`  
+  - `UPDATE clientes SET ... WHERE id = 1;`  
+  - No hace `COMMIT`.  
+  - Resultado: SQL Server coloca un **lock exclusivo** sobre la fila (o página, según configuración).
+
+- **PC2**:  
+  - `BEGIN TRAN;`  
+  - `SELECT * FROM clientes WHERE id = 1;`  
+    - Aquí depende del **nivel de aislamiento**:
+      - **READ COMMITTED (por defecto)**: PC2 **espera** porque el SELECT no puede leer la fila bloqueada por PC1.
+      - **READ UNCOMMITTED**: PC2 lee el valor actualizado aunque no esté confirmado (**lectura sucia**).
+      - **SNAPSHOT**: PC2 ve la versión anterior (similar a MVCC).
+  - `UPDATE clientes SET ... WHERE id = 1;`  
+    - Igual que PostgreSQL: PC2 queda bloqueado hasta que PC1 libere el lock.
+
+**Conclusión en SQL Server:**  
+- Por defecto, incluso el SELECT se bloquea (espera) porque no hay MVCC nativo como en PostgreSQL.  
+- Si habilitas **READ UNCOMMITTED** o **NOLOCK**, puedes leer datos no confirmados (riesgo de inconsistencias).  
+- Con **SNAPSHOT ISOLATION**, el comportamiento se parece a PostgreSQL.
+
+
+#### 🔍 Diferencia clave:
+- **PostgreSQL**: MVCC → SELECT nunca se bloquea, pero UPDATE sí espera.
+- **SQL Server**: Por defecto SELECT también espera (bloqueo compartido/exclusivo), salvo que uses SNAPSHOT o NOLOCK.
