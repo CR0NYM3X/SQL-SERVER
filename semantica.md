@@ -143,3 +143,98 @@ Checkpoints automáticos, indirectos o manuales. Escriben páginas sucias al dis
 #### 🔍 Diferencia clave:
 - **PostgreSQL**: MVCC → SELECT nunca se bloquea, pero UPDATE sí espera.
 - **SQL Server**: Por defecto SELECT también espera (bloqueo compartido/exclusivo), salvo que uses SNAPSHOT o NOLOCK.
+
+
+---
+---
+
+### ✅ **Escenario explicado**
+- **Cuenta inicial:** \$1000.
+- **Celular 1:** inicia transferencia de \$1000 → transacción queda “pendiente” (no confirmada).
+- **Celular 2:** ve el saldo (según la lógica de la app) y también intenta gastar los mismos \$1000 en una compra.
+
+**Problema:**  
+Si el sistema no maneja bien el aislamiento, ambos procesos podrían **comprometer el mismo saldo**, generando sobregiro o fraude.
+
+
+### 🔍 **Qué pasa según el motor y aislamiento**
+- **PostgreSQL (READ COMMITTED por defecto):**
+  - Cada instrucción ve el estado confirmado al inicio de la instrucción.
+  - Si la app no bloquea la fila, el segundo celular podría leer \$1000 y permitir la compra.
+  - Cuando ambas transacciones intenten confirmar, una fallará por **conflicto de actualización** (UPDATE sobre la misma fila).
+  - Resultado: **no hay doble gasto**, pero puede haber mala experiencia (una operación rechazada al final).
+
+- **SQL Server (READ COMMITTED por defecto):**
+  - El SELECT del segundo celular podría quedar bloqueado si la primera transacción tiene lock exclusivo.
+  - Esto evita que el segundo celular vea el saldo hasta que la primera transacción termine.
+  - Resultado: **más seguro**, pero menos concurrente.
+
+
+
+### ✅ **Riesgo real**
+Si la lógica de la aplicación **no espera confirmación** y autoriza la compra solo por el saldo leído, el fraude ocurre **en la capa de negocio**, no en la base de datos.  
+Por eso, **el aislamiento por sí solo no basta**: se necesita **control transaccional + lógica de negocio**.
+
+ 
+
+ 
+
+### ✅ ¿Puede el cliente lograr el fraude con **READ COMMITTED** en PostgreSQL y SQL Server?
+
+**Respuesta corta:**  
+**No**, el fraude no se concreta a nivel de base de datos, pero **sí puede parecer que ocurre en la capa de aplicación** si la lógica está mal diseñada.
+
+ 
+
+### 🔍 **Por qué NO ocurre el fraude en la base de datos**
+- **PostgreSQL (READ COMMITTED):**
+  - Cada instrucción ve datos confirmados al inicio de la instrucción.
+  - Si Celular 1 hace `UPDATE saldo = saldo - 1000` y no confirma, Celular 2 lee el saldo anterior (\$1000) porque MVCC permite lecturas sin bloqueo.
+  - Cuando Celular 2 intenta hacer `UPDATE saldo = saldo - 1000`, queda bloqueado esperando que Celular 1 termine.
+  - Resultado: **una transacción se completa, la otra falla** (por deadlock o por falta de saldo).
+
+- **SQL Server (READ COMMITTED):**
+  - Celular 1 bloquea la fila con lock exclusivo.
+  - Celular 2 no puede leer el saldo (queda esperando) hasta que Celular 1 termine.
+  - Resultado: **más seguro**, porque ni siquiera puede ver el saldo.
+
+ 
+
+### ⚠️ **Dónde está el riesgo real**
+Si la **aplicación autoriza la compra solo por el saldo leído**, sin esperar confirmación de la transacción, entonces:
+- El segundo celular podría iniciar la compra y el sistema externo (pasarela de pago) la procesa.
+- Después, la base de datos rechaza la operación, pero el pago ya se autorizó.
+- Esto no es un problema del aislamiento, sino de la **lógica de negocio y la integración con sistemas externos**.
+
+ 
+### ✅ **Cómo evitar el fraude**
+- **Nivel SERIALIZABLE** o **SELECT ... FOR UPDATE** en operaciones críticas.
+- **Transacciones atómicas**: débito y crédito en la misma transacción.
+- **Validación final antes de confirmar**: verificar saldo actualizado.
+- **Bloqueo lógico en la aplicación**: marcar la cuenta como “en operación” para evitar concurrencia.
+
+
+
+### 🔐 **Niveles de aislamiento recomendados para evitar fraudes**
+1. **SERIALIZABLE**  
+   - Garantiza que las transacciones se ejecuten como si fueran secuenciales.
+   - Evita lecturas inconsistentes y doble gasto.
+   - Más seguro, pero menos escalable.
+
+2. **REPEATABLE READ**  
+   - Evita que otra transacción cambie la fila mientras la primera lee.
+   - Reduce riesgo, pero no tan estricto como SERIALIZABLE.
+
+3. **Bloqueos explícitos (SELECT ... FOR UPDATE)**  
+   - Cuando se consulta el saldo, se bloquea la fila hasta confirmar la operación.
+
+4. **Optimistic Concurrency + Validación en la app**  
+   - Leer saldo, intentar operación, y antes de confirmar verificar que el saldo sigue disponible.
+   - Si no, abortar.
+
+ 
+### ✅ **Mejor práctica en bancos**
+- **Transacción atómica:** débito y crédito en la misma transacción.
+- **Bloqueo de fila:** al iniciar la operación, bloquear el registro de la cuenta.
+- **Nivel SERIALIZABLE o FOR UPDATE** para operaciones críticas.
+- **Validación en la capa de negocio**: nunca confiar solo en el saldo leído.
