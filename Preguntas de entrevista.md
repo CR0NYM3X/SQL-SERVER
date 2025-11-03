@@ -174,7 +174,7 @@
 ### 🧠 **Administración y Configuración de SQL Server**
 
 1. **¿Cómo se configura una instancia de SQL Server para alta disponibilidad?**  
-   Se puede usar *Failover Clustering*, *Always On Availability Groups* o *Log Shipping*, dependiendo del nivel de disponibilidad requerido.
+   Para configurar alta disponibilidad en SQL Server, primero se define el objetivo (failover automático, replicación, escalabilidad), y según eso se elige la tecnología adecuada: Windows Server Failover Clustering (WSFC), Always On Availability Groups, replicación, o log shipping. Luego se prepara la infraestructura, se configura el almacenamiento compartido o los nodos, y se asegura la sincronización y monitoreo continuo. Todo esto se complementa con políticas de respaldo y recuperación
 
 2. **¿Qué diferencias hay entre una instancia nombrada y una instancia predeterminada?**  
    La instancia predeterminada no requiere nombre al conectarse; la nombrada sí, y permite múltiples instancias en un mismo servidor.
@@ -192,7 +192,7 @@
    Es el número máximo de núcleos que puede usar una consulta paralela. Se ajusta para evitar sobrecarga en servidores con muchas CPUs.
 
 7. **¿Cómo se realiza el balanceo de carga entre múltiples servidores SQL Server?**  
-   Se puede usar *replicación*, *particionamiento horizontal*, *Always On* con *read-only replicas*, o soluciones externas como *Application Request Routing*.
+   con un listener es un nombre de red virtual que permite a las aplicaciones conectarse a la réplica primaria sin preocuparse por cuál servidor está activo. Se puede usar *replicación*, *particionamiento horizontal*, *Always On* con *read-only replicas*, o soluciones externas como *Application Request Routing*.
 
 8. **¿Qué es el "Resource Governor" y cómo lo usarías?**  
    Es una herramienta para limitar el uso de CPU y memoria por grupos de usuarios o cargas de trabajo. Se configura con *resource pools* y *workload groups*.
@@ -208,10 +208,10 @@
 ### 🔧 **Optimización y Tuning**
 
 11. **¿Cómo identificas una consulta lenta en SQL Server?**  
-    Usando el *Execution Plan*, *Query Store*, *DMVs* y herramientas como *SQL Profiler*.
+    Usando el *Execution Plan*, *Query Store*, *DMVs*(sys.dm_exec_requests, sys.dm_exec_query_stats, sys.dm_exec_sql_text.) y herramientas como *SQL Profiler*.
 
 12. **¿Qué herramientas usas para hacer tuning de consultas?**  
-    *Execution Plan*, *Query Store*, *Database Engine Tuning Advisor*, *DMVs* y *Extended Events*, sentryone plan explorer, sql querystrees
+    *Execution Plan*, Índices y estadística, *Query Store*, *Database Engine Tuning Advisor*, *DMVs* y *Extended Events*, sentryone plan explorer, sql querystrees
 
 13. **¿Qué tipos de índices existen en SQL Server y cuándo usarías cada uno?**  
     *Clustered* para ordenar físicamente los datos, *Non-Clustered* para búsquedas rápidas, *Full-Text* para texto libre, *Columnstore* para grandes volúmenes.
