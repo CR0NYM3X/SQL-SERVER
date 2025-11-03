@@ -46,4 +46,13 @@ Crea tus primeros planes de mantenimiento en SQL Server -> https://www.youtube.c
 
 Optimizando SQL Server - Tipos de datos -> https://www.youtube.com/watch?v=C0wgE-3UIyE&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=8
 
+   # auditorias 
+SQL 2022 LEDGER (Auditorias y BlockChain) -> https://www.youtube.com/watch?v=Py0QjdMKt9w
+Como crear auditorías de seguridad en SQL Server -> https://www.youtube.com/watch?v=_ht_HgqZ8Vc
+Curso Auditorias SQL: 01 Introducción Auditorias -> https://www.youtube.com/watch?v=JNNFZwYem7Q
+Curso Auditoria SQL: 02 - Server Audit -> https://www.youtube.com/watch?v=pJXlUDuYgWs
+Curso Auditorias SQL: 03 Server Audit Specification -> https://www.youtube.com/watch?v=fL-7kLfObTc
+Curso Auditorias SQL: 04 Database Audit Specification -> https://www.youtube.com/watch?v=3GmBgb76u4A
+Curso Auditorias SQL: 05 Datos Sensibles -> https://www.youtube.com/watch?v=loPT-kN7dfg
+
 ``` 
