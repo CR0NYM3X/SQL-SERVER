@@ -64,7 +64,7 @@
     Sí, usando índices adecuados, particiones y filtros eficientes.
 
 20. **¿Sabes cómo evitar funciones escalar en SELECT?**  
-    Sí, evitando usarlas en columnas del SELECT para no afectar el uso de índices.
+    Sí, evitando usarlas en columnas del SELECT para no afectar el uso de índices. se recomienda usar columnas calculadas persistentes
  
 
 ### 🔐 **Seguridad y Control de Acceso**
