@@ -7,3 +7,10 @@ salvo en el caso de los mensajes generados desde la base de datos tempdb.
 ```SQL
 DBCC CHECKDB WITH ALL_ERRORMSGS;
 ```
+
+
+
+```SQL
+https://ola.hallengren.com/
+```
+
