@@ -98,8 +98,10 @@
 14. **sp_whoisactive**  
    - Procedimiento almacenado para ver procesos activos, bloqueos y rendimiento en tiempo real.
 
-15. **Extended Events / SQL Profiler**  
+15. **Extended Events / SQL Profiler /  Execution Plan /  Query Store / DMVs**  
    - Herramientas nativas para rastrear eventos y analizar problemas de rendimiento.
 
 16. **Redgate SQL Toolbelt**  
    - Conjunto de herramientas para desarrollo, comparación de esquemas, backups, y más.
+
+17. **Sentryone plan explorer, sql querystrees**
