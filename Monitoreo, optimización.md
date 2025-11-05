@@ -1202,13 +1202,94 @@ EXEC sp_query_store_set_hints
 EXEC sp_query_store_clear_hints @query_id = 123;
 
 ```
+---
 
+## En proyectos de rendimiento y optimización en **SQL Server**
 
+### 🔍 **Análisis de consultas y planes de ejecución**
+
+1. **`sys.dm_exec_requests`**
+   - Muestra información sobre las solicitudes que se están ejecutando actualmente, incluyendo el SQL, el estado, el tiempo de espera, etc.
+
+2. **`sys.dm_exec_sessions`**
+   - Información sobre las sesiones activas, útil para ver qué usuarios están conectados y qué están haciendo.
+
+3. **`sys.dm_exec_query_stats`**
+   - Estadísticas acumuladas de ejecución de consultas, como número de ejecuciones, tiempo total, lecturas lógicas, etc.
+
+4. **`sys.dm_exec_sql_text(sql_handle)`**
+   - Permite obtener el texto SQL de una consulta a partir de su `sql_handle`.
+
+5. **`sys.dm_exec_query_plan(plan_handle)`**
+   - Devuelve el plan de ejecución en XML de una consulta específica.
+ 
+### 📊 **Índices y estadísticas**
+
+6. **`sys.dm_db_index_usage_stats`**
+   - Muestra cómo se están utilizando los índices (lecturas, escrituras, búsquedas, etc.).
+
+7. **`sys.dm_db_index_operational_stats`**
+   - Información detallada sobre el rendimiento de los índices, como bloqueos, esperas, etc.
+
+8. **`sys.dm_db_missing_index_details`**
+   - Sugerencias de índices que podrían mejorar el rendimiento de las consultas.
+
+9. **`sys.indexes`**
+   - Información sobre todos los índices definidos en la base de datos.
+ 
+
+### 📁 **I/O y almacenamiento**
+
+10. **`sys.dm_io_virtual_file_stats`**
+    - Estadísticas de I/O por archivo de base de datos (lecturas, escrituras, tiempos de espera).
+
+11. **`sys.dm_io_pending_io_requests`**
+    - Muestra operaciones de I/O pendientes, útil para detectar cuellos de botella en disco.
+ 
+
+### 🧠 **Memoria y caché**
+
+12. **`sys.dm_os_memory_clerks`**
+    - Uso de memoria por tipo de componente (buffer pool, caché de procedimientos, etc.).
+
+13. **`sys.dm_os_buffer_descriptors`**
+    - Información sobre las páginas de datos en memoria.
+
+14. **`sys.dm_exec_cached_plans`**
+    - Muestra los planes de ejecución almacenados en caché.
+
+ 
+
+### ⏱️ **Bloqueos y concurrencia**
+
+15. **`sys.dm_tran_locks`**
+    - Información sobre los bloqueos actuales en la base de datos.
+
+16. **`sys.dm_os_waiting_tasks`**
+    - Muestra las tareas que están esperando recursos, útil para detectar bloqueos o cuellos de botella.
+
+17. **`sys.dm_os_wait_stats`**
+    - Estadísticas acumuladas de los tipos de espera, clave para análisis de rendimiento.
+ 
+### 🧰 **Otras útiles**
+
+18. **`sys.dm_db_partition_stats`**
+    - Información sobre particiones de tablas e índices, útil para analizar tamaño y distribución.
+
+19. **`sys.dm_db_stats_properties`**
+    - Información sobre estadísticas de columnas e índices.
+
+20. **`sys.dm_os_performance_counters`**
+    - Acceso a los contadores de rendimiento de SQL Server.
+
+ 
 
 
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
 monitorear: https://sqlperformance.com/2015/03/io-subsystem/monitoring-read-write-latency
+
+
 
 
 
