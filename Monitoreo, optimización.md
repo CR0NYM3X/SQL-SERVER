@@ -11,7 +11,22 @@ Monitorear las base de datos detectar posibles bloqueos, lentitud y intentar sol
 
 **0.2** .- Habilitar High Performance : Control  -> Power Options -> High Performance (Seleccionar)
 
-**0.3** .- Agregar cuenta de Sql server : gpedit.msc -> Windows Settings -> Security Settings -> Local Policy -> User Rights Assigment  -> (Agregar) [Perform Volume Maintence tasks {mejora el tiempo para Agregar mas espacio en disco,cuando se llena} | Lock pages in memory]
+**0.3** .- Agregar cuenta de SQL Server a políticas de seguridad avanzadas solo deben aplicarse en servidores dedicados
+
+#### ✅ **Perform Volume Maintenance Tasks **
+- **¿Qué hace?** Permite que el proceso de SQL Server realice operaciones de mantenimiento de volumen, como la creación de archivos de base de datos con "instant file initialization".
+- **¿Por qué mejora el rendimiento?** Cuando SQL Server crea o expande archivos de base de datos, normalmente llena el archivo con ceros (por seguridad). Esta opción permite omitir ese paso, acelerando significativamente la operación.
+- **¿Cómo se configura?**
+  1. Abre `gpedit.msc`
+  2. Ve a: `Configuración de Windows` → `Configuración de seguridad` → `Políticas locales` → `Asignación de derechos de usuario`
+  3. Busca **Perform volume maintenance tasks**
+  4. Agrega la cuenta de servicio de SQL Server (por ejemplo: `NT SERVICE\MSSQLSERVER` o la cuenta personalizada que uses)
+
+#### ✅ **Lock Pages in Memory**
+- **¿Qué hace?** Permite que SQL Server bloquee páginas de memoria en RAM, evitando que el sistema operativo las intercambie al disco (swap).
+- **¿Por qué mejora el rendimiento?** En sistemas con mucha RAM, esto evita que SQL Server sufra penalizaciones por paginación, manteniendo los datos en memoria para acceso rápido.
+- **¿Cómo se configura?**
+  - Mismo procedimiento que el anterior, pero seleccionando **Lock pages in memory** en lugar de "Perform volume maintenance tasks".
 
 **0.4** .- Memoria Ram: 90% 
 **0.5** .- comprimir backup automatico : Server Properties -> DatabaseS Setting -> (Seleccionar) Compress Backup
