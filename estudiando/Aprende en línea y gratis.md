@@ -1,4 +1,4 @@
-### ************************ Seguridad  ************************ 
+
 ```
 
 	# hardening
@@ -50,6 +50,8 @@ Crea tus primeros planes de mantenimiento en SQL Server -> https://www.youtube.c
 	# Optimiazación
 Optimizando SQL Server - Tipos de datos -> https://www.youtube.com/watch?v=C0wgE-3UIyE&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=8
 Tablas en memoria -> https://www.youtube.com/watch?v=aPcVxYUqymw&t=474s
+Part 1: SQL Performance Tuning: 10 Real-World Scenarios -> https://www.youtube.com/live/iTQ9etIFomM
+				https://github.com/itversity/data-engineering-courses/tree/main/sql-performance-tuning
 
 Optimización de consultas en SQL Server -> https://medium.com/@shuv.sdr/query-optimization-in-sql-server-fc6f33e0e1d4
 Optimización del rendimiento de las consultas SQL: una guía completa -> https://medium.com/womenintechnology/optimizing-sql-query-performance-a-comprehensive-guide-6cb72b9f52ef
@@ -60,6 +62,22 @@ Optimización del rendimiento de SQL: 10 escenarios reales (y consejos para la p
 Mejora del rendimiento de las bases de datos: Las 10 mejores estrategias y técnicas con MS SQL -> https://dotnetfullstackdev.medium.com/improving-database-performance-top-10-strategies-and-techniques-with-ms-sql-0febe87f715b
 SQL Server 2025: Análisis técnico en profundidad de la optimización del rendimiento -> https://medium.com/@boris.gigovic/sql-server-2025-technical-deep-dive-into-performance-optimization-6e7e74efacd9
 
+Reducing Load on SQL Server Database: Practical Strategies for Enhanced Performance -> https://medium.com/womenintechnology/reducing-load-on-sql-server-database-practical-strategies-for-enhanced-performance-9ae9fcd2680f
+SQL Server Performance Optimization: Window Functions to Double Your Query Efficiency! -> https://medium.com/@Rebooter.S/sql-server-performance-optimization-window-functions-to-double-your-query-efficiency-422322b0e239
+The Good, The Bad, and The Ugly: How Developers Build SQL Joins — Optimize for Best Performance -> https://medium.com/@robertdennyson/the-good-the-bad-and-the-ugly-how-developers-build-sql-joins-optimize-for-best-performance-55c6b803f3e1
+A Comprehensive Guide to Monitoring and Tuning SQL Server Performance -> https://medium.com/@rakesh.mr.0341/a-comprehensive-guide-to-monitoring-and-tuning-sql-server-performance-784984114de5
+SQL Tuning — SQL Server Architecture -> https://medium.com/@lorenzouriel/sql-tuning-sql-server-architecture-b39cf03fc8ac
+Optimising GROUP BY Queries in SQL Server -> https://medium.com/learning-sql/optimising-group-by-queries-in-sql-server-96a11e7d0cd2
+How to Monitor and Optimize SQL Queries in SSMS -> https://medium.com/@madu.sharadika/how-to-monitor-and-optimize-sql-queries-in-ssms-3e932eb3a577
+SQL Server Execution Plans: The Ultimate Guide for Query Performance Tuning -> https://medium.com/@tolgayildiz91/sql-server-execution-plans-the-ultimate-guide-for-query-performance-tuning-91d6160089e0
+16+ Advanced SQL Query Optimization Techniques for Maximum Performance -> https://medium.com/@tayebgasmi1999/15-powerful-techniques-to-optimize-sql-queries-like-a-pro-d12ecfe9dd82
+Maximizing Database Performance with Indexes in SQL Server -> https://medium.com/@rakesh.mr.0341/maximizing-database-performance-with-indexes-in-sql-server-bbd940933fd7
+SQL Performance Tuning Scenario #4: Over-Indexing & Maintenance -> https://medium.com/itversity/sql-performance-tuning-scenario-4-over-indexing-maintenance-9a022c56db9d
+Optimizing Go and SQL Server for Improved Performance -> https://ambiyansyah.medium.com/optimizing-go-and-sql-server-for-improved-performance-6911f3154210
+How to Measure the Performance of SQL Queries and Stored Procedures During Development -> https://medium.com/@washimkarpankaj1/how-to-measure-the-performance-of-sql-queries-and-stored-procedures-during-development-75610f704604
+SQL Performance Tuning: A Comprehensive Guide -> https://dikmenonur.medium.com/sql-performance-tuning-a-comprehensive-guide-0e8a0b0b8aa9
+SQL Query Optimization Techniques -> https://medium.com/@srghimire061/sql-query-optimization-techniques-b9de937dafa7  
+SQL Performance Tuning Scenario #1: Understanding Execution Plans -> https://medium.com/itversity/sql-performance-tuning-scenario-1-understanding-execution-plans-5c2227b40cdb
 
 
    # auditorias 
