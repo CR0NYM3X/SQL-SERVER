@@ -185,3 +185,17 @@ Administración de Contraseñas: Similar a la gMSA, pero no se extiende a varios
 | **Resource Governor** | Permite controlar el uso de CPU y memoria por grupo de trabajo, útil en servidores con múltiples aplicaciones o instancias. |
 | **Buffer Pool Extension** | Usa SSD como extensión de memoria para el buffer pool, útil cuando hay limitaciones de RAM física. |
 | **Lock Pages in Memory** | Permite que SQL Server mantenga páginas en memoria sin que el sistema operativo las intercambie, mejorando estabilidad en entornos críticos. |
+
+
+
+---
+
+### 🧠 Comparación general de entornos
+
+| Entorno        | Propósito principal                     | Datos usados           | Usuarios principales         | Nivel de riesgo |
+|----------------|------------------------------------------|-------------------------|-------------------------------|------------------|
+| **Desarrollo** | Crear y probar nuevas funcionalidades    | Ficticios o mínimos     | Desarrolladores, DBAs         | Bajo             |
+| **QA**         | Validar calidad y funcionalidad          | Simulados o anonimizados| QA, testers, DBAs             | Medio            |
+| **Staging**    | Simular producción para pruebas finales  | Similares a producción  | DevOps, DBAs, QA              | Alto             |
+| **Preprod**    | Validación con usuarios clave            | Reales o replicados     | Usuarios finales, QA, negocio| Alto             |
+| **Producción** | Uso real por clientes o usuarios finales | Reales                  | Todos                         | Crítico          |
