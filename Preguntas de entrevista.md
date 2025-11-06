@@ -1,3 +1,5 @@
+### [Optimización del rendimiento de SQL: 10 escenarios reales (y consejos para la preparación de entrevistas](https://medium.com/itversity/sql-performance-tuning-10-real-world-scenarios-and-interview-prep-tips-da095c5f103f)
+
 # Preguntas mas amistosas 
  
 
@@ -339,3 +341,5 @@
 
 50. **¿Qué es el "SQL Server Data Tools (SSDT)" y cómo lo usas en migraciones?**  
     Es una herramienta para desarrollar, versionar y desplegar bases de datos desde Visual Studio.
+
+
