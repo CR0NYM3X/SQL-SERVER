@@ -203,3 +203,21 @@ SELECT
     @ServiceAccountSSRS AS Cuenta;
 
 ```
+
+
+---
+### 🔍 ¿Qué hace el SQL Server Launchpad?
+
+- **Ejecuta scripts externos** (R o Python) desde consultas T-SQL usando `sp_execute_external_script`.
+- **Aísla los procesos** en contenedores o entornos seguros para evitar que afecten el motor principal de SQL Server.
+- **Administra recursos** como memoria, CPU y seguridad para los procesos externos.
+
+ 
+### 🧠 ¿Por qué es importante para un DBA?
+
+| **Aspecto**               | **Descripción**                                                                 |
+|---------------------------|----------------------------------------------------------------------------------|
+| **Seguridad**             | Launchpad corre scripts externos, por lo que debes controlar permisos y acceso. |
+| **Rendimiento**           | Puede consumir recursos si se ejecutan modelos pesados.                         |
+| **Diagnóstico**           | Si el servicio está detenido, las funciones de ML no funcionarán.               |
+| **Configuración**         | Se puede ajustar para usar múltiples cuentas, contenedores o entornos aislados.|
