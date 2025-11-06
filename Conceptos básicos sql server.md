@@ -199,3 +199,30 @@ Administración de Contraseñas: Similar a la gMSA, pero no se extiende a varios
 | **Staging**    | Simular producción para pruebas finales  | Similares a producción  | DevOps, DBAs, QA              | Alto             |
 | **Preprod**    | Validación con usuarios clave            | Reales o replicados     | Usuarios finales, QA, negocio| Alto             |
 | **Producción** | Uso real por clientes o usuarios finales | Reales                  | Todos                         | Crítico          |
+
+--- 
+
+### 🧩 Tipos de RAID
+
+| **RAID** | **Descripción** | **Ventajas** | **Desventajas** |
+|----------|------------------|--------------|------------------|
+| **RAID 0** | Distribuye los datos entre dos o más discos (striping). | Alta velocidad de lectura/escritura. | No tiene redundancia; si falla un disco, se pierde todo. |
+| **RAID 1** | Duplica los datos en dos discos (mirroring). | Alta disponibilidad; tolerancia a fallos. | Solo se usa el 50% del espacio total. |
+| **RAID 5** | Distribuye datos y paridad entre tres o más discos. | Buena velocidad y tolerancia a fallos. | Rendimiento de escritura más bajo; requiere mínimo 3 discos. |
+| **RAID 6** | Similar a RAID 5 pero con doble paridad. | Puede tolerar la falla de dos discos. | Menor rendimiento de escritura; requiere mínimo 4 discos. |
+| **RAID 10 (1+0)** | Combina RAID 1 y RAID 0 (mirroring + striping). | Alta velocidad y redundancia. | Costoso; requiere mínimo 4 discos. |
+| **RAID 50 (5+0)** | Combina RAID 5 y RAID 0. | Mejor rendimiento y tolerancia que RAID 5. | Complejidad; requiere mínimo 6 discos. |
+| **RAID 60 (6+0)** | Combina RAID 6 y RAID 0. | Alta tolerancia a fallos y buen rendimiento. | Muy complejo; requiere mínimo 8 discos. |
+| **RAID 2, 3, 4** | Obsoletos o poco usados. Usan técnicas de paridad específicas. | Algunas ventajas en entornos específicos. | No se usan comúnmente hoy en día. |
+| **JBOD (Just a Bunch Of Disks)** | No es RAID, pero se usa para agrupar discos sin redundancia. | Aprovecha todo el espacio. | Sin tolerancia a fallos. |
+
+ 
+### 🧠 ¿Cuál es mejor según el uso?
+
+| **Uso** | **RAID recomendado** |
+|--------|-----------------------|
+| Alto rendimiento sin necesidad de redundancia | RAID 0 |
+| Alta disponibilidad y simplicidad | RAID 1 |
+| Equilibrio entre rendimiento y seguridad | RAID 5 o RAID 6 |
+| Máxima seguridad y velocidad | RAID 10 |
+| Grandes volúmenes y alta tolerancia | RAID 50 o RAID 60 |
