@@ -837,3 +837,111 @@ Ref Adicionales :
 
 
 ```
+----
+
+## 🧪 Escenario: Problema de conexión con Kerberos en SQL Server
+
+### 🧠 ¿Qué es Kerberos en SQL Server?
+
+Kerberos es un protocolo de autenticación seguro que se usa cuando un usuario se conecta a SQL Server usando **autenticación de Windows**. Es más seguro que NTLM (el protocolo más antiguo) porque:
+- Usa tickets en lugar de enviar contraseñas.
+- Permite delegación de credenciales.
+- Requiere que el entorno esté bien configurado (DNS, SPNs, políticas de seguridad).
+
+
+### 🎯 Contexto
+Un usuario llamado **Carlos**, analista de datos, intenta conectarse a SQL Server desde su laptop corporativa usando autenticación de Windows. Sin embargo, el servidor registra que la conexión se realiza con **NTLM** en lugar de **Kerberos**, lo que impide el uso de delegación y afecta el rendimiento.
+ 
+
+### 🚨 Síntomas
+- En el log de SQL Server aparece:
+  ```
+  SSPI handshake failed with error code 0x80090311
+  ```
+- En el log de eventos del cliente:
+  ```
+  Authentication package: NTLM
+  ```
+- Carlos no puede ejecutar procedimientos que requieren delegación.
+- Otros usuarios en la misma red sí se conectan con Kerberos.
+
+ 
+
+### 🛠️ Diagnóstico con SQLCheck
+
+1. El equipo de DBA descarga **SQLCheck** desde el sitio oficial de Microsoft.
+2. Ejecutan el siguiente comando en la laptop de Carlos:
+   ```cmd
+   SQLCheck.exe /s nombre_servidor_sql /u dominio\Carlos /p contraseña
+   ```
+3. El log generado muestra:
+   - SPN no registrado correctamente.
+   - Autenticación realizada con NTLM.
+   - Advertencia: "Credential Guard detected – Kerberos ticket access restricted".
+ 
+
+### 🔍 Investigación de políticas
+
+El equipo revisa las políticas aplicadas al equipo de Carlos:
+
+1. Ejecutan `gpresult /h resultado.html` para ver las GPOs aplicadas.
+2. Encuentran que está habilitada la política:
+   ```
+   Turn on Credential Guard
+   ```
+   Ubicación:
+   ```
+   Computer Configuration → Administrative Templates → System → Device Guard
+   ```
+ 
+
+### 🔧 Solución
+
+1. Se desactiva temporalmente **Credential Guard** en el equipo de Carlos:
+   - Se modifica la política en el controlador de dominio.
+   - Se reinicia el equipo para aplicar los cambios.
+
+- **Credential Guard** es una función de seguridad de Windows que protege las credenciales almacenadas en el sistema.
+- Usa virtualización para aislar secretos como hashes de contraseñas.
+- Cuando está habilitada, puede **impedir el uso de Kerberos** si no se configura correctamente.
+- También puede forzar el uso de **NTLM** si Kerberos no puede acceder a los secretos necesarios.
+
+#### Otra política relacionada:
+- **Política de cifrado de Kerberos**: si el equipo o dominio está configurado para aceptar solo ciertos tipos de cifrado (por ejemplo, solo RC4), puede impedir el uso de Kerberos moderno (que usa AES).
+- Esto se configura en el atributo `msDS-SupportedEncryptionTypes` de la cuenta de servicio en Active Directory.
+
+
+
+2. Se verifica que el SPN esté correctamente registrado:
+   ```cmd
+   setspn -L nombre_servidor_sql
+   ```
+
+3. Carlos vuelve a conectarse a SQL Server.
+4. Se ejecuta nuevamente **SQLCheck** y el log muestra:
+   ```
+   Authentication package: Kerberos
+   Delegation: Enabled
+   ```
+
+ 
+
+### 🛠️ Herramientas que pudieron haberse usado
+
+- **Kerberos Configuration Manager for SQL Server**: herramienta oficial de Microsoft para diagnosticar problemas de autenticación Kerberos.
+- **Klist**: comando en CMD para ver tickets Kerberos.
+  ```cmd
+  klist
+  ```
+- **SetSPN**: para verificar o registrar los Service Principal Names (SPNs).
+  ```cmd
+  setspn -L nombre_del_servidor
+  ```
+- **Log de SQL Server**: también puede mostrar si la conexión fue por Kerberos o NTLM.
+ 
+
+### ✅ Resultado
+
+- Carlos ahora se conecta con Kerberos.
+- Puede ejecutar procedimientos que requieren delegación.
+- El equipo documenta el caso y recomienda revisar las políticas de seguridad en laptops corporativas que usan SQL Server con autenticación de Windows.
