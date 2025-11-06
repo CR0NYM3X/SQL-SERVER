@@ -5,12 +5,13 @@
 | **Concepto** | **Descripción** | **Importancia para el DBA** |
 |--------------|------------------|------------------------------|
 | **Estimated Cost** | Costo estimado de la operación en porcentaje. | Ayuda a identificar las operaciones más costosas. |
+| **Estimated Subtree Cost** | Costo total estimado de una rama del plan. | Ayuda a identificar cuellos de botella. |
 | **Actual Rows / Estimated Rows** | Número real vs estimado de filas procesadas. | Detecta problemas de estimación de cardinalidad. |
 | **Execution Mode (Row / Batch)** | Modo de ejecución: fila por fila o por lotes. | Batch es más eficiente en Columnstore. |
 | **Operator (e.g., Index Seek, Table Scan)** | Tipo de operación realizada. | Identifica si se usan índices correctamente. |
 | **Index Seek** | Búsqueda eficiente en un índice. | Ideal para rendimiento óptimo. |
-| **Index Scan** | Escaneo completo de un índice. | Menos eficiente que Seek. |
-| **Table Scan** | Escaneo completo de la tabla. | Indica falta de índice o mal diseño. |
+| **Index Scan** | Recorre todo el índice para encontrar las filas que necesita. Puede ser un índice clustered o non-clustered, uando la consulta no puede usar una búsqueda específica (por ejemplo, no hay filtro selectivo o el índice no cubre la consulta). | Menos eficiente que Seek. |
+| **Table Scan** |  recorre toda la tabla directamente, sin usar ningún índice. ocurre en tablas sin índice clustered (heap). | Indica falta de índice o mal diseño y Puede ser muy costoso en tablas grandes.|
 | **Nested Loops** | Método de combinación de datos entre tablas. | Bueno para pocos datos, pero puede escalar mal. |
 | **Hash Match** | Combina datos usando hash. | Eficiente para grandes volúmenes. |
 | **Sort** | Ordena datos antes de otra operación. | Puede ser costoso si no hay índice adecuado. |
@@ -26,7 +27,7 @@
 | **RID Lookup** | Similar a Key Lookup pero en tablas sin clustered index. | Indica posible necesidad de índice clustered. |
 | **Predicate** | Condición evaluada en una operación. | Ayuda a entender filtros aplicados. |
 | **Warnings (e.g., Missing Index)** | Alertas sobre problemas potenciales. | Clave para optimización. |
-| **Estimated Subtree Cost** | Costo total estimado de una rama del plan. | Ayuda a identificar cuellos de botella. |
 | **Merge Join** | Combina datos ordenados. | Muy eficiente si los datos ya están ordenados. |
 | **Hash Join**                    | Algoritmo de unión que usa una tabla hash para unir grandes conjuntos de datos. | Eficiente para unir tablas grandes sin índices o sin orden se usa la tempdb, pero puede consumir mucha memoria y cpu.          |
+| **Table Spool**                  | Operador que guarda temporalmente datos en el spool para reutilizarlos.         | Puede indicar operaciones repetitivas o falta de optimización; útil pero costoso si mal usado.|
 
