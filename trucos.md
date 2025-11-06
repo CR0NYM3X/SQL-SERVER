@@ -587,3 +587,9 @@ un hint es una instrucción especial que se agrega a una consulta para influir e
   ```sql
   SELECT * FROM Ventas WITH (XLOCK);
   ```
+  
+```sql
+ SELECT * FROM Ventas OPTIONS(  NO_PERFORMANCE_SPOOL)
+ SELECT * FROM Ventas OPTIONS(MAX_grant_percent = 0.01)
+```sql
+
