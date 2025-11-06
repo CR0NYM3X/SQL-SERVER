@@ -1161,6 +1161,10 @@ https://www.mssqltips.com/sqlservertip/6230/memoryoptimized-tempdb-metadata-in-s
 
  # comandos DBCC
 ```sql
+-- Ver el número de páginas en caché
+ DBCC SHOW_STATISTICS( 'Orders' ); 
+ 
+
 DBCC DROPCLEANBUFFERS;
 Este comando se utiliza para eliminar los buffers limpios del caché de la base de datos. Los buffers limpios son aquellos que han sido leídos desde el disco pero no han sido modificados. Utilizar este comando es útil para pruebas de rendimiento, ya que garantiza que los datos se leerán desde el disco en lugar del caché.
 
