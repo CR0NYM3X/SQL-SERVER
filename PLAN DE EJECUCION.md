@@ -11,10 +11,8 @@
 | **Index Seek** | Búsqueda eficiente en un índice. | Ideal para rendimiento óptimo. |
 | **Index Scan** | Escaneo completo de un índice. | Menos eficiente que Seek. |
 | **Table Scan** | Escaneo completo de la tabla. | Indica falta de índice o mal diseño. |
-| **Key Lookup** | Búsqueda adicional en la tabla base tras usar un índice. | Puede ser costoso si ocurre muchas veces. |
 | **Nested Loops** | Método de combinación de datos entre tablas. | Bueno para pocos datos, pero puede escalar mal. |
 | **Hash Match** | Combina datos usando hash. | Eficiente para grandes volúmenes. |
-| **Merge Join** | Combina datos ordenados. | Muy eficiente si los datos ya están ordenados. |
 | **Sort** | Ordena datos antes de otra operación. | Puede ser costoso si no hay índice adecuado. |
 | **Compute Scalar** | Calcula valores escalares (por ejemplo, expresiones). | Normalmente bajo costo, pero puede acumularse. |
 | **Parallelism** | Divide la operación entre varios núcleos. | Mejora rendimiento, pero puede causar sobrecarga. |
@@ -24,8 +22,11 @@
 | **Concatenation** | Une resultados de múltiples ramas. | Común en consultas con `UNION`. |
 | **Stream Aggregate** | Agrupa datos en flujo. | Eficiente para agregaciones simples. |
 | **Hash Aggregate** | Agrupa datos usando hash. | Mejor para grandes volúmenes. |
+| **Key Lookup** | Búsqueda adicional en la tabla base tras usar un índice. | Puede ser costoso si ocurre muchas veces. |
 | **RID Lookup** | Similar a Key Lookup pero en tablas sin clustered index. | Indica posible necesidad de índice clustered. |
 | **Predicate** | Condición evaluada en una operación. | Ayuda a entender filtros aplicados. |
 | **Warnings (e.g., Missing Index)** | Alertas sobre problemas potenciales. | Clave para optimización. |
 | **Estimated Subtree Cost** | Costo total estimado de una rama del plan. | Ayuda a identificar cuellos de botella. |
+| **Merge Join** | Combina datos ordenados. | Muy eficiente si los datos ya están ordenados. |
+| **Hash Join**                    | Algoritmo de unión que usa una tabla hash para unir grandes conjuntos de datos. | Eficiente para unir tablas grandes sin índices o sin orden se usa la tempdb, pero puede consumir mucha memoria y cpu.          |
 
