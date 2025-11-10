@@ -53,6 +53,8 @@ Tablas en memoria -> https://www.youtube.com/watch?v=aPcVxYUqymw&t=474s
 Part 1: SQL Performance Tuning: 10 Real-World Scenarios -> https://www.youtube.com/live/iTQ9etIFomM
 				https://github.com/itversity/data-engineering-courses/tree/main/sql-performance-tuning
 
+Query Hint en SQL Server -> https://www.youtube.com/watch?v=uRA04e2UII0
+
 Optimización de consultas en SQL Server -> https://medium.com/@shuv.sdr/query-optimization-in-sql-server-fc6f33e0e1d4
 Optimización del rendimiento de las consultas SQL: una guía completa -> https://medium.com/womenintechnology/optimizing-sql-query-performance-a-comprehensive-guide-6cb72b9f52ef
 Optimización de grandes conjuntos de datos en SQL Server -> https://medium.com/chat2db/optimizing-large-datasets-in-sql-server-98df674b770a
@@ -113,10 +115,11 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 	Always on Availability Groups en SQL Server 2012 -> https://www.youtube.com/watch?v=RmUnSrjCLlU
 	Replicacion Transaccional SQL Server -> https://www.youtube.com/watch?v=I3fYGTUT42U
 	Replicacion transaccional con suscriptores actualizables -> https://www.youtube.com/watch?v=TOA6-VUw4K8
-	Creación de Bases de Datos Espejo SQL Server -> https://www.youtube.com/watch?v=IS0jvVpz9DE
+	
 	SQL transaction log shipping -> https://www.youtube.com/watch?v=oYH_pEQpbkg
 	Trasvase en SQL Server (Transaction Log Shipping) -> https://www.youtube.com/watch?v=x-uQ_NU_QEA
 	Transaction log shipping. -> https://www.youtube.com/watch?v=G1e9_KM5cHA&t=2049s
+	Creación de Bases de Datos Espejo SQL Server -> https://www.youtube.com/watch?v=IS0jvVpz9DE
 	Instalación de SQL Server en FailOver Cluster -> https://www.youtube.com/watch?v=NdksSXPRPoo
 	Always Encrypted en SQL Server -> https://www.youtube.com/watch?v=aef9eNPHNEE
 	
