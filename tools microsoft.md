@@ -83,8 +83,11 @@
 ---
 
 ### 🔄 **Herramientas de Migración y Desarrollo**
-11. **SQL Server Migration Assistant (SSMA)**  
+11. **SQL Server Migration Assistant (SSMA) o Microsoft Data Migration Assistant (DMA)**  
    - Migración desde Oracle, MySQL, DB2, Access, Sybase a SQL Server o Azure SQL.
+
+11.1 **SQL Server Upgrade Advisor** 
+   - Detecta problemas antes del upgrade.
 
 12. **SqlPackage**  
    - Para desplegar archivos DACPAC/BACPAC, útil en CI/CD y DevOps.
