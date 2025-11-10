@@ -476,6 +476,18 @@ TempDB se Cifra Automáticamente: Esto puede afectar a otras bases de datos no c
 https://learn.microsoft.com/en-us/sql/relational-databases/security/encryption/transparent-data-encryption?view=sql-server-ver16
 ```
 
+## Finaliza el proceso de restauración.
+
+- No permite restaurar más backups** (ni diferenciales ni de logs) después de este punto, porque la base ya está recuperada.
+- Deja la base de datos en estado operativo (ONLINE).
+- Se usa al restaurar el **último backup** en una secuencia (por ejemplo, después de restaurar un full backup y todos los logs).
+- Si se necesita aplicar más backups (diferenciales o logs), se usaría **`WITH NORECOVERY`** en los pasos previos, y solo en el último se usa **`WITH RECOVERY`**.
+
+ 
+```
+RESTORE DATABASE NORTHWIND WITH RECOVERY
+```
+
 # Bibliografías :
 ```
 Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
