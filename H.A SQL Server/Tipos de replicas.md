@@ -1,50 +1,8 @@
 En **SQL Server**, existen varios tipos de **replicación** que puedes configurar, dependiendo de tus necesidades de disponibilidad, rendimiento y sincronización de datos. Aquí te explico los principales:
 
----
-
-### ✅ **Replicación Transaccional**
-- **Objetivo:** Distribución de datos en tiempo casi real (no es HA pura).
-- **Nivel:** Tablas y objetos específicos.
-- **Cómo funciona:** Publica cambios (inserciones, actualizaciones, eliminaciones) desde el **Publisher** hacia **Subscribers** mediante un **Distributor**.
-- **Características:**
-  - Ideal para replicar datos entre servidores para reporting o aplicaciones distribuidas.
-  - No ofrece failover automático.
-  - no clustering
-  - El suscriptor puede estar desfasado unos segundos.
-  - Puede haber retraso mínimo, pero no garantiza sincronización perfecta.
-- **Uso típico:** Escenarios donde se necesita compartir datos con otras aplicaciones o sitios remotos, no tanto para alta disponibilidad.
-
----
-
-### 🔄 2. **Replicación de mezcla (Merge Replication)**
-- **Uso típico**: Aplicaciones móviles o distribuidas donde los cambios pueden ocurrir en múltiples nodos.
-- **Características**:
-  - Permite que tanto el publicador como el suscriptor hagan cambios.
-  - Los cambios se sincronizan y se resuelven los conflictos.
-- **Ideal para**: Bases de datos que se modifican en ambos extremos.
-
----
-
-### 📦 3. **Replicación de instantáneas (Snapshot Replication)**
-- **Uso típico**: Cuando los datos no cambian con frecuencia o no se requiere sincronización continua.
-- **Características**:
-  - Se toma una "foto" de los datos y se copia al suscriptor.
-  - No hay seguimiento de cambios entre snapshots.
-- **Ideal para**: Informes periódicos o sincronización puntual.
-
----
-
-### ✅ **Always On Availability Groups **
-- **Objetivo:** Alta disponibilidad y recuperación ante desastres.
-- **Nivel:** Grupo de bases de datos.
-- **Cómo funciona:** Replica bases completas entre nodos usando **Windows Server Failover Clustering (WSFC)**.
-- **Características:**
-  - Failover automático.
-  - Réplicas sincrónicas (HA) y asincrónicas (DR).
-  - Réplicas de solo lectura para balanceo.
-- **Uso típico:** Entornos críticos donde se necesita continuidad del servicio y mínima pérdida de datos.
-
----
+ 
+ 
+ 
 ### 🟢 **Always On Availability Groups (AGs)**
 
 - **Propósito:** Alta disponibilidad y recuperación ante desastres con réplicas en tiempo real.
@@ -99,6 +57,67 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
 | Ideal para                     | Alta disponibilidad            | Recuperación ante desastres     |
 
 
+---
+
+### ✅ **Replicación Transaccional**
+- **Objetivo:** Distribución de datos en tiempo casi real (no es HA pura).
+- **Nivel:** Tablas y objetos específicos.
+- **Cómo funciona:** Publica cambios (inserciones, actualizaciones, eliminaciones) desde el **Publisher** hacia **Subscribers** mediante un **Distributor**.
+- **Características:**
+  - Ideal para replicar datos entre servidores para reporting o aplicaciones distribuidas.
+  - No ofrece failover automático.
+  - no clustering
+  - El suscriptor puede estar desfasado unos segundos.
+  - Puede haber retraso mínimo, pero no garantiza sincronización perfecta.
+- **Uso típico:** Escenarios donde se necesita compartir datos con otras aplicaciones o sitios remotos, no tanto para alta disponibilidad. Bases críticas que deben estar actualizadas casi al instante.
+
+
+### **1. Snapshot Publication**
+- **Cómo funciona:**  
+  Toma una **instantánea completa** de los datos en un momento específico y la envía al suscriptor.
+- **Características:**
+  - No mantiene sincronización continua.
+  - Se vuelve a generar la instantánea cuando se necesita actualizar.
+- **Ventajas:**
+  - Fácil de configurar.
+  - Útil para datos que cambian poco.
+- **Desventajas:**
+  - Puede ser pesado si la base es grande.
+- **Ideal para:**  
+  Datos estáticos o que no requieren actualización frecuente.
+
+ 
+
+ 
+
+### **3. Peer-to-Peer Publication**
+- **Cómo funciona:**  
+  Es una extensión de la replicación transaccional, pero **todos los nodos son iguales** (no hay publicador único).
+- **Características:**
+  - Cada nodo puede publicar y suscribirse.
+  - Sincronización bidireccional.
+- **Ventajas:**
+  - Alta disponibilidad y escalabilidad.
+- **Desventajas:**
+  - Complejo de administrar.
+- **Ideal para:**  
+  Entornos distribuidos donde varias instancias deben tener los mismos datos.
+
+ 
+
+### **4. Merge Publication**
+- **Cómo funciona:**  
+  Permite que **publicador y suscriptor hagan cambios** y luego los combina (merge).
+- **Características:**
+  - Usa triggers y tablas de seguimiento para detectar cambios.
+- **Ventajas:**
+  - Ideal para entornos desconectados (offline).
+- **Desventajas:**
+  - Conflictos si ambos modifican el mismo dato.
+- **Ideal para:**  
+  Aplicaciones móviles o sucursales que trabajan offline y luego sincronizan.
+
+---
 
 ## 👂 ¿Para qué sirve el Listener?
 
