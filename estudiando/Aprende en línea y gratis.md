@@ -95,6 +95,7 @@ Curso Auditorias SQL: 05 Datos Sensibles -> https://www.youtube.com/watch?v=loPT
 
 
 # Dockers
+Corriendo una imagen de SQL Server Express en un Contenedor de Docker -> https://www.youtube.com/watch?v=tBrpGP83XVo
 
 Tutorial SQL Server Docker: Introducción e imagenes -> https://www.youtube.com/watch?v=lSXTjgdH-58
 Tutorial SQL Server Docker: Crear imagenes personalizadas -> https://www.youtube.com/watch?v=VxIDm-re3u4
@@ -105,5 +106,23 @@ Tutorial SQL Server Docker: Como aplicar un parche -> https://www.youtube.com/wa
 Tutorial SQL Server Docker: Como persistir datos fuera del contenedor -> https://www.youtube.com/watch?v=aJkTvlmEAsQ&t=2s
 Tutorial SQL Server Docker: Copiar y restaurar base de datos -> https://www.youtube.com/watch?v=Z6d5AhagDwc&t=25s
 Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://www.youtube.com/watch?v=Ai0f1fWk0rE
+
+# H.A o Replication
+
+	Replicación en SQL Server Usando Equipos Virtuales de Azure -> https://www.youtube.com/watch?v=fjfi1MHu8PQ
+	Always on Availability Groups en SQL Server 2012 -> https://www.youtube.com/watch?v=RmUnSrjCLlU
+	Replicacion Transaccional SQL Server -> https://www.youtube.com/watch?v=I3fYGTUT42U
+	Replicacion transaccional con suscriptores actualizables -> https://www.youtube.com/watch?v=TOA6-VUw4K8
+	Creación de Bases de Datos Espejo SQL Server -> https://www.youtube.com/watch?v=IS0jvVpz9DE
+	SQL transaction log shipping -> https://www.youtube.com/watch?v=oYH_pEQpbkg
+	Trasvase en SQL Server (Transaction Log Shipping) -> https://www.youtube.com/watch?v=x-uQ_NU_QEA
+	Transaction log shipping. -> https://www.youtube.com/watch?v=G1e9_KM5cHA&t=2049s
+	SQL transaction log shipping -> https://www.youtube.com/watch?v=oYH_pEQpbkg
+	Instalación de SQL Server en FailOver Cluster -> https://www.youtube.com/watch?v=NdksSXPRPoo
+	Always Encrypted en SQL Server -> https://www.youtube.com/watch?v=aef9eNPHNEE
+	
+	
+	Instalación de SQL2014 dentro de Active Directory -> https://www.youtube.com/watch?v=-gYQrAbsagE
+
 
 ``` 
