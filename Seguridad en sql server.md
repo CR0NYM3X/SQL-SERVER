@@ -704,6 +704,8 @@ para esto puedes desde ingresar al **SQL server configuration manager** después
 
 o puedes realizar esto desde el cmd 
  ```SQL
+Consideraciones: Se debe usar el puerto 1433 que es el por defaul no funciona si la instanccia tiene otro puerto 
+
 NOTA: si es por instancia se coloca MSSQL$NOMBREINSTANCIA
 
 net start MSSQL$mssqlserver
