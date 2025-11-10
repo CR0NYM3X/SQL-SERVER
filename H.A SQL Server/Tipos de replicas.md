@@ -50,7 +50,7 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
   - Sincronización casi inmediata.
 - **Ideal para:** Entornos críticos que requieren alta disponibilidad y mínima pérdida de datos.
 
-🟢 **Database Mirroring**  
+### 🟢 **Database Mirroring**  
 **Propósito:** Alta disponibilidad y recuperación ante desastres a nivel de base de datos individual.  
 **Requiere:** Dos o tres instancias de SQL Server (principal, espejo y opcionalmente un testigo para failover automático).  
 **Funcionamiento:** Replica una base de datos específica desde el servidor principal al espejo. Puede ser en modo sincrónico (alta disponibilidad) o asincrónico (recuperación ante desastres).  
