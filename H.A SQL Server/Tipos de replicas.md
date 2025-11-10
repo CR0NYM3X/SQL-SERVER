@@ -2,13 +2,17 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
 
 ---
 
-### 🔁 1. **Replicación transaccional**
-- **Uso típico**: Distribuir datos en tiempo casi real desde una base de datos principal a una o varias secundarias.
-- **Características**:
-  - Alta velocidad.
-  - Ideal para reportes o sistemas de solo lectura.
+### ✅ **Replicación Transaccional**
+- **Objetivo:** Distribución de datos en tiempo casi real (no es HA pura).
+- **Nivel:** Tablas y objetos específicos.
+- **Cómo funciona:** Publica cambios (inserciones, actualizaciones, eliminaciones) desde el **Publisher** hacia **Subscribers** mediante un **Distributor**.
+- **Características:**
+  - Ideal para replicar datos entre servidores para reporting o aplicaciones distribuidas.
+  - No ofrece failover automático.
+  - no clustering
   - El suscriptor puede estar desfasado unos segundos.
-- **Componentes**: Publicador, Distribuidor, Suscriptor.
+  - Puede haber retraso mínimo, pero no garantiza sincronización perfecta.
+- **Uso típico:** Escenarios donde se necesita compartir datos con otras aplicaciones o sitios remotos, no tanto para alta disponibilidad.
 
 ---
 
@@ -30,13 +34,15 @@ En **SQL Server**, existen varios tipos de **replicación** que puedes configura
 
 ---
 
-### 🧠 4. **Grupos de disponibilidad Always On (Alta disponibilidad)**
-- **Uso típico**: Alta disponibilidad y recuperación ante desastres.
-- **Características**:
-  - Réplicas sincronizadas o asincrónicas.
-  - Permite conmutación por error automática.
-  - Las réplicas secundarias pueden ser de solo lectura.
-- **Requiere**: SQL Server Enterprise Edition y configuración de clúster de Windows.
+### ✅ **Always On Availability Groups **
+- **Objetivo:** Alta disponibilidad y recuperación ante desastres.
+- **Nivel:** Grupo de bases de datos.
+- **Cómo funciona:** Replica bases completas entre nodos usando **Windows Server Failover Clustering (WSFC)**.
+- **Características:**
+  - Failover automático.
+  - Réplicas sincrónicas (HA) y asincrónicas (DR).
+  - Réplicas de solo lectura para balanceo.
+- **Uso típico:** Entornos críticos donde se necesita continuidad del servicio y mínima pérdida de datos.
 
 ---
 ### 🟢 **Always On Availability Groups (AGs)**
