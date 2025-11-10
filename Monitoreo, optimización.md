@@ -1301,8 +1301,52 @@ EXEC sp_query_store_clear_hints @query_id = 123;
 20. **`sys.dm_os_performance_counters`**
     - Acceso a los contadores de rendimiento de SQL Server.
 
- 
+ ---
 
+
+
+---
+
+### ✅ **Trace Flags comunes y recomendados**
+**trace flags recomendados** que muchos **DBAs aplican como buenas prácticas** en SQL Server, especialmente para mejorar el rendimiento, la estabilidad y la visibilidad del sistema. Estos flags deben usarse con precaución y preferiblemente en entornos controlados antes de aplicarlos en producción.
+
+| Trace Flag | Descripción | Recomendado para |
+|------------|-------------|------------------|
+| **3226**   | Suprime los mensajes de backup exitoso en el error log. | Evitar saturación del error log. |
+| **1117**   | Hace que todos los archivos de datos en un filegroup crezcan al mismo tiempo. *(Obsoleto desde SQL Server 2016, ahora es comportamiento por defecto)* | Mejorar rendimiento en `tempdb`. |
+| **1118**   | Fuerza asignación de extents uniformes en lugar de mixtos. *(Obsoleto desde SQL Server 2016)* | Reducir contención en `tempdb`. |
+| **2371**   | Cambia el umbral de actualización automática de estadísticas para tablas grandes. *(Por defecto desde SQL Server 2016)* | Bases de datos grandes (VLDBs). |
+| **2389** y **2390** | Mejora la gestión de estadísticas para columnas con valores crecientes. | Consultas con filtros en columnas de tipo ID incremental. |
+| **3023**   | Habilita la generación de checksums durante backups. *(Por defecto desde SQL Server 2014)* | Validación de integridad en backups. |
+| **1222**   | Muestra información detallada de deadlocks en el error log. | Diagnóstico de bloqueos. |
+| **1204**   | Muestra información básica de deadlocks en el error log. | Diagnóstico de bloqueos. |
+| **4199**   | Habilita mejoras de optimización de consultas que no están habilitadas por defecto. | Optimización avanzada de queries. |
+| **6532**   | Mejora el rendimiento de consultas con `IN` y `OR` en grandes conjuntos. | Consultas complejas. |
+| **8744**   | Desactiva el uso de prefetching en ciertos planes de ejecución. | Diagnóstico de rendimiento. |
+| **4136**   | Desactiva la parametrización automática de consultas. | Control de planes de ejecución. |
+
+---
+
+### 🛠️ ¿Cómo habilitarlos?
+
+- **Temporalmente (hasta reinicio):**
+
+  ```sql
+  DBCC TRACEON(3226, -1);
+  ```
+
+- **Permanente (en el inicio del servicio):**
+  - Agrega `-T3226` en los parámetros de inicio del servicio SQL Server desde **SQL Server Configuration Manager**.
+
+
+### ⚠️ Recomendaciones
+
+- **Siempre prueba en entornos de desarrollo o QA antes de producción.**
+- Algunos trace flags ya están **obsoletos o integrados por defecto** en versiones recientes (2016+).
+- Consulta la [documentación oficial de Microsoft](https://learn.microsoft.com/en-us/sql/t-sql/database-console-commands/dbcc-traceon-trace-flags-transact-sql?view=sql-server-ver17) para verificar compatibilidad y efectos secundarios.
+- Usa `DBCC TRACESTATUS(-1);` para ver qué trace flags están activos.
+
+ 
 
 # Bibliografías : 
 https://blog.sqlauthority.com/2023/10/06/sql-server-maintenance-techniques-a-comprehensive-guide-to-keeping-your-server-running-smoothly/ <br> 
