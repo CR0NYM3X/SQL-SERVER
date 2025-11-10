@@ -117,7 +117,6 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 	SQL transaction log shipping -> https://www.youtube.com/watch?v=oYH_pEQpbkg
 	Trasvase en SQL Server (Transaction Log Shipping) -> https://www.youtube.com/watch?v=x-uQ_NU_QEA
 	Transaction log shipping. -> https://www.youtube.com/watch?v=G1e9_KM5cHA&t=2049s
-	SQL transaction log shipping -> https://www.youtube.com/watch?v=oYH_pEQpbkg
 	Instalación de SQL Server en FailOver Cluster -> https://www.youtube.com/watch?v=NdksSXPRPoo
 	Always Encrypted en SQL Server -> https://www.youtube.com/watch?v=aef9eNPHNEE
 	
