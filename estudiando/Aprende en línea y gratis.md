@@ -18,6 +18,7 @@ Cómo encriptar datos en SQL Server y Azure SQL paso a paso -> https://www.youtu
 ENCRIPTAR Y DESENCRIPTAR DATOS EN SQL SERVER -> https://www.youtube.com/watch?v=WDNIwjPfRFk
 ENCRIPTAR Y DESENCRIPTAR -> https://www.youtube.com/watch?v=qifgt_MurzE
 SQL Server Encryption Symmetric vs. Asymmetric Keys -> https://www.mssqltips.com/sqlservertip/1886/sql-server-encryption-symmetric-vs-asymmetric-keys/
+Always Encrypted en SQL Server: El cifrado avanzado -> https://www.youtube.com/watch?v=fq_N8RymfEE
 
 
 
