@@ -125,6 +125,8 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 	Creación de Bases de Datos Espejo SQL Server -> https://www.youtube.com/watch?v=IS0jvVpz9DE
 	Instalación de SQL Server en FailOver Cluster -> https://www.youtube.com/watch?v=NdksSXPRPoo
 	
+	EASY! 2 Node Windows Failover Cluster Tutorial with File Share Witness -> https://www.youtube.com/watch?v=fNfm4mNqXfU
+	Learn How to Create a Cluster Quorum Witness in a Windows Server 2022 Failover Cluster -> https://www.youtube.com/watch?v=qiftcGCtgi4
 	
 	
 	Instalación de SQL2014 dentro de Active Directory -> https://www.youtube.com/watch?v=-gYQrAbsagE
