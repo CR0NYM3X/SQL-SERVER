@@ -1150,6 +1150,47 @@ DENY EXECUTE ON fn_virtualservernodes TO rol_restringido;
 
 ```
 
+---
+
+### 🔐 ¿Qué es Always Encrypted?
+
+Es una tecnología que **cifra datos sensibles en columnas específicas** de una tabla, de modo que **ni el motor de SQL Server ni los administradores de base de datos pueden ver los datos en texto claro**. Solo las aplicaciones cliente que tienen acceso a las claves pueden descifrar los datos.
+
+### 🧰 Requisitos
+
+- SQL Server 2016 o superior.
+- .NET Framework 4.6 o superior.
+- ADO.NET con soporte para Always Encrypted.
+- Configuración de claves en el cliente.
+
+### 🎯 ¿Para qué sirve?
+
+- **Proteger datos confidenciales** en tránsito, en reposo y en uso.
+- Cumplir con normativas como GDPR, HIPAA, PCI-DSS.
+- Evitar que personal con acceso al servidor (DBAs, soporte, etc.) vea datos sensibles.
+- Asegurar que el cifrado y descifrado se haga **solo en el cliente**, no en el servidor.
+
+
+
+### 🧠 ¿Cómo funciona?
+
+1. **Columnas cifradas**: Se eligen columnas específicas para cifrar (por ejemplo, `tarjeta_credito`, `curp`, `rfc`).
+2. **Claves de cifrado**:
+   - **Column Master Key (CMK)**: Protege la clave de columna. Se guarda en el cliente o en un almacén seguro (como Windows Certificate Store o Azure Key Vault).
+   - **Column Encryption Key (CEK)**: Cifra los datos. Se guarda en SQL Server pero cifrada con la CMK.
+3. **Cifrado en el cliente**: El cliente (por ejemplo, una app en C# con ADO.NET) cifra los datos antes de enviarlos al servidor y los descifra al recibirlos.
+
+
+### 🧪 Tipos de cifrado
+
+| Tipo de cifrado | Características | Uso común |
+|------------------|------------------|------------|
+| **Deterministic** | Siempre produce el mismo valor cifrado para el mismo valor original. Permite búsquedas y joins. | Buscar por CURP, RFC, etc. |
+| **Randomized** | Produce valores cifrados diferentes cada vez. Más seguro pero no permite búsquedas. | Contraseñas, tokens, etc. |
+
+
+---
+
 # Bibliografías 
 ```
 https://www.netspi.com/blog/technical/network-penetration-testing/hacking-sql-server-stored-procedures-part-1-untrustworthy-databases/
