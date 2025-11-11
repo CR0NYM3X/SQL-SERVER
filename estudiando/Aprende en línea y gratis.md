@@ -112,9 +112,9 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 # H.A o Replication
 	Implementación de replicación en el SQL Server -> https://www.youtube.com/watch?v=d-k3Rm9fFP4
 	Replicación en SQL Server Usando Equipos Virtuales de Azure -> https://www.youtube.com/watch?v=fjfi1MHu8PQ
+	WorkShop de Always On en el SQL Server en Azure -> https://www.youtube.com/watch?v=o8SAhKe-YV8
 	Always on Availability Groups en SQL Server 2012 -> https://www.youtube.com/watch?v=RmUnSrjCLlU
 	Grupos de Alta Disponibilidad en el SQL Server -> https://www.youtube.com/watch?v=AAR6AokVIGU
-	WorkShop de Always On en el SQL Server -> https://www.youtube.com/watch?v=o8SAhKe-YV8
 	Replicacion Transaccional SQL Server -> https://www.youtube.com/watch?v=I3fYGTUT42U
 	Replicacion transaccional con suscriptores actualizables -> https://www.youtube.com/watch?v=TOA6-VUw4K8
 	
