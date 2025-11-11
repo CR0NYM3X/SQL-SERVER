@@ -1,4 +1,18 @@
 
+### ✅ **Bases de datos de prueba**
+- **Microsoft Docs**: https://learn.microsoft.com/en-us/sql/samples/sql-samples-where-are
+- **GitHub oficial**: https://github.com/microsoft/sql-server-samples
+1. **Northwind**  
+   - Simula una empresa de importación/exportación.
+   - Ideal para aprender consultas básicas y relaciones.
+
+2. **AdventureWorks**  
+   - Base de datos más completa y moderna.
+   - Incluye escenarios de ventas, producción, logística.
+   - Disponible en versiones OLTP y Data Warehouse.
+
+---
+
 ###  Recorrer una tabla grande 
 ```sql
 	select   * from project_configuration order by id OFFSET 0 ROWS FETCH NEXT 5 ROWS ONLY 
