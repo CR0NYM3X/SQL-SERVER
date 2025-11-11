@@ -19,7 +19,7 @@ ENCRIPTAR Y DESENCRIPTAR DATOS EN SQL SERVER -> https://www.youtube.com/watch?v=
 ENCRIPTAR Y DESENCRIPTAR -> https://www.youtube.com/watch?v=qifgt_MurzE
 SQL Server Encryption Symmetric vs. Asymmetric Keys -> https://www.mssqltips.com/sqlservertip/1886/sql-server-encryption-symmetric-vs-asymmetric-keys/
 Always Encrypted en SQL Server: El cifrado avanzado -> https://www.youtube.com/watch?v=fq_N8RymfEE
-
+Always Encrypted en SQL Server -> https://www.youtube.com/watch?v=aef9eNPHNEE
 
 
 	# Backups 
@@ -124,7 +124,7 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 	Transaction log shipping. -> https://www.youtube.com/watch?v=G1e9_KM5cHA&t=2049s
 	Creación de Bases de Datos Espejo SQL Server -> https://www.youtube.com/watch?v=IS0jvVpz9DE
 	Instalación de SQL Server en FailOver Cluster -> https://www.youtube.com/watch?v=NdksSXPRPoo
-	Always Encrypted en SQL Server -> https://www.youtube.com/watch?v=aef9eNPHNEE
+	
 	
 	
 	Instalación de SQL2014 dentro de Active Directory -> https://www.youtube.com/watch?v=-gYQrAbsagE
