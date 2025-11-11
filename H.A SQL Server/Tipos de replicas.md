@@ -1,3 +1,148 @@
+### 🧪 Requisitos clave
+
+- Windows Server Standard o Datacenter (con soporte para clustering).
+- SQL Server Enterprise Edition (para múltiples réplicas sincronizadas).
+- Red confiable entre los nodos.
+- DNS y Active Directory correctamente configurados.
+- Firewall configurado para permitir puertos de clúster y SQL Server (ej. 1433, 5022).
+ 
+
+### ⚠️ Consideraciones clave
+
+- Todos los nodos deben estar en el mismo **Windows Failover Cluster**.
+- Las bases deben estar en modo **FULL recovery**.
+- Se requiere **SQL Server Enterprise Edition** para múltiples réplicas sincronizadas.
+- El **quorum** debe estar bien configurado para evitar pérdida de servicio.
+ 
+ 
+
+
+
+### 🛡️ Infraestructura robusta recomendada
+
+Para alta disponibilidad y tolerancia a fallos, se recomienda:
+
+- **2 o más réplicas secundarias** (una local y otra en sitio remoto).
+- **1 nodo de quorum** (puede ser un File Share Witness).
+- **Red redundante** (dos interfaces de red por nodo).
+- **Almacenamiento rápido y replicado** (preferiblemente SSD o NVMe).
+- **Monitoreo y alertas** (con herramientas como SCOM, Zabbix, o Prometheus).
+
+ 
+### 🧪 Ejemplo de arquitectura robusta
+
+```plaintext
+[ Cliente ]
+    |
+[ Load Balancer (opcional) ]
+    |
+[ Nodo 1 - SQL Server Primary ]
+    |
+[ Nodo 2 - SQL Server Secondary (sincronizado, solo lectura) ]
+    |
+[ Nodo 3 - SQL Server Secondary (asíncrono, en sitio remoto) ]
+    |
+[ Nodo 4 - File Share Witness / Quorum ]
+```
+
+
+### 📌 Detalles clave:
+
+- **WSFC se instala en los nodos 1, 2 y opcionalmente en el 3** si quieres que el nodo remoto participe en el clúster (por ejemplo, para failover manual o monitoreo).
+- **Nodo 4** solo necesita tener una carpeta compartida accesible por los nodos del clúster. No requiere instalación de WSFC.
+- El **quorum** se configura desde el **Administrador de clústeres de conmutación por error**, y se recomienda usar **File Share Witness** en clústeres con número par de nodos (como este).
+
+
+### 🧠 Roles en detalle
+
+ 
+#### 🔵 **Nodo 1 – Réplica primaria (activo)**
+
+| Característica | Detalle |
+|----------------|--------|
+| **Sincronización** | Envía datos en tiempo real a las réplicas secundarias. |
+| **Ubicación** | Sitio principal o nodo activo del clúster. |
+| **Modo de acceso** | Lectura y escritura (acepta todas las operaciones DML y DDL). |
+| **Rol en HA** | Nodo principal del grupo de disponibilidad. En caso de falla, otro nodo puede asumir su rol si hay failover automático configurado. |
+| **Ventaja** | Punto central de operaciones. Garantiza consistencia y disponibilidad de datos. |
+
+✅ **Ideal para**:  
+- Aplicaciones críticas de negocio  
+- Operaciones de escritura intensiva  
+- Procesamiento de transacciones  
+- Alta disponibilidad y recuperación ante desastres  
+
+ 
+
+#### 🟢 **Nodo 2 – Réplica secundaria sincronizada (solo lectura)**
+
+| Característica | Detalle |
+|----------------|--------|
+| **Sincronización** | En tiempo real con el nodo primario.  Reciben datos desde el nodo primario. |
+| **Ubicación** | Mismo sitio o red local que el primario. |
+| **Modo de acceso** | Solo lectura (ideal para reportes, BI, consultas pesadas). |
+| **Rol en HA** | Puede asumir el rol de primario automáticamente si el nodo 1 falla (failover automático). |
+| **Ventaja** | Reduce carga en el nodo principal y mejora rendimiento general. |
+
+✅ **Ideal para**:  
+- Consultas analíticas  
+- Reportes  
+- Balanceo de carga de lectura  
+- Alta disponibilidad local
+
+ 
+
+#### 🟡 **Nodo 3 – Réplica secundaria asíncrona (sitio remoto)**
+
+| Característica | Detalle |
+|----------------|--------|
+| **Sincronización** | No en tiempo real (puede haber retraso). |
+| **Ubicación** | Sitio remoto (otra ciudad, región o datacenter). |
+| **Modo de acceso** | Puede ser solo lectura o sin acceso directo. |
+| **Rol en DR** | Actúa como respaldo en caso de desastre total en el sitio principal. |
+| **Failover** | Solo **manual**, no automático. |
+
+✅ **Ideal para**:  
+- Recuperación ante desastres (Disaster Recovery)  
+- Protección geográfica  
+- Continuidad del negocio
+
+
+
+ 
+#### 🟣 **Nodo 4 – File Share Witness / Quorum**
+Es un archivo compartido en red que actúa como voto adicional en un clúster de alta disponibilidad (WSFC).
+Su función principal es ayudar a mantener el quorum, especialmente cuando hay un número par de nodos.
+
+| Característica | Detalle |
+|----------------|--------|
+| **Función principal** | Actúa como testigo para ayudar al clúster a determinar si hay mayoría (quorum) en caso de fallos. |
+| **Ubicación** | Carpeta compartida en un servidor accesible por todos los nodos del clúster. No necesita SQL Server instalado. |
+| **Modo de acceso** | Solo lectura/escritura por parte del clúster de Windows (no por usuarios ni aplicaciones). |
+| **Rol en HA** | Ayuda a evitar el “split-brain” y permite que el clúster tome decisiones de failover correctamente. |
+| **Ventaja** | Mejora la tolerancia a fallos y permite mantener el quorum con un número impar de nodos. |
+
+
+
+✅ **Ideal para**:  
+- Clústeres con número par de nodos  
+- Escenarios donde se necesita alta disponibilidad sin perder quorum  
+- Ambientes distribuidos donde no todos los nodos están en el mismo sitio físico  
+- Evita que el clúster se apague si un nodo falla.
+- Permite que el clúster tome decisiones correctas de failover.
+- Mejora la tolerancia a fallos sin necesidad de agregar más servidores.
+
+### ⚠️ ¿Por qué es importante el File Share Witness?
+
+En un clúster de solo 2 nodos, **no se puede alcanzar quorum si uno falla**, a menos que haya un **tercer voto**. Por eso se recomienda agregar un **File Share Witness**, que es simplemente una carpeta compartida en otro servidor o equipo de red confiable.
+
+- **Sin FSW**: Si un nodo falla, el clúster no puede decidir quién debe ser el nuevo primario.
+- **Con FSW**: El nodo restante puede mantener el servicio activo.
+
+---
+---
+---
+
 En **SQL Server**, existen varios tipos de **replicación** que puedes configurar, dependiendo de tus necesidades de disponibilidad, rendimiento y sincronización de datos. Aquí te explico los principales:
 
  
