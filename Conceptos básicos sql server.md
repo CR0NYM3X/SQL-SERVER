@@ -226,3 +226,36 @@ Administración de Contraseñas: Similar a la gMSA, pero no se extiende a varios
 | Equilibrio entre rendimiento y seguridad | RAID 5 o RAID 6 |
 | Máxima seguridad y velocidad | RAID 10 |
 | Grandes volúmenes y alta tolerancia | RAID 50 o RAID 60 |
+
+
+# **Estructuras internas de SQL Server (.mdf, .ndf)** 
+que se usan para administrar el espacio en disco dentro de los archivos de datos (.mdf, .ndf). Son fundamentales para entender cómo SQL Server organiza las páginas y extents.
+
+ 
+### ✅ **1. GAM (Global Allocation Map)**
+
+*   **Qué es:** Una página especial que indica **qué extents (8 páginas = 64 KB)** están **libres o asignados** en un archivo de base de datos.
+*   **Función:** Cada bit en la GAM representa un extent:
+    *   **0** = extent asignado.
+    *   **1** = extent libre.
+*   **Ubicación:** Cada GAM cubre 4 GB de espacio de datos y se encuentra cada 511.232 páginas (\~4 GB).
+ 
+
+### ✅ **2. SGAM (Shared Global Allocation Map)**
+
+*   **Qué es:** Otra página especial que indica **qué extents están parcialmente usados para asignaciones mixtas**.
+*   **Función:** SQL Server puede asignar páginas individuales dentro de un extent (mixed extent). SGAM marca:
+    *   **1** = extent tiene páginas libres para asignación mixta.
+    *   **0** = extent no disponible para asignación mixta.
+*   **Ubicación:** Igual que GAM, cada SGAM cubre 4 GB.
+ 
+### ✅ **3. PFS (Page Free Space)**
+
+*   **Qué es:** Página que rastrea el **espacio libre dentro de cada página** y si está asignada.
+*   **Función:** Indica:
+    *   Si la página está asignada.
+    *   Si es parte de un objeto.
+    *   Cuánto espacio libre tiene (en rangos: 0-50%, 50-80%, etc.).
+*   **Ubicación:** Cada PFS cubre 8.088 páginas (\~64 MB).
+
+
