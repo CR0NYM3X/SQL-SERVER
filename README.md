@@ -25,7 +25,7 @@
 
 
 # Páginas para info de sql server:
-
+```
 --- Clubs de DBAS MSSQL  <br> 
 https://github.com/MadeiraData/microsoft-dbas-club/tree/master <br> 
 
@@ -33,7 +33,7 @@ https://blog.sqlauthority.com/ <br>
 https://www.mssqltips.com/sql-server-categories/ <br>
 https://www.sqlservertutorial.net/
 https://udayarumilli.com/mssql-security-interview-questions-answers/
-
+https://www.sqlservercentral.com/
 https://database.guide/category/dbms/rdbms/sql-server/
 
 https://www.sqlskills.com/blogs/glenn/sql-server-diagnostic-information-queries-detailed-day-13/
@@ -50,3 +50,4 @@ https://soportesql.wordpress.com/
 https://learn.microsoft.com/es-es/credentials/support/retired-certification-exams
 https://www.microsoft.com/es-es/evalcenter
 
+```
