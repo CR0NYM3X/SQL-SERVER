@@ -222,7 +222,14 @@ Esto puede mejorar el rendimiento de las consultas al mantener los índices de l
 ALTER INDEX ALL ON tu_tabla REBUILD;
 ALTER INDEX ALL ON tu_tabla REORGANIZE;
 
+
+-- REBUILD OFFLINE (por defecto)
+-- Bloquea la tabla completa mientras se reconstruye el índice. Ninguna operación de lectura/escritura puede ejecutarse.
 ALTER INDEX nombre_indice ON nombre_tabla REBUILD;
+
+-- REBUILD ONLINE (Enterprise Edition)
+-- Permite que las consultas continúen mientras se reconstruye el índice. Solo hay bloqueos cortos al inicio y al final.
+ALTER INDEX idx_cliente ON clientes REBUILD WITH (ONLINE = ON);
 
 
 ************** REINDEX EN TODAS LA TABLAS ********
