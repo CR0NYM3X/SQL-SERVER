@@ -302,3 +302,10 @@ Piensa en WSFC como el **sistema operativo que gestiona el clúster**.
   - Cuando ocurre un failover, el servicio SQL se mueve al otro nodo, pero **los datos no se copian**, porque están en el mismo disco compartido.
 
 Piensa en FCI como **una sola instalación de SQL Server que puede moverse entre servidores**.
+
+
+
+
+```
+https://www.sqlservercentral.com/articles/setting-up-basic-always-on-availability-groups-in-sql-server-standard
+```
