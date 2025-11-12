@@ -257,6 +257,15 @@ REPAIR_REBUILD :  Esta opción es la recomendada
 REPAIR_ALLOW_DATA_LOSS : Esta opción puede eliminar algunas páginas de la base de datos. Por lo tanto, Microsoft no recomienda, en caso de ser muy necesario usar esta opción
 ```
 
+###   **Buenas prácticas**
+
+*   **Ejecutar regularmente** (diario/semanal).
+*   **Nunca reparar directamente en producción** sin respaldo.
+*   Si hay corrupción:
+    *   **Primero restaurar desde backup**.
+    *   Si no hay backup, usar `REPAIR_ALLOW_DATA_LOSS` como último recurso.
+
+
 **4.- Ver el Porcentaje de recovery**
 ```
 EXEC sp_readerrorlog 0, 1, 'Recovery of database' 
