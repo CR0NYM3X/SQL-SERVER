@@ -275,3 +275,30 @@ El Listener es crucial para la alta disponibilidad y la continuidad del negocio 
     * Si se configura el **enrutamiento de solo lectura** (`read-only routing`), el Listener puede dirigir las conexiones con intención de solo lectura (`ApplicationIntent=ReadOnly`) a una de las **réplicas secundarias** configuradas para permitir lecturas.
 
 En esencia, el Listener actúa como un **proxy** o un **intermediario** que garantiza que siempre puedas acceder a la base de datos, aunque el servidor subyacente que la aloja cambie debido a un evento de alta disponibilidad.
+
+
+
+---
+
+# conceptos
+
+### **1. WSFC (Windows Server Failover Cluster)**
+- Es una **característica de Windows Server** que permite crear un clúster de servidores para alta disponibilidad.
+- Proporciona:
+  - **Detección de fallos** (si un nodo falla, otro toma el control).
+  - **Recursos compartidos** (IP virtual, nombre de red, discos, etc.).
+- Es la base sobre la que funcionan:
+  - **Failover Cluster Instances (FCI)**.
+  - **Always On Availability Groups (AG)**.
+
+Piensa en WSFC como el **sistema operativo que gestiona el clúster**.
+
+ 
+### **2. FCI (Failover Cluster Instance)**
+- Es una **instancia de SQL Server instalada en modo clúster**.
+- Características:
+  - Solo hay **una instancia activa a la vez** (activo-pasivo).
+  - Requiere **almacenamiento compartido** (SAN o iSCSI), porque los nodos acceden a los mismos archivos de base de datos.
+  - Cuando ocurre un failover, el servicio SQL se mueve al otro nodo, pero **los datos no se copian**, porque están en el mismo disco compartido.
+
+Piensa en FCI como **una sola instalación de SQL Server que puede moverse entre servidores**.
