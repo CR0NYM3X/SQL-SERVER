@@ -2,7 +2,7 @@
 
 - Windows Server Standard o Datacenter (con soporte para clustering).
 - SQL Server Enterprise Edition (para múltiples réplicas sincronizadas).
-- Red confiable entre los nodos.
+- Red confiable entre los nodos. Latencia entre nodos debe ser **<1 ms** para réplicas síncronas.
 - DNS y Active Directory correctamente configurados.
 - Firewall configurado para permitir puertos de clúster y SQL Server (ej. 1433, 5022).
  
@@ -13,9 +13,11 @@
 - Las bases deben estar en modo **FULL recovery**.
 - Se requiere **SQL Server Enterprise Edition** para múltiples réplicas sincronizadas.
 - El **quorum** debe estar bien configurado para evitar pérdida de servicio.
- 
- 
-
+-  **No uses discos compartidos** para Always On (no los necesita, a diferencia de un cluster tradicional con discos compartidos).
+-  Cada nodo debe tener su propio almacenamiento.
+-  Usa **discos virtuales de alto rendimiento** (preferiblemente SSD).
+-  Configura **paravirtual SCSI** para optimizar I/O. 
+-   Configura **anti-affinity rules** para que las VMs no estén en el mismo host físico (para alta disponibilidad real).
 
 
 ### 🛡️ Infraestructura robusta recomendada
@@ -121,7 +123,7 @@ Su función principal es ayudar a mantener el quorum, especialmente cuando hay u
 | **Modo de acceso** | Solo lectura/escritura por parte del clúster de Windows (no por usuarios ni aplicaciones). |
 | **Rol en HA** | Ayuda a evitar el “split-brain” y permite que el clúster tome decisiones de failover correctamente. |
 | **Ventaja** | Mejora la tolerancia a fallos y permite mantener el quorum con un número impar de nodos. |
-
+| **recomendaciones** | usa **File Share Witness** en un servidor físico o en otra VM estable.  No pongas el witness en el mismo host que los nodos SQL. | 
 
 
 ✅ **Ideal para**:  
