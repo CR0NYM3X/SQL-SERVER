@@ -490,6 +490,9 @@ RESTORE DATABASE NORTHWIND WITH RECOVERY
 
 # Bibliografías :
 ```
+
+SQL Server Backup & Recovery ->  https://www.critfc.org/wp-content/uploads/2019/04/AutomatingSQLServerBackups_Nowinski_04172019.pdf
+
 Reparación de una dba: https://nira.com/how-to-repair-a-corrupted-sql-database/
 
 https://www.dell.com/support/kbdoc/en-us/000200606/microsoft-sql-server-msdb-database-recovery
