@@ -307,5 +307,23 @@ Piensa en FCI como **una sola instalación de SQL Server que puede moverse entre
 
 
 ```
+
+
+Mejores prácticas de configuración de HADR (SQL Server en máquinas virtuales de Azure) -> https://docs.azure.cn/en-us/azure-sql/virtual-machines/windows/hadr-cluster-best-practices?tabs=windows2012
+
+Configuration Microsoft SQL Server
+2022 Always on -> https://www.mitel.com/sites/default/files/s3_imports/Applications/Contact%20Center/Call%20Recording/Mitel%20Interaction%20Recording%20powered%20by%20ASC/Installation/7.3/EN/Config_MS_SQL_2022_SP_us.pdf
+
+SQL Server Basic Availability Groups -> https://www.clickstudios.com.au/downloads/version9/SQL_Server_Basic_Availability_Groups.pdf
+Configuration Microsoft SQL Server 2022 -> 
+
+SQL Server “AlwaysOn” -> https://www.proofpoint.com/sites/default/files/oit-files/pfpt-sql-server-always-on-setup.pdf
+How to implement Always on Availability Groups in SQL Server 2019 on Windows? -> https://rafaelrampineli.medium.com/how-to-implement-always-on-availability-groups-in-sql-server-2019-on-windows-11f6fb8aad5f
+Step by step guide to setting up MS SQL Server AlwaysOn -> https://www.forrards.com/post/step-by-step-guide-to-setting-up-ms-sql-server-alwayson
+
+https://everexpanse.com/docs/SQLServer_2014_AlwaysOnImplementationGuide.pdf
 https://www.sqlservercentral.com/articles/setting-up-basic-always-on-availability-groups-in-sql-server-standard
+https://www.tech-coffee.net/wp-content/uploads/2014/04/Part-1-AlwaysOn-Introduction.pdf
+https://www.tech-coffee.net/wp-content/uploads/2014/04/AlwaysOn-Availability-Group-Part-2-Lab-Design.pdf
+
 ```
