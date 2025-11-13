@@ -21,8 +21,6 @@
 | **Filter** | Aplica condiciones tipo `WHERE`. | Útil para reducir filas procesadas. |
 | **Top** | Limita el número de filas. | Reduce carga si se usa correctamente. |
 | **Concatenation** | Une resultados de múltiples ramas. | Común en consultas con `UNION`. |
-| **Stream Aggregate** | Agrupa datos en flujo. | Eficiente para agregaciones simples. |
-| **Hash Aggregate** | Agrupa datos usando hash. | Mejor para grandes volúmenes. |
 | **Key Lookup** | Búsqueda adicional en la tabla base tras usar un índice. | Puede ser costoso si ocurre muchas veces. |
 | **RID Lookup** | Similar a Key Lookup pero en tablas sin clustered index. | Indica posible necesidad de índice clustered. |
 | **Predicate** | Condición evaluada en una operación. | Ayuda a entender filtros aplicados. |
@@ -30,4 +28,7 @@
 | **Merge Join** | Combina datos ordenados. | Muy eficiente si los datos ya están ordenados. |
 | **Hash Join**                    | Algoritmo de unión que usa una tabla hash para unir grandes conjuntos de datos. | Eficiente para unir tablas grandes sin índices o sin orden se usa la tempdb, pero puede consumir mucha memoria y cpu.          |
 | **Table Spool**                  | Operador que guarda temporalmente datos en el spool para reutilizarlos.         | Puede indicar operaciones repetitivas o falta de optimización; útil pero costoso si mal usado.|
-
+| **Stream Aggregate**           | Se usa cuando los datos ya están ordenados por la clave de agrupación.                          | Más eficiente porque evita ordenar y estructuras complejas.               | **Agregación ordenada** (ej. `GROUP BY` con índice adecuado).            |
+| **Hash Aggregate**             | Se usa cuando los datos no están ordenados; crea una tabla hash en memoria para agrupar.        | Puede consumir más memoria y generar spills a disco si hay muchos datos.  | **Agregación con hash** (ideal para datos desordenados).                 |
+| **Partial / Final Aggregate**  | Divide el trabajo en varias partes (paralelismo) y luego combina resultados.                    | Mejora el rendimiento en consultas paralelas.                             | **Agregación paralela** (en planes con múltiples threads).               |
+| **Scalar Aggregate**           | Cuando no hay `GROUP BY` y se calcula un agregado sobre todo el conjunto (ej. `COUNT(*)`).      | Útil para cálculos globales sobre la tabla completa.                      | **Agregación escalar** (sin agrupación, resultado único).                |
