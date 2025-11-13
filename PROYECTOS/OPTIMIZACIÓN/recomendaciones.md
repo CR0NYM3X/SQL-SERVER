@@ -123,3 +123,42 @@ use tempdb
 SELECT name, physical_name, size*8/1024 AS SizeMB,*
 FROM sys.database_files;
 ```
+
+#  **¿Cuándo se dispara un wait?**
+
+*   Los waits son indicadores clave de **cuellos de botella**.
+*   Analizar los waits ayuda a saber si el problema está en **CPU, memoria, disco, red o bloqueos**.
+
+Un wait se dispara cuando:
+
+1.  **Un recurso está ocupado o bloqueado**
+    *   Ejemplo: Espera por un **latch**, **lock**, o acceso a disco.
+2.  **Hay contención en memoria o CPU**
+    *   Ejemplo: Espera por memoria para ejecutar un plan.
+3.  **Operaciones externas tardan en responder**
+    *   Ejemplo: Espera por I/O en disco, red, o tempdb.
+4.  **Sincronización interna**
+    *   Ejemplo: Espera por un hilo paralelo en un plan de ejecución.
+
+ 
+### 🔍 **Tipos comunes de waits**
+
+*   **PAGEIOLATCH\_**\* → Espera por lectura/escritura en disco.
+*   **CXPACKET / CXCONSUMER** → Espera por sincronización en consultas paralelas.
+*   **ASYNC\_NETWORK\_IO** → Espera porque el cliente no consume datos rápido.
+*   **RESOURCE\_SEMAPHORE** → Espera por memoria para ejecutar el plan.
+*   **WRITELOG** → Espera por escritura en el log de transacciones.
+
+ 
+### ✅ **Cómo ver los waits activos**
+
+```sql
+SELECT 
+    wait_type, 
+    waiting_tasks_count, 
+    wait_time_ms, 
+    max_wait_time_ms, 
+    signal_wait_time_ms
+FROM sys.dm_os_wait_stats
+ORDER BY wait_time_ms DESC;
+```
