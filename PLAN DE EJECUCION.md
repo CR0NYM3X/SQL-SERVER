@@ -21,7 +21,7 @@
 | **Filter** | Aplica condiciones tipo `WHERE`. | Útil para reducir filas procesadas. |
 | **Top** | Limita el número de filas. | Reduce carga si se usa correctamente. |
 | **Concatenation** | Une resultados de múltiples ramas. | Común en consultas con `UNION`. |
-| **Key Lookup** | Búsqueda adicional en la tabla base tras usar un índice. | Puede ser costoso si ocurre muchas veces. |
+| **Key Lookup** | La consulta usa un índice no cubriente (el índice no contiene todas las columnas que se necesitan en el SELECT) SQL Server hace un Index Seek para encontrar las filas por la clave de búsqueda, pero luego necesita columnas adicionales que no están en el índice. Para obtener esas columnas, va a la tabla base (clustered index) usando la clave primaria → eso es el Key Lookup | Puede ser costoso. |
 | **RID Lookup** | Similar a Key Lookup pero en tablas sin clustered index. | Indica posible necesidad de índice clustered. |
 | **Predicate** | Condición evaluada en una operación. | Ayuda a entender filtros aplicados. |
 | **Warnings (e.g., Missing Index)** | Alertas sobre problemas potenciales. | Clave para optimización. |
