@@ -1,7 +1,7 @@
 
 ## Conexion string 
 ```
-Server=192.28.230.122;Application Name=TEST_APLICATION;Database=master;User Id=sys_usert;Password=A138AFB73ECD5B64F6;Encrypt=True;TrustServerCertificate=True;
+Server=192.28.230.122;Application Name=TEST_APLICATION;Database=master;User Id=sys_usert;Password=A138AFB73ECD5B64F6;Encrypt=True;TrustServerCertificate=True;Connect Timeout=30;
 
 *** Referencias ***
 https://www.mssqltips.com/sqlservertip/7220/sql-server-connection-strings-reference-guide/
