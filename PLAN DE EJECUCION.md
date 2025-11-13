@@ -32,3 +32,9 @@
 | **Hash Aggregate**             | Se usa cuando los datos no están ordenados; crea una tabla hash en memoria para agrupar.        | Puede consumir más memoria y generar spills a disco si hay muchos datos.  | **Agregación con hash** (ideal para datos desordenados).                 |
 | **Partial / Final Aggregate**  | Divide el trabajo en varias partes (paralelismo) y luego combina resultados.                    | Mejora el rendimiento en consultas paralelas.                             | **Agregación paralela** (en planes con múltiples threads).               |
 | **Scalar Aggregate**           | Cuando no hay `GROUP BY` y se calcula un agregado sobre todo el conjunto (ej. `COUNT(*)`).      | Útil para cálculos globales sobre la tabla completa.                      | **Agregación escalar** (sin agrupación, resultado único).                |
+
+
+# Extra
+
+### Aggregation
+significa que el motor está realizando una operación para agrupar o resumir datos.
