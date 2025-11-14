@@ -178,4 +178,8 @@ GlennBerry Performance GitHub
 https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/tree/main
 https://github.com/Ratithoglys/GlennBerry_DMV_Queries/tree/master
 
+procedimiento almacenado gratuito para diagnosticar problemas de presión en CPU y memoria en SQL Server.
+https://github.com/erikdarlingdata/DarlingData
+
+
 ```
