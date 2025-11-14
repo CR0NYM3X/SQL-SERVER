@@ -174,4 +174,8 @@ Prácticas recomendadas para las instancias de SQL Server -> https://docs.cloud.
 SQL Server Best Practices, Part I: Configuration -> https://www.varonis.com/blog/sql-server-best-practices-part-configuration
 SQL Server Best Practices, Part II: Virtualized Environments ->  https://www.varonis.com/blog/sql-server-best-practices-in-virtualized-environments
 
+GlennBerry Performance GitHub
+https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/tree/main
+https://github.com/Ratithoglys/GlennBerry_DMV_Queries/tree/master
+
 ```
