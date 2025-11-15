@@ -189,6 +189,13 @@ FROM sys.dm_resource_governor_resource_pools WITH (NOLOCK)
 OPTION (RECOMPILE);
 
 
+-- Memory Clerk Usage for instance  (Query 51) (Memory Clerk Usage)
+-- Look for high value for CACHESTORE_SQLCP (Ad-hoc query plans)
+SELECT TOP(10) mc.[type] AS [Memory Clerk Type], 
+       CAST((SUM(mc.pages_kb)/1024.0) AS DECIMAL (15,2)) AS [Memory Usage (MB)] 
+FROM sys.dm_os_memory_clerks AS mc WITH (NOLOCK)
+GROUP BY mc.[type]  
+ORDER BY SUM(mc.pages_kb) DESC OPTION (RECOMPILE);
 ```
  
 
@@ -239,7 +246,6 @@ AND OBJECT_NAME(p.[object_id]) NOT LIKE N'xml_index_nodes%'
 GROUP BY fg.name, o.Schema_ID, p.[object_id], p.index_id, 
          p.data_compression_desc, p.[Rows]
 ORDER BY [BufferCount] DESC OPTION (RECOMPILE);
-
 
 
 -- Get input buffer information for the current database (Query 86) (Input Buffer)
