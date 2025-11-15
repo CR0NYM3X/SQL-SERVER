@@ -259,3 +259,32 @@ que se usan para administrar el espacio en disco dentro de los archivos de datos
 *   **Ubicación:** Cada PFS cubre 8.088 páginas (\~64 MB).
 
 
+---
+
+### ✅ **1. Memoria RAM**
+
+*   **Qué es:** La memoria física del servidor que SQL Server utiliza para almacenar datos, ejecutar consultas y mantener estructuras internas.
+*   **Trabajo:** SQL Server reserva una parte de la RAM para su operación (configurable con `max server memory` y `min server memory`).
+*   **Ventaja:** Acceso rápido a datos y estructuras sin depender del disco.
+*   **Desventaja:** Si hay poca RAM, SQL Server puede recurrir a disco (swap), lo que degrada el rendimiento.
+
+ 
+### ✅ **2. Buffer Pool**
+
+*   **Qué es:** Es la **zona principal dentro de la RAM** que SQL Server usa para almacenar **páginas de datos e índices** que se leen desde disco.
+*   **Trabajo:** Cuando una consulta necesita datos, SQL Server los carga en el buffer pool. Si ya están ahí, se evita leer del disco (mucho más lento).
+*   **Ventaja:** Reduce I/O en disco, mejora velocidad de lectura y escritura.
+*   **Desventaja:** Si el buffer pool es pequeño, habrá más expulsión de páginas y más lecturas desde disco → rendimiento pobre.
+ 
+### ✅ **3. Cache**
+
+*   **Qué es:** Conjunto de áreas en memoria para almacenar información temporal:
+    *   **Plan Cache:** Guarda planes de ejecución compilados para reutilizarlos.
+    *   **Procedure Cache:** Similar, para procedimientos almacenados.
+    *   **Data Cache:** Parte del buffer pool que contiene datos.
+*   **Trabajo:** Evita recompilar consultas y reduce tiempo de ejecución.
+*   **Ventaja:** Ahorra CPU y tiempo en consultas repetitivas.
+*   **Desventaja:** Si hay demasiados planes o consultas ad-hoc, puede fragmentarse y consumir memoria innecesaria.
+
+
+
