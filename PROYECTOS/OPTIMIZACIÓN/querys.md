@@ -175,9 +175,11 @@ SELECT total_physical_memory_kb/1024 AS [Physical Memory (MB)],
        system_memory_state_desc AS [System Memory State]
 FROM sys.dm_os_sys_memory WITH (NOLOCK) OPTION (RECOMPILE);
 
-
-
-
+-- Get information on location, time and size of any memory dumps from SQL Server  (Query 23) (Memory Dump Info)
+SELECT [filename], creation_time, size_in_bytes/1048576.0 AS [Size (MB)]
+FROM sys.dm_server_memory_dumps WITH (NOLOCK) 
+ORDER BY creation_time DESC OPTION (RECOMPILE);
+ 
 -- Resource Governor Resource Pool information (Query 34) (RG Resource Pools)
 SELECT pool_id, [Name], statistics_start_time,
        min_memory_percent, max_memory_percent,  
@@ -188,6 +190,11 @@ SELECT pool_id, [Name], statistics_start_time,
 FROM sys.dm_resource_governor_resource_pools WITH (NOLOCK)
 OPTION (RECOMPILE);
 
+-- Memory Grants Pending value for current instance  (Query 50) (Memory Grants Pending)
+SELECT @@SERVERNAME AS [Server Name], RTRIM([object_name]) AS [Object Name], cntr_value AS [Memory Grants Pending]                                                                                                       
+FROM sys.dm_os_performance_counters WITH (NOLOCK)
+WHERE [object_name] LIKE N'%Memory Manager%' -- Handles named instances
+AND counter_name = N'Memory Grants Pending' OPTION (RECOMPILE);
 
 -- Memory Clerk Usage for instance  (Query 51) (Memory Clerk Usage)
 -- Look for high value for CACHESTORE_SQLCP (Ad-hoc query plans)
