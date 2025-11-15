@@ -153,6 +153,7 @@ FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id,
 ORDER BY record_id DESC OPTION (RECOMPILE);
 ```
 
+
 # Memoria
 ```SQL
 -- SQL Server Process Address space info  (Query 6) (Process Memory)
@@ -181,6 +182,17 @@ FROM sys.dm_server_memory_dumps WITH (NOLOCK)
 ORDER BY creation_time DESC OPTION (RECOMPILE);
  
 -- Resource Governor Resource Pool information (Query 34) (RG Resource Pools)
+-- Es una característica de SQL Server que permite administrar y limitar el uso de recursos (CPU y memoria) para diferentes cargas de trabajo.
+-- 
+--    ¿Para qué sirve?
+--        Controlar el consumo de recursos por grupos de usuarios o aplicaciones.
+--        Evitar que una consulta pesada afecte el rendimiento global.
+--    Cómo funciona:
+--        Define Pools de recursos (máximo y mínimo de CPU/memoria).
+--        Define Grupos de carga de trabajo (workload groups) que asignan sesiones a esos pools.
+--    Ejemplo de uso:  
+--     Limitar que procesos ETL no consuman toda la memoria y CPU, dejando recursos para consultas OLTP.
+
 SELECT pool_id, [Name], statistics_start_time,
        min_memory_percent, max_memory_percent,  
        max_memory_kb/1024 AS [max_memory_mb],  
@@ -190,14 +202,39 @@ SELECT pool_id, [Name], statistics_start_time,
 FROM sys.dm_resource_governor_resource_pools WITH (NOLOCK)
 OPTION (RECOMPILE);
 
+
 -- Memory Grants Pending value for current instance  (Query 50) (Memory Grants Pending)
+-- Son reservas de memoria que SQL Server asigna a una consulta antes de ejecutarla, principalmente para operaciones como:
+-- 
+--    Ordenamientos (Sort)
+--    Joins complejos
+--    Operaciones de agregación
+-- 
+-- ¿Por qué son importantes?
+-- 
+--    Si una consulta necesita más memoria de la que se le concede, puede usar tempdb (más lento).
+--    Si hay muchas consultas esperando memory grants, se genera RESOURCE\_SEMAPHORE waits (bloqueos por falta de memoria).
+
 SELECT @@SERVERNAME AS [Server Name], RTRIM([object_name]) AS [Object Name], cntr_value AS [Memory Grants Pending]                                                                                                       
 FROM sys.dm_os_performance_counters WITH (NOLOCK)
 WHERE [object_name] LIKE N'%Memory Manager%' -- Handles named instances
 AND counter_name = N'Memory Grants Pending' OPTION (RECOMPILE);
 
+SELECT * FROM sys.dm_exec_query_memory_grants;
+
+
+
 -- Memory Clerk Usage for instance  (Query 51) (Memory Clerk Usage)
 -- Look for high value for CACHESTORE_SQLCP (Ad-hoc query plans)
+-- Un Memory Clerk es un componente interno que rastrea y administra el uso de memoria por diferentes partes del motor:
+-- 
+--    Ejemplos:
+--        CACHESTORE\_SQLCP → Planes de consultas ad-hoc.
+--        CACHESTORE\_OBJCP → Planes de procedimientos almacenados.
+--        MEMORYCLERK\_SQLBUFFERPOOL → Buffer Pool (páginas de datos).
+--    ¿Para qué sirve?
+--        Diagnóstico de consumo de memoria por cada área del motor.
+
 SELECT TOP(10) mc.[type] AS [Memory Clerk Type], 
        CAST((SUM(mc.pages_kb)/1024.0) AS DECIMAL (15,2)) AS [Memory Usage (MB)] 
 FROM sys.dm_os_memory_clerks AS mc WITH (NOLOCK)
