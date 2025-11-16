@@ -288,3 +288,31 @@ que se usan para administrar el espacio en disco dentro de los archivos de datos
 
 
 
+#  **throughput**
+ se refiere a la **cantidad de trabajo que el sistema puede procesar en un período de tiempo determinado**. Es una métrica clave para medir el rendimiento, especialmente en sistemas transaccionales o de consultas masivas.
+
+### ✅ **Definición técnica**
+
+*   Es la **tasa de operaciones completadas por segundo** (o por minuto/hora), como:
+    *   Transacciones (TPS: Transactions Per Second)
+    *   Consultas ejecutadas
+    *   Lecturas/escrituras en disco
+*   Se mide en **operaciones por unidad de tiempo**.
+
+### ✅ **Relación con rendimiento**
+
+*   **Alto throughput** = el sistema procesa muchas operaciones rápidamente.
+*   **Bajo throughput** = el sistema está limitado por CPU, memoria, I/O, bloqueos o concurrencia.
+
+### ✅ **Ejemplo práctico**
+
+Si un servidor SQL procesa:
+
+*   10,000 consultas en 10 segundos → throughput = **1,000 consultas/segundo**.
+
+### ✅ **Factores que afectan el throughput**
+
+*   **Hardware**: CPU, RAM, velocidad de disco.
+*   **Diseño de la base**: índices, normalización.
+*   **Concurrencia**: bloqueos, aislamiento de transacciones.
+*   **Configuración**: tamaño de pool de conexiones, parámetros de I/O.
