@@ -264,6 +264,26 @@ ORDER BY TiempoBloqueado_Minutos DESC;
 
 
 # Waits 
+### **¿Por qué monitorear los waits?**
+
+Porque las **esperas (waits)** indican que una tarea en SQL Server está detenida esperando un recurso (CPU, memoria, disco, red, bloqueos, etc.). Son una señal directa de cuellos de botella en el sistema y ayudan a entender dónde está el problema de rendimiento.
+
+Si no se controlan, pueden provocar:
+
+*   Lentitud general en consultas.
+*   Bloqueos prolongados.
+*   Saturación de recursos (CPU, I/O, memoria).
+*   Deadlocks y baja disponibilidad.
+ 
+### **¿Qué valido al monitorearlos?**
+
+*   **Tipo de espera (wait\_type):** Para identificar el recurso que causa la espera (Memory, Lock, I/O, Network, etc.).
+*   **Duración de la espera:** Cuánto tiempo lleva esperando la tarea.
+*   **Cantidad de tareas esperando:** Si hay muchas, indica contención grave.
+*   **Categoría de espera:** Agrupación lógica (Memory, Lock, Buffer I/O, Logging, etc.) para priorizar análisis.
+*   **Sesión y query involucrada:** Para saber qué proceso está afectado y optimizarlo.
+*   **Patrones repetitivos:** Si siempre ocurre el mismo tipo de espera, hay un problema estructural (ej. falta de índices, hardware insuficiente).
+
 
 ```sql
 -- select * from sys.all_objects  where name like '%wait%'
@@ -420,7 +440,30 @@ LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
 
 
 
-# Querys I/O
+# I/O
+
+### **¿Por qué monitorear el I/O?**
+
+Porque las operaciones de **entrada/salida** son críticas para el rendimiento de SQL Server: implican lectura y escritura de datos en disco y en memoria. Si el I/O es lento, las consultas se retrasan, los bloqueos se prolongan y el throughput general del sistema cae.
+
+Problemas comunes si no se controla:
+
+*   Cuellos de botella en disco.
+*   Alta latencia en lectura/escritura.
+*   Saturación del buffer pool.
+*   Esperas prolongadas por PAGEIOLATCH (lectura) o WRITELOG (escritura).
+*   Impacto en transacciones críticas y procesos batch.
+ 
+
+### **¿Qué valido al monitorearlo?**
+
+*   **Tasa de I/O (MB/s):** Cuánto se está leyendo/escribiendo en disco.
+*   **Tipos de espera relacionados:** PAGEIOLATCH (lectura), WRITELOG (escritura), IO\_COMPLETION.
+*   **Duración de las esperas:** Si son altas, indica problemas de disco o almacenamiento.
+*   **Contención en buffer pool:** Si hay muchas esperas por Buffer I/O.
+*   **Patrones de uso:** Si hay picos durante backups, cargas masivas o consultas grandes.
+*   **Impacto en queries:** Identificar qué procesos generan más I/O para optimizarlos.
+
 ```sql
 -- SQL Server NUMA Node information  (Query 13) (SQL Server NUMA Info)
 SELECT osn.node_id, osn.node_state_desc, osn.memory_node_id, osn.processor_group, osn.cpu_count, osn.online_scheduler_count, 
@@ -533,7 +576,26 @@ ON vfs.[file_id]= df.[file_id] OPTION (RECOMPILE);
 ```
 
 
-# Querys CPU
+# CPU
+#### **¿Por qué monitoreo el CPU?**
+
+Porque el **procesador** es el recurso principal para ejecutar consultas, procesos internos y operaciones del motor. Si el CPU está saturado, las consultas se vuelven lentas, las tareas en segundo plano se retrasan y el sistema puede quedar inestable.
+
+Problemas comunes si no se controla:
+
+*   Cuellos de botella por alta concurrencia.
+*   Consultas mal optimizadas consumiendo CPU excesivo.
+*   Bloqueos prolongados por falta de ciclos de CPU.
+*   Impacto en procesos críticos como backups, replicación o jobs.
+
+#### **¿Qué valido al monitorearlo?**
+
+*   **% de uso del CPU por SQL Server:** Si está cerca del 100%, hay sobrecarga.
+*   **Esperas relacionadas:** SOS\_SCHEDULER\_YIELD (indica presión de CPU).
+*   **Consultas más costosas:** Identificar queries que consumen más CPU.
+*   **Patrones de uso:** Picos durante horarios específicos o procesos batch.
+*   **Impacto en sesiones activas:** Si hay muchas tareas esperando CPU.
+
 ```SQL
 -- Get CPU utilization by database (Query 38) (CPU Usage by Database)
 WITH DB_CPU_Stats
@@ -573,6 +635,26 @@ ORDER BY record_id DESC OPTION (RECOMPILE);
 
 
 # Memoria
+
+#### **¿Por qué monitoreo la memoria?**
+
+Porque la **memoria** es esencial para el rendimiento: SQL Server usa el buffer pool para almacenar páginas y reducir I/O en disco. Si hay poca memoria disponible, se incrementan las lecturas desde disco y las consultas se vuelven lentas.
+
+Problemas comunes si no se controla:
+
+*   Alta presión en el buffer pool.
+*   Incremento de PAGEIOLATCH (lecturas desde disco).
+*   Uso excesivo por consultas grandes o falta de índices.
+*   Fragmentación interna y falta de memoria para operaciones críticas.
+
+#### **¿Qué valido al monitorearla?**
+
+*   **Memoria total asignada vs disponible:** Si SQL Server está cerca del límite.
+*   **Esperas relacionadas:** RESOURCE\_SEMAPHORE (indica falta de memoria para ejecutar consultas).
+*   **Tamaño del buffer pool:** Si es insuficiente para la carga.
+*   **Consultas que consumen mucha memoria:** Para optimizarlas.
+*   **Patrones de uso:** Picos durante cargas masivas o procesos ETL.
+
 ```SQL
 -- SQL Server Process Address space info  (Query 6) (Process Memory)
 -- (shows whether locked pages is enabled, among other things)
