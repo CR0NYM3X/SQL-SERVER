@@ -803,3 +803,57 @@ WHERE es.database_id = DB_ID()
 AND es.is_user_process = 1 OPTION (RECOMPILE); 
 ```
 
+
+--- 
+
+
+# Consultas que están usando tempdb (spills)
+significa que SQL Server no puede mantener toda la información en memoria y necesita usar espacio en disco para operaciones temporales. Esto ocurre principalmente en:
+
+### **¿Cuándo sucede?**
+
+*   **Consultas con operaciones de ordenamiento grandes** (ORDER BY, GROUP BY) que exceden la memoria asignada.
+*   **Joins complejos** (especialmente hash joins) que no caben en memoria.
+*   **Operaciones de agregación masiva** (SUM, COUNT, etc.) sobre grandes volúmenes.
+*   **Consultas que usan tablas temporales o variables de tabla**.
+*   **Spills a tempdb**: Cuando el operador (Sort, Hash) no tiene suficiente memoria grant y “derrama” datos a disco.
+
+ 
+
+### **¿Cómo detectarlo?**
+
+1.  **Plan de ejecución**:
+    *   Busca advertencias como **“Hash Warning”** o **“Sort Warning”**.
+    *   Indicadores: `Spill Level` > 0 en operadores Hash o Sort.
+
+2.  **DMVs en tiempo real**:
+    *   `sys.dm_exec_query_stats` + `sys.dm_exec_query_plan` para ver spills.
+    *   `sys.dm_exec_requests` → columna `grant_memory_kb` vs `used_memory_kb`.
+
+3.  **Eventos extendidos**:
+    *   Evento: `sort_warning` o `hash_spill_details`.
+    *   Captura cuándo ocurre el spill y cuánto se escribe en tempdb.
+
+4.  **Monitoreo de tempdb**:
+    *   Si hay crecimiento repentino en tempdb durante consultas grandes, es señal de spills.
+
+```SQL
+SELECT
+    r.session_id,
+    r.status,
+    r.command,
+    mg.requested_memory_kb AS MemoriaSolicitada_KB,
+    mg.granted_memory_kb AS MemoriaConcedida_KB,
+    tu.internal_objects_alloc_page_count * 8 AS TempdbAllocado_KB,
+    tu.user_objects_alloc_page_count * 8 AS TempdbUsuario_KB,
+    t.text AS QueryTexto
+FROM sys.dm_exec_requests AS r
+JOIN sys.dm_exec_query_memory_grants AS mg
+    ON r.session_id = mg.session_id
+JOIN sys.dm_db_task_space_usage AS tu
+    ON r.session_id = tu.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS t
+WHERE tu.internal_objects_alloc_page_count > 0 OR tu.user_objects_alloc_page_count > 0
+ORDER BY TempdbAllocado_KB DESC;
+```
+
