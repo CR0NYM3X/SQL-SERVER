@@ -1,0 +1,723 @@
+
+
+# Títulos
+- Conexion
+- Locks
+- WAITS
+- I/O
+- CPU, Memoria
+
+
+# Tools
+- Activity monitor (SQL Server)
+- Performance monitor (Windows)
+- [Querys GlennBerry ](https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/blob/main/SQL%20Server%202022%20Diagnostic%20Information%20Queries.sql)
+
+----
+# Conexion
+**¿Por qué monitoreo las conexiones?**  
+Porque las conexiones son el punto de entrada a la base de datos y su correcta gestión garantiza la estabilidad, el rendimiento y la disponibilidad del sistema.  
+Un exceso de conexiones abiertas o mal administradas puede provocar saturación de recursos, errores de “too many connections”, degradación del rendimiento e incluso caída del servicio.
+
+**¿Qué valido al monitorearlas?**
+
+*   **Número total de conexiones activas**: Para evitar que se alcance el límite máximo definido en el servidor.
+*   **Estado de las conexiones**: Activas, inactivas, en espera, para identificar posibles fugas o sesiones huérfanas.
+*   **Tiempo de vida de la conexión**: Detectar conexiones que permanecen abiertas demasiado tiempo sin actividad.
+*   **Aplicación o cliente que genera la conexión**: Para identificar patrones y ajustar la configuración.
+*   **Usuario y base de datos asociada**: Para verificar que no haya accesos indebidos o sobrecarga en una base específica.
+*   **Consumo de recursos por conexión**: CPU, memoria y transacciones en curso.
+*   **Patrones repetitivos**: Horarios pico, aplicaciones que no cierran conexiones, para aplicar optimizaciones (pooling, límites, alertas).
+
+**Notas**
+*   **En SQL Server, el límite crítico es por *sesiones***, porque el parámetro `user connections` controla cuántas sesiones lógicas pueden existir simultáneamente.
+*   Cada sesión consume recursos (CPU, memoria, bloqueos) y si se alcanza el límite, **SQL Server rechaza nuevas conexiones**, afectando la disponibilidad.
+*   **Conexiones físicas** son solo el canal de comunicación (TCP/IP, Named Pipes). Una sesión normalmente tiene una conexión, pero puede tener varias (MARS).
+*   **Para monitoreo de capacidad y alertas críticas → usa sesiones.**
+*   **Para diagnóstico de red, seguridad y auditoría → usa conexiones.**
+
+📌 **Regla práctica para tu gráfico y reportes:**
+
+*   Métrica principal: **Porcentaje de sesiones usadas vs límite (`user connections`)**.
+*   Métrica complementaria: **Conexiones físicas por host/IP** para análisis de red.
+
+***
+```sql
+
+--- Muestra el Máximo de conexiones y conexiones actuales 
+SELECT
+    cfg.max_connections,
+    ses.current_connections ,
+    CASE 
+        WHEN cfg.max_connections = 0 THEN NULL  -- Si es 0, no calculamos porcentaje
+        ELSE CAST(ROUND((ses.current_connections * 100.0) / cfg.max_connections, 2) AS DECIMAL(5,2))
+    END AS percent_used
+FROM 
+    (SELECT CAST(value_in_use AS INT) AS max_connections
+     FROM sys.configurations
+     WHERE name = 'user connections') AS cfg
+CROSS JOIN
+    (SELECT
+    count(*) AS current_connections
+FROM sys.dm_exec_connections AS c
+JOIN sys.dm_exec_sessions AS s
+    ON c.session_id = s.session_id
+WHERE c.endpoint_id != 2) AS ses;
+
+--- Muestra el cantas conexiones hay por IP 
+SELECT
+    c.client_net_address ,
+    s.host_name,
+    COUNT(DISTINCT s.session_id) AS total_sessions,
+    --COUNT(c.session_id) AS total_connections,
+    SUM(s.cpu_time) AS total_cpu_ms,
+    SUM(s.memory_usage) * 8 AS total_memory_kb  -- Cada unidad = 8 KB
+FROM sys.dm_exec_sessions AS s
+LEFT JOIN sys.dm_exec_connections AS c
+    ON s.session_id = c.session_id
+WHERE s.host_name IS NOT NULL AND   c.endpoint_id != 2 
+GROUP BY c.client_net_address,s.host_name
+ORDER BY total_sessions DESC;
+
+
+-- Muestra los detalles de cada conexion realizada 
+SELECT
+    s.session_id AS [SessionID],
+    c.connect_time AS [ConnectionStartTime],
+    c.client_net_address AS [ClientIP],
+    c.protocol_type AS [ConnectionType],c.encrypt_option,c.auth_scheme  ,
+    s.login_name AS [LoginName],
+    s.host_name AS [HostName],
+    s.program_name,
+    s.status AS [RequestStatus],
+    CASE WHEN r.start_time IS NULL THEN s.last_request_start_time ELSE r.start_time END AS [QueryStartTime],
+    DATEDIFF(MINUTE,  CASE WHEN r.start_time IS NULL THEN s.last_request_start_time ELSE r.start_time END  , GETDATE()) AS MinutosTranscurridos,
+    r.command AS [CommandType],
+    r.cpu_time AS [CPU_Time_ms],
+    r.total_elapsed_time AS [ElapsedTime_ms],
+    SUBSTRING(t.text, (r.statement_start_offset/2)+1,
+        ((CASE r.statement_end_offset
+            WHEN -1 THEN DATALENGTH(t.text)
+            ELSE r.statement_end_offset END - r.statement_start_offset)/2)+1) AS [ExecutingQuery],
+    f.text AS [LastExecutedQuery],
+     r.reads, --  lecturas físicas de páginas desde disco (cada página = 8 KB en SQL Server).
+     r.writes,  --   escrituras físicas de páginas a disco (también páginas de 8 KB).
+     r.logical_reads, --   lecturas lógicas de páginas desde el buffer cache (memoria), no desde disco.
+     s.text_size, -- máximo tamaño en bytes que la sesión puede devolver para columnas tipo texto (por defecto 2 GB).
+     s.cpu_time, --  tiempo total de CPU consumido por la sesión, medido en milisegundos
+     s.memory_usage * 8 AS memory_usage_kb -- cantidad de páginas de memoria asignadas a la sesión. Cada unidad equivale a 8 KB (página estándar en SQL Server).
+
+FROM  sys.dm_exec_sessions s 
+LEFT JOIN sys.dm_exec_connections c  ON s.session_id = c.session_id --  Detalles de la conexión (IP, protocolo, hora de conexión).
+LEFT JOIN sys.dm_exec_requests r ON c.session_id = r.session_id --  Consultas en ejecución  (estado, tiempo, CPU).
+OUTER APPLY sys.dm_exec_sql_text(r.sql_handle) t --  query que están en ejecución activa 
+OUTER APPLY sys.dm_exec_sql_text(c.most_recent_sql_handle) f  -- La ultima query ejecutada
+WHERE 
+  c.endpoint_id != 2  -- Excluye procesos Shared memory que normalmente son conexiones internas
+  -- s.is_user_process = 1  -- Excluye procesos internos del sistema
+  AND s.session_id <> @@SPID -- Excluye la sesión actual
+ORDER BY MinutosTranscurridos DESC;
+ ```
+
+ 
+
+
+
+
+# Locks 
+**¿Por qué monitoreo los locks?**  
+Porque los bloqueos son mecanismos que garantizan la integridad y consistencia de los datos cuando varias transacciones acceden a los mismos recursos  (filas, páginas, tablas).
+y previenen que modifiquen simultáneamente la misma información y provoquen corrupción o resultados incorrectos.
+
+Si no se controlan, pueden generar cuellos de botella, lentitud, bloqueos en cascada o incluso deadlocks que afectan la disponibilidad del sistema.
+
+**¿Qué valido al monitorearlos?**
+
+*   **Duración del bloqueo**: Cuánto tiempo lleva bloqueado un recurso.
+*   **Tipo de lock**: Shared, Exclusive, Update, etc., para entender el nivel de contención.
+*   **Proceso bloqueador y bloqueado**: Identificar quién está causando la espera.
+*   **Query que genera el bloqueo**: Para optimizarla o corregirla.
+*   **Impacto en recursos**: CPU, memoria y base de datos involucrada.
+*   **Patrones repetitivos**: Para prevenir problemas recurrentes y deadlocks.
+
+### Obtener los locks usando la vista dm_os_waiting_tasks
+```sql
+SELECT
+    wt.blocking_session_id AS Proceso_Bloqueador,
+    wt.session_id AS Proceso_Bloqueado,
+    CAST(wt.wait_duration_ms / 60000.0 AS DECIMAL(10,2)) AS TiempoBloqueado_Minutos,
+
+    -- Información del bloqueador
+    bl.status AS Bloqueador_Status,
+    bl.login_name AS Bloqueador_Login,
+    bl.host_name AS Bloqueador_Host,
+    DB_NAME(bl.database_id) AS Bloqueador_BaseDatos,
+    bl.cpu_time AS Bloqueador_CPU_Time,
+    bl.memory_usage AS Bloqueador_MemoriaKB,
+    --CAST(DATEDIFF(SECOND, bl.login_time, GETDATE()) / 60.0 AS DECIMAL(10,2)) AS Bloqueador_TiempoSesion_Minutos,
+    ISNULL(txt_bl.text, 'No hay query registrada') AS Bloqueador_UltimaQuery,
+    -- ISNULL(qp.query_plan, 'No hay plan disponible') AS Bloqueador_QueryPlan,
+
+    -- Información del bloqueado
+    bk.status AS Bloqueado_Status,
+    bk.login_name AS Bloqueado_Login,
+    bk.host_name AS Bloqueado_Host,
+    DB_NAME(bk.database_id) AS Bloqueado_BaseDatos,
+    bk.cpu_time AS Bloqueado_CPU_Time,
+    bk.memory_usage AS Bloqueado_MemoriaKB,
+    --CAST(DATEDIFF(SECOND, bk.login_time, GETDATE()) / 60.0 AS DECIMAL(10,2)) AS Bloqueado_TiempoSesion_Minutos,
+    ISNULL(txt_bk.text, 'No hay query registrada') AS Bloqueado_UltimaQuery
+FROM sys.dm_os_waiting_tasks wt
+INNER JOIN sys.dm_exec_sessions bl ON wt.blocking_session_id = bl.session_id
+INNER JOIN sys.dm_exec_sessions bk ON wt.session_id = bk.session_id
+LEFT JOIN sys.dm_exec_connections conn_bl ON bl.session_id = conn_bl.session_id
+LEFT JOIN sys.dm_exec_connections conn_bk ON bk.session_id = conn_bk.session_id
+OUTER APPLY sys.dm_exec_sql_text(conn_bl.most_recent_sql_handle) AS txt_bl
+OUTER APPLY sys.dm_exec_sql_text(conn_bk.most_recent_sql_handle) AS txt_bk
+OUTER APPLY sys.dm_exec_query_plan(conn_bl.most_recent_sql_handle) AS qp
+WHERE wt.blocking_session_id IS NOT NULL
+  AND wt.blocking_session_id <> wt.session_id
+ORDER BY wt.wait_duration_ms DESC;
+
+-- Este funciona para ver que es lo que esta ejecutando pero ya no lo ocupas porque la query te lo dice
+-- DBCC INPUTBUFFER (59)   -- num session_id
+
+-- Para cerrar el Proceso utiliza kill
+-- kill 80 
+
+```
+
+### Obtener los locks usando la vista dm_tran_locks
+```SQL
+/*
+Sch-S (Schema Stability): Este modo de bloqueo se utiliza cuando una transacción intenta adquirir un bloqueo de esquema (Schema Lock)
+ para un objeto. Este tipo de bloqueo permite que otros procesos puedan realizar consultas pero evita que realicen modificaciones
+ que puedan interferir con la estructura del esquema del objeto.
+
+S (Shared): El bloqueo compartido permite que múltiples transacciones puedan leer datos simultáneamente, pero ninguna de ellas puede
+realizar modificaciones mientras el bloqueo está activo. Este tipo de bloqueo es compatible con otros bloqueos compartidos pero no
+con bloqueos exclusivos.
+
+U (Update): Indica un bloqueo de actualización. Este bloqueo se adquiere cuando una transacción necesita realizar una modificación
+en un recurso y no quiere permitir que otros procesos realicen cambios simultáneos.
+
+X (Exclusive): El bloqueo exclusivo es el tipo más restrictivo de bloqueo. Se adquiere cuando una transacción necesita realizar
+ una modificación en un recurso y no permite que otros procesos realicen ninguna operación (lectura o escritura) en ese recurso
+hasta que se libere el bloqueo.
+
+IS (Intent Shared): Este tipo de bloqueo indica la intención de adquirir un bloqueo compartido en un recurso más específico dentro
+de una jerarquía. Ayuda a evitar bloqueos incoherentes en la jerarquía de bloqueos.
+
+IU (Intent Update): Similar al IS, indica la intención de adquirir un bloqueo de actualización en un recurso más específico dentro
+ de una jerarquía de bloqueos.
+
+IX (Intent Exclusive): Indica la intención de adquirir un bloqueo exclusivo en un recurso más específico dentro de una jerarquía
+de bloqueos.
+
+*/
+
+SELECT DISTINCT
+    bl.request_session_id AS Proceso_Bloqueador,
+    bk.request_session_id AS Proceso_Bloqueado,
+    CAST(ISNULL(req_bk.wait_time / 60000.0, 0) AS DECIMAL(10,2)) AS TiempoBloqueado_Minutos,
+
+    -- Información del bloqueador
+    ses_bl.status AS Bloqueador_Status,
+    ses_bl.login_name AS Bloqueador_Login,
+    ses_bl.host_name AS Bloqueador_Host,
+    DB_NAME(ses_bl.database_id) AS Bloqueador_BaseDatos,
+    ses_bl.cpu_time AS Bloqueador_CPU_Time,
+    ses_bl.memory_usage AS Bloqueador_MemoriaKB,
+    ISNULL(txt_bl.text, 'No hay query registrada') AS Bloqueador_UltimaQuery,
+
+    -- Información del bloqueado
+    ses_bk.status AS Bloqueado_Status,
+    ses_bk.login_name AS Bloqueado_Login,
+    ses_bk.host_name AS Bloqueado_Host,
+    DB_NAME(ses_bk.database_id) AS Bloqueado_BaseDatos,
+    ses_bk.cpu_time AS Bloqueado_CPU_Time,
+    ses_bk.memory_usage AS Bloqueado_MemoriaKB,
+    ISNULL(txt_bk.text, 'No hay query registrada') AS Bloqueado_UltimaQuery
+FROM sys.dm_tran_locks bk
+INNER JOIN sys.dm_tran_locks bl 
+    ON bk.resource_type = bl.resource_type
+    AND bk.resource_description = bl.resource_description
+    AND bk.request_status = 'WAIT'
+    AND bl.request_status = 'GRANT'
+INNER JOIN sys.dm_exec_sessions ses_bk ON bk.request_session_id = ses_bk.session_id
+INNER JOIN sys.dm_exec_sessions ses_bl ON bl.request_session_id = ses_bl.session_id
+LEFT JOIN sys.dm_exec_requests req_bk ON ses_bk.session_id = req_bk.session_id
+LEFT JOIN sys.dm_exec_connections conn_bl ON ses_bl.session_id = conn_bl.session_id
+LEFT JOIN sys.dm_exec_connections conn_bk ON ses_bk.session_id = conn_bk.session_id
+OUTER APPLY sys.dm_exec_sql_text(conn_bl.most_recent_sql_handle) AS txt_bl
+OUTER APPLY sys.dm_exec_sql_text(conn_bk.most_recent_sql_handle) AS txt_bk
+WHERE bk.request_session_id <> bl.request_session_id
+ORDER BY TiempoBloqueado_Minutos DESC;
+```
+
+
+
+
+
+
+
+
+
+# Waits 
+
+```sql
+-- select * from sys.all_objects  where name like '%wait%'
+
+WITH Waits AS
+(
+    SELECT 
+        wait_type,
+        wait_duration_ms
+    FROM sys.dm_os_waiting_tasks
+)
+SELECT 
+    Categoria,
+    COUNT(*) AS CantidadEsperas,
+    SUM(wait_duration_ms) AS TiempoAcumulado_ms,
+    AVG(wait_duration_ms) AS TiempoPromedio_ms,
+    Descripcion
+FROM
+(
+    SELECT 
+        CASE 
+            WHEN wait_type LIKE 'MEMORY_%' OR wait_type IN ('RESOURCE_SEMAPHORE', 'CMEMTHREAD') THEN 'Memory'
+            WHEN wait_type LIKE 'SQLCLR%' THEN 'SQLCLR'
+            WHEN wait_type LIKE 'BUFFER_LATCH%' THEN 'Buffer Latch'
+            WHEN wait_type LIKE 'LATCH_%' THEN 'Latch'
+            WHEN wait_type LIKE 'NETWORK%' THEN 'Network I/O'
+            WHEN wait_type LIKE 'WRITELOG' OR wait_type LIKE 'LOG%' THEN 'Logging'
+            WHEN wait_type LIKE 'PAGEIOLATCH%' THEN 'Buffer I/O'
+            WHEN wait_type LIKE 'LCK_%' THEN 'Lock'
+            ELSE 'Other'
+        END AS Categoria,
+        wait_duration_ms,
+        CASE 
+            WHEN wait_type LIKE 'MEMORY_%' OR wait_type IN ('RESOURCE_SEMAPHORE', 'CMEMTHREAD') 
+                THEN 'Esperas relacionadas con asignación de memoria y semáforos.'
+            WHEN wait_type LIKE 'SQLCLR%' 
+                THEN 'Esperas por ejecución de código CLR (Common Language Runtime) en SQL Server.'
+            WHEN wait_type LIKE 'BUFFER_LATCH%' 
+                THEN 'Esperas para acceder a páginas en memoria (buffer pool).'
+            WHEN wait_type LIKE 'LATCH_%' 
+                THEN 'Esperas por estructuras internas de sincronización (latches).'
+            WHEN wait_type LIKE 'NETWORK%' 
+                THEN 'Esperas por operaciones de red, envío/recepción de datos.'
+            WHEN wait_type LIKE 'WRITELOG' OR wait_type LIKE 'LOG%' 
+                THEN 'Esperas por escritura en el log de transacciones.'
+            WHEN wait_type LIKE 'PAGEIOLATCH%' 
+                THEN 'Esperas por lectura/escritura de páginas en disco (I/O).'
+            WHEN wait_type LIKE 'LCK_%' 
+                THEN 'Esperas por bloqueos (locks) en recursos como filas, páginas o tablas.'
+            ELSE 'Otras esperas no clasificadas.'
+        END AS Descripcion
+    FROM Waits
+    WHERE wait_type NOT IN ('SLEEP_TASK','BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR','SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE')
+) AS Categorias
+GROUP BY Categoria, Descripcion
+ORDER BY TiempoAcumulado_ms DESC;
+
+
+ 
+ 
+-- Estadísticas históricas de todos los tipos de espera con descripción y causa
+WITH Waits AS (
+    SELECT 
+        wait_type,
+        waiting_tasks_count,
+        wait_time_ms,
+        signal_wait_time_ms
+    FROM sys.dm_os_wait_stats
+    WHERE wait_type NOT IN (
+        'SLEEP_TASK','BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR',
+        'SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE'
+    )
+),
+WaitTypes AS (
+    SELECT *
+    FROM (
+        VALUES
+        ('LCK_M_X', 'Espera por un bloqueo exclusivo (Exclusive Lock).', 'Contención por actualizaciones o eliminaciones en filas o páginas.'),
+        ('LCK_M_S', 'Espera por un bloqueo compartido (Shared Lock).', 'Lecturas bloqueadas por transacciones activas.'),
+        ('LCK_M_U', 'Espera por un bloqueo de actualización (Update Lock).', 'Contención cuando múltiples transacciones intentan actualizar la misma fila o página antes de convertir el bloqueo a exclusivo.'),
+        ('PAGEIOLATCH_SH', 'Espera por lectura de página desde disco a memoria (Shared latch).', 'I/O lento en disco, falta de memoria o índices ineficientes.'),
+        ('PAGEIOLATCH_EX', 'Espera por escritura de página desde memoria a disco (Exclusive latch).', 'Alta actividad de escritura, problemas de almacenamiento.'),
+        ('CXPACKET', 'Espera por sincronización entre hilos en ejecución paralela.', 'Paralelismo excesivo o desbalanceado en planes de ejecución.'),
+        ('CXCONSUMER', 'Espera por consumo de filas en paralelismo.', 'Procesamiento paralelo desbalanceado.'),
+        ('ASYNC_NETWORK_IO', 'Espera por envío de datos al cliente.', 'Aplicación cliente lenta en consumir resultados.'),
+        ('WRITELOG', 'Espera por escritura en el log de transacciones.', 'Problemas de I/O en el archivo de log, falta de optimización en discos.'),
+        ('SOS_SCHEDULER_YIELD', 'Espera por CPU, el hilo cede voluntariamente para que otros se ejecuten.', 'Alta presión de CPU, consultas costosas.'),
+        ('RESOURCE_SEMAPHORE', 'Espera por memoria para ejecutar consultas (Memory Grant).', 'Consultas grandes, falta de memoria disponible.'),
+        ('NETWORK_IO', 'Espera por operaciones de red.', 'Latencia en red, problemas de conectividad.'),
+        ('HADR_SYNC_COMMIT', 'Espera por confirmación en réplica secundaria (Always On).', 'Latencia entre réplicas en grupos de disponibilidad.'),
+        ('IO_COMPLETION', 'Espera por completar operaciones de I/O.', 'Problemas de disco o almacenamiento lento.'),
+        ('BACKUPIO', 'Espera durante operaciones de backup.', 'Discos lentos o contención durante backup.'),
+        ('LOGBUFFER', 'Espera por espacio en el buffer del log.', 'Alta actividad de transacciones, problemas de disco del log.'),
+        ('PAGEIOLATCH_UP', 'Espera por actualización de página en disco.', 'Contención en páginas y problemas de I/O.'),
+        ('CXROWSET_SYNC', 'Sincronización en operaciones paralelas con rowsets.', 'Paralelismo en consultas complejas.'),
+        ('PREEMPTIVE_OS_AUTHENTICATION', 'Espera por autenticación en el sistema operativo.', 'Problemas de autenticación externa.'),
+		('PAGEIOLATCH_SH', 'Espera por lectura de página desde disco a memoria (Shared latch).', 'I/O lento en disco, falta de memoria o índices ineficientes.'),
+		('PAGEIOLATCH_EX', 'Espera por escritura de página desde memoria a disco (Exclusive latch).', 'Alta actividad de escritura, problemas de almacenamiento.'),
+		('CXPACKET', 'Espera por sincronización entre hilos en ejecución paralela.', 'Paralelismo excesivo o desbalanceado en planes de ejecución.'),
+		('CXCONSUMER', 'Espera por consumo de filas en paralelismo.', 'Procesamiento paralelo desbalanceado.'),
+		('ASYNC_NETWORK_IO', 'Espera por envío de datos al cliente.', 'Aplicación cliente lenta en consumir resultados.'),
+		('WRITELOG', 'Espera por escritura en el log de transacciones.', 'Problemas de I/O en el archivo de log, falta de optimización en discos.'),
+		('SOS_SCHEDULER_YIELD', 'Espera por CPU, el hilo cede voluntariamente para que otros se ejecuten.', 'Alta presión de CPU, consultas costosas.'),
+		('RESOURCE_SEMAPHORE', 'Espera por memoria para ejecutar consultas (Memory Grant).', 'Consultas grandes, falta de memoria disponible.'),
+		('NETWORK_IO', 'Espera por operaciones de red.', 'Latencia en red, problemas de conectividad.'),
+		('HADR_SYNC_COMMIT', 'Espera por confirmación en réplica secundaria (Always On).', 'Latencia entre réplicas en grupos de disponibilidad.'),
+		('IO_COMPLETION', 'Espera por completar operaciones de I/O.', 'Problemas de disco o almacenamiento lento.'),
+		('BACKUPIO', 'Espera durante operaciones de backup.', 'Discos lentos o contención durante backup.'),
+		('LOGBUFFER', 'Espera por espacio en el buffer del log.', 'Alta actividad de transacciones, problemas de disco del log.'),
+		('PAGEIOLATCH_UP', 'Espera por actualización de página en disco.', 'Contención en páginas y problemas de I/O.'),
+		('CXROWSET_SYNC', 'Sincronización en operaciones paralelas con rowsets.', 'Paralelismo en consultas complejas.'),
+		('FT_IFTS_SCHEDULER_IDLE_WAIT', 'Espera en tareas de índice de texto completo.', 'Procesamiento de índices full-text.'),
+		('PREEMPTIVE_OS_AUTHENTICATION', 'Espera por autenticación en el sistema operativo.', 'Problemas de autenticación externa.'),
+		('BROKER_TRANSMITTER', 'Espera en transmisión de mensajes del Service Broker.', 'Procesamiento de colas o problemas de red.'),
+		('QDS_ASYNC_QUEUE', 'Espera en cola asíncrona del Query Data Store.', 'Carga alta en Query Store o mantenimiento.'),
+		('WAIT_XTP_HOST_WAIT', 'Espera relacionada con operaciones In-Memory OLTP.', 'Procesamiento de tablas optimizadas para memoria.'),
+		('XTP_PREEMPTIVE_TASK', 'Espera por tareas preemptivas en In-Memory OLTP.', 'Operaciones internas de memoria.'),
+		('PVS_PREALLOCATE', 'Espera por preasignación de recursos internos.', 'Inicialización de estructuras internas.'),
+		('FT_IFTSHC_MUTEX', 'Espera por mutex en índice de texto completo.', 'Contención en operaciones full-text.'),
+		('ONDEMAND_TASK_QUEUE', 'Espera en cola de tareas bajo demanda.', 'Procesamiento interno de tareas diferidas.'),
+		('KSOURCE_WAKEUP', 'Espera por activación de fuente de eventos.', 'Procesamiento interno de eventos.'),
+		('CLR_AUTO_EVENT', 'Espera por eventos automáticos en CLR.', 'Operaciones internas del CLR.'),
+		('SP_SERVER_DIAGNOSTICS_SLEEP', 'Espera durante diagnóstico del servidor.', 'Proceso interno de salud del servidor.'),
+		('QDS_PERSIST_TASK_MAIN_LOOP_SLEEP', 'Espera en persistencia de Query Store.', 'Grabación de datos en Query Store.'),
+		('CHECKPOINT_QUEUE', 'Espera en cola de checkpoints.', 'Procesamiento de páginas sucias en disco.'),
+		('SQLTRACE_INCREMENTAL_FLUSH_SLEEP', 'Espera en flush incremental de SQL Trace.', 'Procesamiento interno de trazas.'),
+		('REQUEST_FOR_DEADLOCK_SEARCH', 'Espera en búsqueda de deadlocks.', 'Proceso interno para detectar bloqueos.'),
+		('XE_DISPATCHER_WAIT', 'Espera en despachador de eventos extendidos.', 'Procesamiento de eventos XE.'),
+		('XE_TIMER_EVENT', 'Espera en temporizador de eventos extendidos.', 'Procesamiento interno de XE.'),
+		('LAZYWRITER_SLEEP', 'Espera del Lazy Writer.', 'Liberación de páginas en buffer pool.'),
+		('HADR_FILESTREAM_IOMGR_IOCOMPLETION', 'Espera en operaciones FILESTREAM en Always On.', 'Latencia en I/O FILESTREAM.'),
+		('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
+		('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
+		('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
+		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.')
+
+        
+    ) AS WT(WaitType, Descripcion, CausaComun)
+)
+SELECT 
+    W.wait_type,
+    WT.Descripcion,
+    WT.CausaComun,
+    W.waiting_tasks_count AS CantidadWaits,
+    W.wait_time_ms AS DuracionTotalMS,
+    CAST(W.wait_time_ms * 100.0 / SUM(W.wait_time_ms) OVER() AS DECIMAL(5,2)) AS Porcentaje
+FROM Waits W
+LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
+ ORDER BY Porcentaje  DESC;
+-- ORDER BY W.wait_time_ms DESC;
+
+```
+
+
+
+
+# Querys I/O
+```sql
+-- SQL Server NUMA Node information  (Query 13) (SQL Server NUMA Info)
+SELECT osn.node_id, osn.node_state_desc, osn.memory_node_id, osn.processor_group, osn.cpu_count, osn.online_scheduler_count, 
+       osn.idle_scheduler_count, osn.active_worker_count, 
+	   osmn.pages_kb/1024 AS [Committed Memory (MB)], 
+	   osmn.locked_page_allocations_kb/1024 AS [Locked Physical (MB)],
+	   CONVERT(DECIMAL(18,2), osmn.foreign_committed_kb/1024.0) AS [Foreign Commited (MB)],
+	   osmn.target_kb/1024 AS [Target Memory Goal (MB)],
+	   osn.avg_load_balance, osn.resource_monitor_state
+FROM sys.dm_os_nodes AS osn WITH (NOLOCK)
+INNER JOIN sys.dm_os_memory_nodes AS osmn WITH (NOLOCK)
+ON osn.memory_node_id = osmn.memory_node_id
+WHERE osn.node_state_desc <> N'ONLINE DAC' OPTION (RECOMPILE);
+
+
+-- Drive level latency information (Query 31) (Drive Level Latency)
+SELECT tab.[Drive], tab.volume_mount_point AS [Volume Mount Point], 
+	CASE 
+		WHEN num_of_reads = 0 THEN 0 
+		ELSE (io_stall_read_ms/num_of_reads) 
+	END AS [Read Latency],
+	CASE 
+		WHEN num_of_writes = 0 THEN 0 
+		ELSE (io_stall_write_ms/num_of_writes) 
+	END AS [Write Latency],
+	CASE 
+		WHEN (num_of_reads = 0 AND num_of_writes = 0) THEN 0 
+		ELSE (io_stall/(num_of_reads + num_of_writes)) 
+	END AS [Overall Latency],
+	CASE 
+		WHEN num_of_reads = 0 THEN 0 
+		ELSE (num_of_bytes_read/num_of_reads) 
+	END AS [Avg Bytes/Read],
+	CASE 
+		WHEN num_of_writes = 0 THEN 0 
+		ELSE (num_of_bytes_written/num_of_writes) 
+	END AS [Avg Bytes/Write],
+	CASE 
+		WHEN (num_of_reads = 0 AND num_of_writes = 0) THEN 0 
+		ELSE ((num_of_bytes_read + num_of_bytes_written)/(num_of_reads + num_of_writes)) 
+	END AS [Avg Bytes/Transfer]
+FROM (SELECT LEFT(UPPER(mf.physical_name), 2) AS Drive, SUM(num_of_reads) AS num_of_reads,
+	         SUM(io_stall_read_ms) AS io_stall_read_ms, SUM(num_of_writes) AS num_of_writes,
+	         SUM(io_stall_write_ms) AS io_stall_write_ms, SUM(num_of_bytes_read) AS num_of_bytes_read,
+	         SUM(num_of_bytes_written) AS num_of_bytes_written, SUM(io_stall) AS io_stall, vs.volume_mount_point 
+      FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS vfs
+      INNER JOIN sys.master_files AS mf WITH (NOLOCK)
+      ON vfs.database_id = mf.database_id AND vfs.file_id = mf.file_id
+	  CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.[file_id]) AS vs 
+      GROUP BY LEFT(UPPER(mf.physical_name), 2), vs.volume_mount_point) AS tab
+ORDER BY [Overall Latency] OPTION (RECOMPILE);
+
+
+
+-- Calculates average latency per read, per write, and per total input/output for each database file  (Query 32) (IO Latency by File)
+-- Latency above 30-40ms is usually a problem 
+SELECT DB_NAME(fs.database_id) AS [Database Name], CAST(fs.io_stall_read_ms/(1.0 + fs.num_of_reads) AS NUMERIC(10,1)) AS [avg_read_latency_ms],
+CAST(fs.io_stall_write_ms/(1.0 + fs.num_of_writes) AS NUMERIC(10,1)) AS [avg_write_latency_ms],
+CAST((fs.io_stall_read_ms + fs.io_stall_write_ms)/(1.0 + fs.num_of_reads + fs.num_of_writes) AS NUMERIC(10,1)) AS [avg_io_latency_ms],
+CONVERT(DECIMAL(18,2), mf.size/128.0) AS [File Size (MB)], mf.physical_name, mf.type_desc, fs.io_stall_read_ms, fs.num_of_reads, 
+fs.io_stall_write_ms, fs.num_of_writes, fs.io_stall_read_ms + fs.io_stall_write_ms AS [io_stalls], fs.num_of_reads + fs.num_of_writes AS [total_io],
+io_stall_queued_read_ms AS [Resource Governor Total Read IO Latency (ms)], io_stall_queued_write_ms AS [Resource Governor Total Write IO Latency (ms)] 
+FROM sys.dm_io_virtual_file_stats(null,null) AS fs
+INNER JOIN sys.master_files AS mf WITH (NOLOCK)
+ON fs.database_id = mf.database_id
+AND fs.[file_id] = mf.[file_id]
+ORDER BY avg_io_latency_ms DESC OPTION (RECOMPILE);
+
+ 
+
+
+ -- Get I/O utilization by database (Query 39) (IO Usage By Database)
+WITH Aggregate_IO_Statistics
+AS (SELECT DB_NAME(database_id) AS [Database Name],
+    CAST(SUM(num_of_bytes_read + num_of_bytes_written) / 1048576 AS DECIMAL(12, 2)) AS [ioTotalMB],
+    CAST(SUM(num_of_bytes_read ) / 1048576 AS DECIMAL(12, 2)) AS [ioReadMB],
+    CAST(SUM(num_of_bytes_written) / 1048576 AS DECIMAL(12, 2)) AS [ioWriteMB]
+    FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS [DM_IO_STATS]
+    GROUP BY database_id)
+SELECT ROW_NUMBER() OVER (ORDER BY ioTotalMB DESC) AS [I/O Rank],
+        [Database Name], ioTotalMB AS [Total I/O (MB)],
+        CAST(ioTotalMB / SUM(ioTotalMB) OVER () * 100.0 AS DECIMAL(5, 2)) AS [Total I/O %],
+        ioReadMB AS [Read I/O (MB)], 
+		CAST(ioReadMB / SUM(ioReadMB) OVER () * 100.0 AS DECIMAL(5, 2)) AS [Read I/O %],
+        ioWriteMB AS [Write I/O (MB)], 
+		CAST(ioWriteMB / SUM(ioWriteMB) OVER () * 100.0 AS DECIMAL(5, 2)) AS [Write I/O %]
+FROM Aggregate_IO_Statistics
+ORDER BY [I/O Rank] OPTION (RECOMPILE);
+
+
+
+
+
+-- I/O Statistics by file for the current database  (Query 61) (IO Stats By File)
+SELECT DB_NAME(DB_ID()) AS [Database Name], df.name AS [Logical Name], vfs.[file_id], df.type_desc,
+df.physical_name AS [Physical Name], CAST(vfs.size_on_disk_bytes/1048576.0 AS DECIMAL(15, 2)) AS [Size on Disk (MB)],
+vfs.num_of_reads, vfs.num_of_writes, vfs.io_stall_read_ms, vfs.io_stall_write_ms,
+CAST(100. * vfs.io_stall_read_ms/(vfs.io_stall_read_ms + vfs.io_stall_write_ms) AS DECIMAL(10,1)) AS [IO Stall Reads Pct],
+CAST(100. * vfs.io_stall_write_ms/(vfs.io_stall_write_ms + vfs.io_stall_read_ms) AS DECIMAL(10,1)) AS [IO Stall Writes Pct],
+(vfs.num_of_reads + vfs.num_of_writes) AS [Writes + Reads], 
+CAST(vfs.num_of_bytes_read/1048576.0 AS DECIMAL(15, 2)) AS [MB Read], 
+CAST(vfs.num_of_bytes_written/1048576.0 AS DECIMAL(15, 2)) AS [MB Written],
+CAST(100. * vfs.num_of_reads/(vfs.num_of_reads + vfs.num_of_writes) AS DECIMAL(15,1)) AS [# Reads Pct],
+CAST(100. * vfs.num_of_writes/(vfs.num_of_reads + vfs.num_of_writes) AS DECIMAL(15,1)) AS [# Write Pct],
+CAST(100. * vfs.num_of_bytes_read/(vfs.num_of_bytes_read + vfs.num_of_bytes_written) AS DECIMAL(15,1)) AS [Read Bytes Pct],
+CAST(100. * vfs.num_of_bytes_written/(vfs.num_of_bytes_read + vfs.num_of_bytes_written) AS DECIMAL(15,1)) AS [Written Bytes Pct]
+FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) AS vfs
+INNER JOIN sys.database_files AS df WITH (NOLOCK)
+ON vfs.[file_id]= df.[file_id] OPTION (RECOMPILE);
+```
+
+
+# Querys CPU
+```SQL
+-- Get CPU utilization by database (Query 38) (CPU Usage by Database)
+WITH DB_CPU_Stats
+AS
+(SELECT pa.DatabaseID, DB_Name(pa.DatabaseID) AS [Database Name], SUM(qs.total_worker_time/1000) AS [CPU_Time_Ms]
+ FROM sys.dm_exec_query_stats AS qs WITH (NOLOCK)
+ CROSS APPLY (SELECT CONVERT(int, value) AS [DatabaseID] 
+              FROM sys.dm_exec_plan_attributes(qs.plan_handle)
+              WHERE attribute = N'dbid') AS pa
+ GROUP BY DatabaseID)
+SELECT ROW_NUMBER() OVER(ORDER BY [CPU_Time_Ms] DESC) AS [CPU Rank],
+       [Database Name], [CPU_Time_Ms] AS [CPU Time (ms)], 
+       CAST([CPU_Time_Ms] * 1.0 / SUM([CPU_Time_Ms]) OVER() * 100.0 AS DECIMAL(5, 2)) AS [CPU Percent]
+FROM DB_CPU_Stats
+WHERE DatabaseID <> 32767 -- ResourceDB
+ORDER BY [CPU Rank] OPTION (RECOMPILE);
+
+
+-- Get CPU Utilization History for last 256 minutes (in one minute intervals)  (Query 47) (CPU Utilization History)
+DECLARE @ts_now bigint = (SELECT ms_ticks FROM sys.dm_os_sys_info WITH (NOLOCK)); 
+
+SELECT TOP(256) SQLProcessUtilization AS [SQL Server Process CPU Utilization], 
+               SystemIdle AS [System Idle Process], 
+               100 - SystemIdle - SQLProcessUtilization AS [Other Process CPU Utilization], 
+               DATEADD(ms, -1 * (@ts_now - [timestamp]), GETDATE()) AS [Event Time] 
+FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id, 
+              record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') 
+                      AS [SystemIdle], 
+              record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') 
+                      AS [SQLProcessUtilization], [timestamp] 
+         FROM (SELECT [timestamp], CONVERT(xml, record) AS [record] 
+                      FROM sys.dm_os_ring_buffers WITH (NOLOCK)
+                      WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR' 
+                      AND record LIKE N'%<SystemHealth>%') AS x) AS y 
+ORDER BY record_id DESC OPTION (RECOMPILE);
+```
+
+
+# Memoria
+```SQL
+-- SQL Server Process Address space info  (Query 6) (Process Memory)
+-- (shows whether locked pages is enabled, among other things)
+SELECT physical_memory_in_use_kb/1024 AS [SQL Server Memory Usage (MB)],
+	   locked_page_allocations_kb/1024 AS [SQL Server Locked Pages Allocation (MB)],
+       large_page_allocations_kb/1024 AS [SQL Server Large Pages Allocation (MB)], 
+	   page_fault_count, memory_utilization_percentage, available_commit_limit_kb, 
+	   process_physical_memory_low, process_virtual_memory_low
+FROM sys.dm_os_process_memory WITH (NOLOCK) OPTION (RECOMPILE);
+
+
+-- Good basic information about OS memory amounts and state  (Query 14) (System Memory)
+SELECT total_physical_memory_kb/1024 AS [Physical Memory (MB)], 
+       available_physical_memory_kb/1024 AS [Available Memory (MB)], 
+       total_page_file_kb/1024 AS [Page File Commit Limit (MB)],
+	   total_page_file_kb/1024 - total_physical_memory_kb/1024 AS [Physical Page File Size (MB)],
+	   available_page_file_kb/1024 AS [Available Page File (MB)], 
+	   system_cache_kb/1024 AS [System Cache (MB)],
+       system_memory_state_desc AS [System Memory State]
+FROM sys.dm_os_sys_memory WITH (NOLOCK) OPTION (RECOMPILE);
+
+-- Get information on location, time and size of any memory dumps from SQL Server  (Query 23) (Memory Dump Info)
+SELECT [filename], creation_time, size_in_bytes/1048576.0 AS [Size (MB)]
+FROM sys.dm_server_memory_dumps WITH (NOLOCK) 
+ORDER BY creation_time DESC OPTION (RECOMPILE);
+ 
+-- Resource Governor Resource Pool information (Query 34) (RG Resource Pools)
+-- Es una característica de SQL Server que permite administrar y limitar el uso de recursos (CPU y memoria) para diferentes cargas de trabajo.
+-- 
+--    ¿Para qué sirve?
+--        Controlar el consumo de recursos por grupos de usuarios o aplicaciones.
+--        Evitar que una consulta pesada afecte el rendimiento global.
+--    Cómo funciona:
+--        Define Pools de recursos (máximo y mínimo de CPU/memoria).
+--        Define Grupos de carga de trabajo (workload groups) que asignan sesiones a esos pools.
+--    Ejemplo de uso:  
+--     Limitar que procesos ETL no consuman toda la memoria y CPU, dejando recursos para consultas OLTP.
+
+SELECT pool_id, [Name], statistics_start_time,
+       min_memory_percent, max_memory_percent,  
+       max_memory_kb/1024 AS [max_memory_mb],  
+       used_memory_kb/1024 AS [used_memory_mb],   
+       target_memory_kb/1024 AS [target_memory_mb],
+	   min_iops_per_volume, max_iops_per_volume
+FROM sys.dm_resource_governor_resource_pools WITH (NOLOCK)
+OPTION (RECOMPILE);
+
+
+-- Memory Grants Pending value for current instance  (Query 50) (Memory Grants Pending)
+-- Son reservas de memoria que SQL Server asigna a una consulta antes de ejecutarla, principalmente para operaciones como:
+-- 
+--    Ordenamientos (Sort)
+--    Joins complejos
+--    Operaciones de agregación
+-- 
+-- ¿Por qué son importantes?
+-- 
+--    Si una consulta necesita más memoria de la que se le concede, puede usar tempdb (más lento).
+--    Si hay muchas consultas esperando memory grants, se genera RESOURCE\_SEMAPHORE waits (bloqueos por falta de memoria).
+
+SELECT @@SERVERNAME AS [Server Name], RTRIM([object_name]) AS [Object Name], cntr_value AS [Memory Grants Pending]                                                                                                       
+FROM sys.dm_os_performance_counters WITH (NOLOCK)
+WHERE [object_name] LIKE N'%Memory Manager%' -- Handles named instances
+AND counter_name = N'Memory Grants Pending' OPTION (RECOMPILE);
+
+SELECT * FROM sys.dm_exec_query_memory_grants;
+
+
+
+-- Memory Clerk Usage for instance  (Query 51) (Memory Clerk Usage)
+-- Look for high value for CACHESTORE_SQLCP (Ad-hoc query plans)
+-- Un Memory Clerk es un componente interno que rastrea y administra el uso de memoria por diferentes partes del motor:
+-- 
+--    Ejemplos:
+--        CACHESTORE\_SQLCP → Planes de consultas ad-hoc.
+--        CACHESTORE\_OBJCP → Planes de procedimientos almacenados.
+--        MEMORYCLERK\_SQLBUFFERPOOL → Buffer Pool (páginas de datos).
+--    ¿Para qué sirve?
+--        Diagnóstico de consumo de memoria por cada área del motor.
+
+SELECT TOP(10) mc.[type] AS [Memory Clerk Type], 
+       CAST((SUM(mc.pages_kb)/1024.0) AS DECIMAL (15,2)) AS [Memory Usage (MB)] 
+FROM sys.dm_os_memory_clerks AS mc WITH (NOLOCK)
+GROUP BY mc.[type]  
+ORDER BY SUM(mc.pages_kb) DESC OPTION (RECOMPILE);
+```
+ 
+
+# Buffer 
+```sql
+-- Get total buffer usage by database for current instance  (Query 40) (Total Buffer Usage by Database)
+-- This may take some time to run on a busy instance with lots of RAM
+WITH AggregateBufferPoolUsage
+AS
+(SELECT DB_NAME(database_id) AS [Database Name],
+CAST(COUNT_BIG(*) * 8/1024.0 AS DECIMAL (15,2)) AS [CachedSize],
+COUNT(page_id) AS [Page Count],
+AVG(read_microsec) AS [Avg Read Time (microseconds)]
+FROM sys.dm_os_buffer_descriptors WITH (NOLOCK)
+GROUP BY DB_NAME(database_id))
+SELECT ROW_NUMBER() OVER(ORDER BY CachedSize DESC) AS [Buffer Pool Rank], [Database Name], 
+       CAST(CachedSize / SUM(CachedSize) OVER() * 100.0 AS DECIMAL(5,2)) AS [Buffer Pool Percent],
+       [Page Count], CachedSize AS [Cached Size (MB)], [Avg Read Time (microseconds)]
+FROM AggregateBufferPoolUsage
+ORDER BY [Buffer Pool Rank] OPTION (RECOMPILE);
+
+
+
+
+-- Breaks down buffers used by current database by object (table, index) in the buffer cache  (Query 74) (Buffer Usage)
+-- Note: This query could take some time on a busy instance
+SELECT fg.name AS [Filegroup Name], SCHEMA_NAME(o.Schema_ID) AS [Schema Name],
+OBJECT_NAME(p.[object_id]) AS [Object Name], p.index_id, 
+CAST(COUNT(*)/128.0 AS DECIMAL(10, 2)) AS [Buffer size(MB)],  
+COUNT(*) AS [BufferCount], p.[Rows] AS [Row Count],
+p.data_compression_desc AS [Compression Type]
+FROM sys.allocation_units AS a WITH (NOLOCK)
+INNER JOIN sys.dm_os_buffer_descriptors AS b WITH (NOLOCK)
+ON a.allocation_unit_id = b.allocation_unit_id
+INNER JOIN sys.partitions AS p WITH (NOLOCK)
+ON a.container_id = p.hobt_id
+INNER JOIN sys.objects AS o WITH (NOLOCK)
+ON p.object_id = o.object_id
+INNER JOIN sys.database_files AS f WITH (NOLOCK)
+ON b.file_id = f.file_id
+INNER JOIN sys.filegroups AS fg WITH (NOLOCK)
+ON f.data_space_id = fg.data_space_id
+WHERE b.database_id = CONVERT(int, DB_ID())
+AND p.[object_id] > 100
+AND OBJECT_NAME(p.[object_id]) NOT LIKE N'plan_%'
+AND OBJECT_NAME(p.[object_id]) NOT LIKE N'sys%'
+AND OBJECT_NAME(p.[object_id]) NOT LIKE N'xml_index_nodes%'
+GROUP BY fg.name, o.Schema_ID, p.[object_id], p.index_id, 
+         p.data_compression_desc, p.[Rows]
+ORDER BY [BufferCount] DESC OPTION (RECOMPILE);
+
+
+-- Get input buffer information for the current database (Query 86) (Input Buffer)
+SELECT es.session_id, DB_NAME(es.database_id) AS [Database Name],
+       es.[program_name], es.[host_name], es.login_name,
+       es.login_time, es.cpu_time, es.logical_reads, es.memory_usage,
+       es.[status], ib.event_info AS [Input Buffer]
+FROM sys.dm_exec_sessions AS es WITH (NOLOCK)
+CROSS APPLY sys.dm_exec_input_buffer(es.session_id, NULL) AS ib
+WHERE es.database_id = DB_ID()
+AND es.is_user_process = 1 OPTION (RECOMPILE); 
+```
+
