@@ -137,4 +137,9 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 SQL SERVER RESOURCE GOVERNOR -> https://medium.com/@murat_sari/sql-server-resource-governor-e15be1375cad
 Resource Governor in SQL Server -> https://www.youtube.com/watch?v=G_y_TW1TeE0
 
+Taller de configuración Database-Mail -> https://www.youtube.com/watch?v=w2xYTTg9mP0
+
+
 ``` 
+
+
