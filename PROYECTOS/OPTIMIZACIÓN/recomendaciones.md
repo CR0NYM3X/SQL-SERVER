@@ -205,6 +205,8 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 *   Verifica el tamaño actual con:
     ```sql
     SELECT name, buckets_count FROM sys.dm_os_memory_cache_hash_tables WHERE name IN ('SQL Plans','Object Plans','Bound Trees');
+
+ 	select name, type, pages_kb, entries_count from sys.dm_os_memory_cache_counters where name IN ( 'SQL Plans' , 'Object Plans' ,  'Bound Trees' );
     ```
 
 ### **Desventajas**
@@ -222,7 +224,6 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 
 ### 🔍 **Recomendaciones para entornos críticos**
 
-*   **7412:** Actívalo si necesitas diagnóstico en vivo y tu versión es < SQL Server 2019. En 2019+ ya está por defecto.
 *   **174:** Actívalo solo si tu workload tiene miles de consultas ad hoc y notas contención en spinlocks.
 *   **Siempre prueba en QA antes de producción** y monitorea impacto en CPU y memoria.
  
