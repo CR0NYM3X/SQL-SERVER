@@ -188,9 +188,9 @@ https://github.com/erikdarlingdata/DarlingData
 
 
 # ✅ **Trace Flag 174**
-
-**Propósito:**  
-Aumenta el número de **buckets en el plan cache** para reducir la contención en el spinlock `SOS_CACHESTORE` cuando hay muchas consultas ad hoc. Por defecto, en sistemas 64-bit hay 40,009 buckets; con este flag se incrementa a 160,001. [\[sqlservice.se\]](https://www.sqlservice.se/sql-server-trace-flag-174/)
+[Link oficial](https://support.microsoft.com/es-es/topic/kb3026083-correcci%C3%B3n-sos-cachestore-contenci%C3%B3n-de-bloqueo-en-la-cach%C3%A9-de-planes-sql-server-ad-hoc-provoca-un-uso-elevado-de-la-cpu-en-sql-server-798ca4a5-3813-a3d2-f9c4-89eb1128fe68)
+<br>**Propósito:**  
+Aumenta el número de **buckets en el plan cache** para reducir la contención en el spinlock `SOS_CACHESTORE` cuando hay muchas consultas ad hoc. Por defecto, en sistemas 64-bit hay 40,009 buckets; con este flag se incrementa a 160,001. [\[sqlservice.se\]](https://www.sqlservice.se/sql-server-trace-flag-174/) 
 
 ### **Beneficios**
 
@@ -219,8 +219,7 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 *   En cargas con muchas consultas ad hoc, puedes sufrir:
     *   Alta contención en `SOS_CACHESTORE`.
     *   Elevado uso de CPU.
-    *   Degradación general del rendimiento. [\[sqlservice.se\]](https://www.sqlservice.se/sql-server-trace-flag-174/)
- 
+    *   Degradación general del rendimiento. 
 
 ### 🔍 **Recomendaciones para entornos críticos**
 
