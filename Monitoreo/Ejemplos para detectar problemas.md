@@ -8,10 +8,52 @@
 - CPU, Memoria
 
 
+
+
 # Tools
 - Activity monitor (SQL Server)
 - Performance monitor (Windows)
 - [Querys GlennBerry ](https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/blob/main/SQL%20Server%202022%20Diagnostic%20Information%20Queries.sql)
+
+
+# Umbrales de rendimiento (CPU, I/O y Memoria)
+
+### ✅ **1. CPU**
+
+*   **Estable:**  
+    Uso por consulta < **20%** del total disponible y duración < **1 seg**.
+*   **Malo:**  
+    Uso por consulta entre **20% – 50%** o duración > **1 seg**.
+*   **Crítico:**  
+    Uso > **50%** sostenido o duración > **5 seg** (en OLTP) / > **30 seg** (en OLAP).
+ 
+
+
+### ✅ **I/O (Lecturas y Escrituras)**
+
+*   **Estable:**
+    *   Lecturas lógicas: **< 10.000** páginas por consulta.
+    *   Escrituras lógicas: **< 1.000** páginas  por consulta.
+    *   Espera en disco: **< 10 ms**.
+*   **Malo:**
+    *   Lecturas: **10.000 – 100.000** páginas.
+    *   Escrituras: **1.000 – 10.000** páginas.
+    *   Espera en disco: **10 – 20 ms**.
+*   **Crítico:**
+    *   Lecturas: **> 100.000**.
+    *   Escrituras: **> 10.000**.
+    *   Espera en disco: **> 20 ms** (indica problemas serios: falta de índices, consultas mal diseñadas, o saturación de disco).
+ 
+
+ 
+### ✅ **3. Memoria**
+
+*   **Estable:**  
+    Uso < **25%** del buffer pool asignado.
+*   **Malo:**  
+    Uso entre **25% – 50%**, con señales de **spills** en tempdb.
+*   **Crítico:**  
+    Uso > **50%** y presencia de **hash spills** o **sort spills** frecuentes.
 
 ----
 # Conexion
