@@ -910,3 +910,46 @@ WHERE tu.internal_objects_alloc_page_count > 0 OR tu.user_objects_alloc_page_cou
 ORDER BY TempdbAllocado_KB DESC;
 ```
 
+
+# **Otras querys que sirven**:
+```SQL
+SELECT 'Top 10 por Espacio'
+SELECT TOP 10
+    CONNECTIONPROPERTY('local_net_address') AS IPServidor,
+    DB_NAME(database_id) AS DatabaseName,
+    CAST(SUM(size) AS BIGINT) * 8 / 1024 / 1024 AS SizeGB
+FROM sys.master_files
+GROUP BY database_id
+ORDER BY CAST(SUM(size) AS BIGINT) DESC;
+
+SELECT 'Top 10 por I/O'
+SELECT TOP 10
+	CONNECTIONPROPERTY('local_net_address') AS IPServidor,
+    DB_NAME(database_id) AS DatabaseName,
+    SUM(num_of_reads + num_of_writes) AS TotalIO
+FROM sys.dm_io_virtual_file_stats(NULL, NULL)
+GROUP BY database_id
+ORDER BY TotalIO DESC
+ 
+SELECT 'Top 10 por Memoria'
+SELECT TOP 10
+	CONNECTIONPROPERTY('local_net_address') AS IPServidor,
+    DB_NAME(database_id) AS DatabaseName,
+    COUNT(*) * 8 / 1024 AS BufferPoolMB
+FROM sys.dm_os_buffer_descriptors
+GROUP BY database_id
+ORDER BY BufferPoolMB DESC;
+
+
+SELECT 'Top 10 por CPU'
+SELECT TOP 10
+	CONNECTIONPROPERTY('local_net_address') AS IPServidor,
+    DB_NAME(database_id) AS DatabaseName,
+    SUM(total_worker_time) / 1000 AS CPU_ms
+FROM sys.dm_exec_query_stats qs
+JOIN sys.dm_exec_requests r ON qs.plan_handle = r.plan_handle
+GROUP BY database_id
+ORDER BY CPU_ms DESC;
+```
+
+
