@@ -242,3 +242,117 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 
 *   Aumenta el número de buckets en el plan cache, reduciendo la probabilidad de que dos hilos compitan por el mismo bucket.
 *   Menos contención → mejor escalabilidad en entornos con muchísimas consultas ad hoc.
+
+---
+
+
+# **low page life expectancy - [Ref](https://www.sqlskills.com/blogs/paul/page-life-expectancy-isnt-what-you-think/)”** 
+ 
+
+El PLE mide cuántos segundos, en promedio, las páginas permanecen en el buffer pool antes de ser reemplazadas. Un valor bajo significa que hay presión de memoria.
+
+### ✅ ¿Regla?
+    *   **PLE recomendado**: mínimo **300 segundos por cada 4 GB de RAM** (regla general).
+
+
+### ✅ **Por qué es malo**
+
+1.  **Más lecturas desde disco**
+    *   Si las páginas no permanecen en memoria el tiempo suficiente, SQL Server debe leerlas repetidamente desde el disco.
+    *   El disco (incluso SSD) es miles de veces más lento que la memoria RAM.
+
+2.  **Aumento de latencia en consultas**
+    *   Consultas que podrían resolverse desde memoria ahora esperan I/O físico.
+    *   Esto impacta directamente el tiempo de respuesta en entornos críticos.
+
+3.  **Mayor presión en subsistema de I/O**
+    *   Incrementa la carga en el almacenamiento, lo que puede saturar SAN/NAS o discos locales.
+    *   Puede generar colas de espera (`PAGEIOLATCH_*` en `sys.dm_exec_requests`).
+
+4.  **Impacto en CPU**
+    *   Más operaciones para gestionar lecturas y escrituras.
+    *   Si hay contención, el motor puede gastar ciclos en spinlocks y gestión de memoria.
+
+5.  **Efecto cascada en todo el servidor**
+    *   Backups, mantenimiento y consultas pesadas expulsan páginas, afectando otras consultas.
+    *   En sistemas mega transaccionales, esto puede provocar bloqueos y timeouts.
+
+ 
+
+
+### 🔍 **Causas comunes de PLE bajo**
+
+1.  **Falta de memoria**: El buffer pool no tiene suficiente RAM para la carga.
+2.  **Consultas que hacen grandes lecturas**: Escaneos masivos que expulsan páginas del buffer.
+3.  **Planes de ejecución ineficientes**: Falta de índices, uso excesivo de `TABLE SCAN`.
+4.  **Mantenimiento intensivo**: Rebuilds de índices o backups que leen grandes volúmenes.
+5.  **Configuración incorrecta**: `max server memory` demasiado bajo.
+ 
+ 
+### ✅ **Acciones para mejorar PLE**
+
+*   **Aumentar memoria** (si es posible).
+*   **Optimizar consultas**: Crear índices adecuados, evitar escaneos innecesarios.
+*   **Revisar mantenimiento**: Programar rebuilds fuera de horas pico.
+*   **Configurar `max server memory`** correctamente para evitar presión por otros procesos.
+*   **Evita operaciones masivas en horas pico** (rebuilds, backups).
+*   **Habilitar Resource Governor** si hay cargas descontroladas.
+
+
+ 
+
+
+### ✅ **Cómo investigar**
+
+*   **Ver memoria asignada y usada**:
+    ```sql
+    SELECT total_physical_memory_kb/1024 AS TotalRAM_MB,
+           available_physical_memory_kb/1024 AS AvailableRAM_MB,
+           system_memory_state_desc
+    FROM sys.dm_os_sys_memory;
+    ```
+*   **Ver PLE actual y por nodo**:
+    ```sql
+    SELECT [object_name], [instance_name], [cntr_value]
+		FROM sys.dm_os_performance_counters
+    WHERE [counter_name] = 'Page life expectancy';
+    ```
+
+*   **Ejemplo de Resultado:**
+    *   `object_name`:
+        *   `SQLServer:Buffer Manager` → PLE global.
+        *   `SQLServer:Buffer Node` → PLE por nodo NUMA (en tu caso, instancia `000`).
+    *   `cntr_value`: **1368 segundos** (≈ 22.8 minutos).
+
+**¿Es bueno o malo?**
+
+*   **Regla general:**
+    *   Mínimo aceptable: **300 segundos por cada 4 GB de RAM**.
+*   Si tu servidor tiene, por ejemplo:
+    *   **64 GB RAM** → Esperarías **4800 segundos** (≈ 80 minutos).
+    *   **128 GB RAM** → Esperarías **9600 segundos** (≈ 160 minutos).
+*   **1368 segundos** es bajo para servidores grandes → indica **presión de memoria**.
+
+
+	
+*   **Identificar consultas que consumen más I/O**:
+    ```sql
+    SELECT TOP 10
+           qs.total_logical_reads, qs.total_physical_reads, qs.execution_count,
+           SUBSTRING(qt.text, 1, 200) AS QueryText
+    FROM sys.dm_exec_query_stats qs
+    CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
+    ORDER BY qs.total_physical_reads DESC;
+    ```
+
+ 
+ 
+3.  **Identifica consultas que hacen lecturas masivas**:
+    ```sql
+    SELECT TOP 10
+           qs.total_logical_reads, qs.total_physical_reads, qs.execution_count,
+           SUBSTRING(qt.text, 1, 200) AS QueryText
+    FROM sys.dm_exec_query_stats qs
+    CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
+    ORDER BY qs.total_physical_reads DESC;
+    ```
