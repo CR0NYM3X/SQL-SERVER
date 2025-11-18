@@ -183,3 +183,62 @@ https://github.com/erikdarlingdata/DarlingData
 
 
 ```
+
+
+
+
+# ✅ **Trace Flag 174**
+
+**Propósito:**  
+Aumenta el número de **buckets en el plan cache** para reducir la contención en el spinlock `SOS_CACHESTORE` cuando hay muchas consultas ad hoc. Por defecto, en sistemas 64-bit hay 40,009 buckets; con este flag se incrementa a 160,001. [\[sqlservice.se\]](https://www.sqlservice.se/sql-server-trace-flag-174/)
+
+### **Beneficios**
+
+*   Reduce la contención en el plan cache en entornos con **altísimo volumen de consultas ad hoc**.
+*   Disminuye el uso excesivo de CPU causado por spinlocks.
+*   Mejora la escalabilidad en servidores mega transaccionales.
+
+### **Consideraciones**
+
+*   Solo aplica en versiones **SQL Server 2012–2017** (en 2019+ el comportamiento puede variar).
+*   Requiere habilitarlo como **startup parameter (-T174)** y tener ciertos Cumulative Updates instalados.
+*   Verifica el tamaño actual con:
+    ```sql
+    SELECT name, buckets_count FROM sys.dm_os_memory_cache_hash_tables WHERE name IN ('SQL Plans','Object Plans','Bound Trees');
+    ```
+
+### **Desventajas**
+
+*   Incrementar buckets aumenta el consumo de memoria para el plan cache.
+*   Si tu carga no tiene muchas consultas ad hoc, no aporta beneficio y solo consume más memoria.
+
+### **Si NO está habilitado**
+
+*   En cargas con muchas consultas ad hoc, puedes sufrir:
+    *   Alta contención en `SOS_CACHESTORE`.
+    *   Elevado uso de CPU.
+    *   Degradación general del rendimiento. [\[sqlservice.se\]](https://www.sqlservice.se/sql-server-trace-flag-174/)
+ 
+
+### 🔍 **Recomendaciones para entornos críticos**
+
+*   **7412:** Actívalo si necesitas diagnóstico en vivo y tu versión es < SQL Server 2019. En 2019+ ya está por defecto.
+*   **174:** Actívalo solo si tu workload tiene miles de consultas ad hoc y notas contención en spinlocks.
+*   **Siempre prueba en QA antes de producción** y monitorea impacto en CPU y memoria.
+ 
+### **Ejemplo práctico de contención  en SQL Server**
+
+*   El **plan cache** es una estructura compartida donde se almacenan los planes de ejecución.
+*   Cuando miles de consultas intentan leer/escribir en esa estructura al mismo tiempo, se usan mecanismos como **spinlocks** para controlar el acceso.
+*   Si hay pocos “buckets” (espacios de hash), muchos hilos intentan entrar al mismo bucket → **alta contención** → más espera → más CPU consumida.
+
+### **Impacto**
+
+*   Incremento en el tiempo de respuesta.
+*   Uso excesivo de CPU por hilos que giran esperando (spinlocks).
+*   Degradación del rendimiento general.
+
+### **Cómo lo mitiga el Trace Flag 174**
+
+*   Aumenta el número de buckets en el plan cache, reduciendo la probabilidad de que dos hilos compitan por el mismo bucket.
+*   Menos contención → mejor escalabilidad en entornos con muchísimas consultas ad hoc.
