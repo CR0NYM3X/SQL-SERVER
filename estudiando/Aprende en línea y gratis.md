@@ -4,6 +4,7 @@
 	# hardening
 Tips seguridad SQL Server 1 -> https://www.youtube.com/watch?v=-b2ETCil72Q
 Tips seguridad SQL Server 2 -> https://www.youtube.com/watch?v=HjQRZuEg2ks
+SEGURIDAD INFORMÁTICA - SEGURIDAD EN BASE DE DATOS. Explicado Fácilmente -> https://www.youtube.com/watch?v=pYBcC5DwJVQ
 
 	# Seguridad de acceso en los datos
 
