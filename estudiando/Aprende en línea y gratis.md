@@ -132,4 +132,9 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 	Instalación de SQL2014 dentro de Active Directory -> https://www.youtube.com/watch?v=-gYQrAbsagE
 
 
+# Configuraciones
+
+SQL SERVER RESOURCE GOVERNOR -> https://medium.com/@murat_sari/sql-server-resource-governor-e15be1375cad
+Resource Governor in SQL Server -> https://www.youtube.com/watch?v=G_y_TW1TeE0
+
 ``` 
