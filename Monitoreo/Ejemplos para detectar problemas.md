@@ -507,6 +507,17 @@ Problemas comunes si no se controla:
 *   **Impacto en queries:** Identificar qué procesos generan más I/O para optimizarlos.
 
 ```sql
+
+--  **Identificar consultas que consumen más I/O**:
+ 
+    SELECT TOP 10
+           qs.total_logical_reads, qs.total_physical_reads, qs.execution_count,
+           SUBSTRING(qt.text, 1, 200) AS QueryText
+    FROM sys.dm_exec_query_stats qs
+    CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
+    ORDER BY qs.total_physical_reads DESC;
+
+
 -- SQL Server NUMA Node information  (Query 13) (SQL Server NUMA Info)
 SELECT osn.node_id, osn.node_state_desc, osn.memory_node_id, osn.processor_group, osn.cpu_count, osn.online_scheduler_count, 
        osn.idle_scheduler_count, osn.active_worker_count, 
