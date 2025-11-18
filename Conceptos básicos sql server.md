@@ -316,3 +316,20 @@ Si un servidor SQL procesa:
 *   **Diseño de la base**: índices, normalización.
 *   **Concurrencia**: bloqueos, aislamiento de transacciones.
 *   **Configuración**: tamaño de pool de conexiones, parámetros de I/O.
+
+
+### ✅ **¿Qué es un Data Mart?**
+
+Un **data mart** es un **subconjunto especializado de un almacén de datos (data warehouse)**, diseñado para atender las necesidades de un área específica de negocio (por ejemplo, ventas, marketing, finanzas).
+
+*   **Propósito:** Permitir acceso rápido y eficiente a datos relevantes para un departamento sin tener que consultar todo el data warehouse.
+*   **Características:**
+    *   Contiene datos resumidos y filtrados.
+    *   Facilita análisis y generación de reportes específicos.
+    *   Reduce costos y complejidad frente a un data warehouse completo.
+*   **Tipos:**
+    *   **Dependiente:** Se alimenta de un data warehouse central.
+    *   **Independiente:** Se construye directamente desde sistemas fuente.
+    *   **Lógico:** Integra datos sin almacenarlos físicamente.
+ 
+ 
