@@ -246,7 +246,9 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 ---
 
 
-# **low page life expectancy - [Ref](https://www.sqlskills.com/blogs/paul/page-life-expectancy-isnt-what-you-think/)”** 
+# **low page life expectancy **
+- [Ref1](https://www.sqlskills.com/blogs/paul/page-life-expectancy-isnt-what-you-think/)
+- [Ref2](https://axial-sql.com/es/comprendiendo-la-esperanza-de-vida-de-las-paginas-en-sql-server-3/)
  
 
 El PLE mide cuántos segundos, en promedio, las páginas permanecen en el buffer pool antes de ser reemplazadas. Un valor bajo significa que hay presión de memoria.
@@ -287,7 +289,11 @@ El PLE mide cuántos segundos, en promedio, las páginas permanecen en el buffer
 3.  **Planes de ejecución ineficientes**: Falta de índices, uso excesivo de `TABLE SCAN`.
 4.  **Mantenimiento intensivo**: Rebuilds de índices o backups que leen grandes volúmenes.
 5.  **Configuración incorrecta**: `max server memory` demasiado bajo.
- 
+6. - Mantenimiento de Índices
+7. - Consultas Grandes
+8. - Actividad de Migración de Datos
+9. - Planes de Ejecución Múltiples: Tener múltiples planes de ejecución para un solo procedimiento puede afectar PLE.
+
  
 ### ✅ **Acciones para mejorar PLE**
 
@@ -345,14 +351,95 @@ El PLE mide cuántos segundos, en promedio, las páginas permanecen en el buffer
     ORDER BY qs.total_physical_reads DESC;
     ```
 
+---
  
+## ✅ **Tipos de mantenimiento en SQL Server con frecuencia sugerida**
+
  
-3.  **Identifica consultas que hacen lecturas masivas**:
-    ```sql
-    SELECT TOP 10
-           qs.total_logical_reads, qs.total_physical_reads, qs.execution_count,
-           SUBSTRING(qt.text, 1, 200) AS QueryText
-    FROM sys.dm_exec_query_stats qs
-    CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
-    ORDER BY qs.total_physical_reads DESC;
-    ```
+*   **Monitoreo**: **24/7 con alertas**. [\[axial-sql.com\]](https://axial-sql.com/es/optimizando-el-mantenimiento-de-la-base-de-datos-de-sql-server-para-operaciones-24x7/), [\[axial-sql.com\]](https://axial-sql.com/es/tecnicas-de-mantenimiento-esenciales-para-sql-server/)
+
+ 
+
+### 1. **Copias de seguridad (Backups)**
+
+*   **Completa**
+    *   **Servidor normal:** 1 vez por semana.
+    *   **Transaccional:** Diario.
+    *   **Muy transaccional:** Diario (o varias veces al día si el RPO es crítico).
+*   **Diferencial**
+    *   **Normal:** Cada 2-3 días.
+    *   **Transaccional:** Diario.
+    *   **Muy transaccional:** Varias veces al día.
+*   **Log de transacciones**
+    *   **Normal:** Cada 4-6 horas.
+    *   **Transaccional:** Cada 15-30 minutos.
+    *   **Muy transaccional:** Cada 5-10 minutos.
+ 
+### 2. **Mantenimiento de índices**
+
+*   **Reorganización (fragmentación 5%-30%)**
+    *   **Normal:** Mensual.
+    *   **Transaccional:** Semanal.
+    *   **Muy transaccional:** Diario o cada 2 días.
+*   **Reconstrucción (fragmentación >30%)**
+    *   **Normal:** Mensual.
+    *   **Transaccional:** Semanal.
+    *   **Muy transaccional:** Semanal (o más frecuente si hay alto impacto en rendimiento).
+
+ 
+
+### 3. **Actualización de estadísticas**
+
+*   **Normal:** Mensual.
+*   **Transaccional:** Semanal.
+*   **Muy transaccional:** Diario (o usar `AUTO_UPDATE_STATISTICS` habilitado).
+
+ 
+
+### 4. **Limpieza de archivos y logs**
+
+*   **Normal:** Mensual.
+*   **Transaccional:** Semanal.
+*   **Muy transaccional:** Semanal (o según política de retención).
+
+ 
+
+### 5. **Optimización de consultas y plan cache**
+
+*   **Normal:** Trimestral.
+*   **Transaccional:** Mensual.
+*   **Muy transaccional:** Semanal (revisar Query Store y limpiar planes obsoletos).
+
+ 
+
+### 6. **Verificación de integridad (`DBCC CHECKDB`)**
+
+*   **Normal:** Mensual.
+*   **Transaccional:** Semanal.
+*   **Muy transaccional:** Semanal (o diario en bases críticas, pero programado en ventana de mantenimiento).
+
+---
+
+# Fragmentación
+
+*   Desfragmentar el disco **no corrige la fragmentación de índices**.
+*   Desfragmentar índices **no reorganiza sectores físicos del HDD**, solo páginas lógicas en el archivo MDF.
+
+ 
+### ✅ **Desfragmentación de disco**
+
+*   **Nivel:** físico.
+*   **Objetivo:** reorganizar los bloques en el disco duro para que los archivos estén en sectores contiguos.
+*   **Por qué:** en HDD, los datos pueden quedar dispersos por la fragmentación del sistema de archivos, lo que aumenta el tiempo de búsqueda del cabezal.
+*   **Impacto:** mejora el rendimiento del disco, no afecta directamente la estructura lógica de la base de datos.
+
+ 
+
+### ✅ **Desfragmentación de índices (SQL Server)**
+
+*   **Nivel:** lógico dentro de la base de datos.
+*   **Objetivo:** reorganizar las páginas de datos en los índices para que estén ordenadas y contiguas según la clave.
+*   **Por qué:** las operaciones DML (INSERT, UPDATE, DELETE) generan fragmentación lógica en los índices.
+*   **Impacto:** mejora la eficiencia de las consultas, no cambia la ubicación física en el disco.
+
+*   
