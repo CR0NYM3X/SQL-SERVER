@@ -175,26 +175,7 @@ ORDER BY wait_time_ms DESC;
 ```
 
 
-```
-Lista de verificación: Mejores prácticas para SQL Server en máquinas virtuales -> https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist?view=azuresql#sql-server-features
-Recommended updates and configuration options for SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommended-updates-configuration-options
-Recomendaciones para reducir la contención de asignación en la base de datos tempdb de SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommendations-reduce-allocation-contention#resolution
-SQL Server Design Considerations -> https://learn.microsoft.com/en-us/system-center/scom/plan-sqlserver-design?view=sc-om-2025
-SQL Server security best practices -> https://learn.microsoft.com/en-us/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver17
-Prácticas recomendadas para las instancias de SQL Server -> https://docs.cloud.google.com/compute/docs/instances/sql-server/best-practices?hl=es-419
-SQL Server Best Practices, Part I: Configuration -> https://www.varonis.com/blog/sql-server-best-practices-part-configuration
-SQL Server Best Practices, Part II: Virtualized Environments ->  https://www.varonis.com/blog/sql-server-best-practices-in-virtualized-environments
-
-GlennBerry Performance GitHub
-https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/tree/main
-https://github.com/Ratithoglys/GlennBerry_DMV_Queries/tree/master
-
-procedimiento almacenado gratuito para diagnosticar problemas de presión en CPU y memoria en SQL Server.
-https://github.com/erikdarlingdata/DarlingData
-
-
-```
-
+---
 
 
 
@@ -508,3 +489,25 @@ El archivo queda “partido” en varias zonas → el cabezal del HDD debe mover
 *   Fragmentación alta en índices = más lecturas de páginas = consultas más lentas.
 *   Esto afecta directamente el rendimiento del motor SQL, incluso si el disco está perfectamente desfragmentado.
  
+---
+
+# Links 
+```
+Lista de verificación: Mejores prácticas para SQL Server en máquinas virtuales -> https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist?view=azuresql#sql-server-features
+Recommended updates and configuration options for SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommended-updates-configuration-options
+Recomendaciones para reducir la contención de asignación en la base de datos tempdb de SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommendations-reduce-allocation-contention#resolution
+SQL Server Design Considerations -> https://learn.microsoft.com/en-us/system-center/scom/plan-sqlserver-design?view=sc-om-2025
+SQL Server security best practices -> https://learn.microsoft.com/en-us/sql/relational-databases/security/sql-server-security-best-practices?view=sql-server-ver17
+Prácticas recomendadas para las instancias de SQL Server -> https://docs.cloud.google.com/compute/docs/instances/sql-server/best-practices?hl=es-419
+SQL Server Best Practices, Part I: Configuration -> https://www.varonis.com/blog/sql-server-best-practices-part-configuration
+SQL Server Best Practices, Part II: Virtualized Environments ->  https://www.varonis.com/blog/sql-server-best-practices-in-virtualized-environments
+
+GlennBerry Performance GitHub
+https://github.com/yazalpizar/GlennBerry-SQL-Server-Diagnostic-Queries/tree/main
+https://github.com/Ratithoglys/GlennBerry_DMV_Queries/tree/master
+
+procedimiento almacenado gratuito para diagnosticar problemas de presión en CPU y memoria en SQL Server.
+https://github.com/erikdarlingdata/DarlingData
+
+
+```
