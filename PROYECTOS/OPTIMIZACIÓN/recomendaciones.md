@@ -47,7 +47,18 @@ Si necesitas más archivos de TempDB en SQL Server, normalmente se analiza la co
 
 Si confirma que existe una alta contención de tipo PAGELATCH_UP o PAGELATCH_EX relacionada con las páginas de asignación de tempdb, incremente a 12 archivos.
 
+
+
+
+
+
 ```sql
+
+-- Introducido en SQL Server 2019 Su objetivo es reducir la contención en las tablas de sistema de TempDB
+-- cuando hay muchas operaciones concurrentes que crean y eliminan objetos temporales (#temp tables, variables de tabla, etc.).
+-- En lugar de usar páginas en disco para el metadata, se usan tablas optimizadas para memoria (In-Memory OLTP), eliminando bloqueos tipo PAGELATCH_xx en TempDB.
+SELECT SERVERPROPERTY('IsTempdbMetadataMemoryOptimized');
+
 
 -- Ver contención en tempdb
 SELECT
