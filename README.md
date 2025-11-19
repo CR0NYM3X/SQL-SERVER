@@ -27,6 +27,7 @@
 # Páginas para info de sql server:
 ```
 --- Clubs de DBAS MSSQL  <br>
+https://sqlrambling.net/category/sql/security-sql/
 https://erikdarling.com/
 https://www.brentozar.com/blog/
 https://sqlperformance.com/
