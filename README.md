@@ -26,9 +26,12 @@
 
 # Páginas para info de sql server:
 ```
---- Clubs de DBAS MSSQL  <br> 
-https://github.com/MadeiraData/microsoft-dbas-club/tree/master <br> 
+--- Clubs de DBAS MSSQL  <br>
+https://erikdarling.com/
+https://www.brentozar.com/blog/
+https://sqlperformance.com/
 
+https://github.com/MadeiraData/microsoft-dbas-club/tree/master <br> 
 https://blog.sqlauthority.com/ <br>
 https://www.mssqltips.com/sql-server-categories/ <br>
 https://www.sqlservertutorial.net/
