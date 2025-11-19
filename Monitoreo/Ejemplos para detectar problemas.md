@@ -493,6 +493,11 @@ Problemas comunes si no se controla:
 *   **Impacto en queries:** Identificar qué procesos generan más I/O para optimizarlos.
 
 ```sql
+
+-- muestra todas las solicitudes de I/O que están pendientes en el nivel del subsistema de almacenamiento.
+  SELECT * from sys.dm_io_pending_io_requests ;
+  SELECT * FROM sys.dm_io_virtual_file_stats(NULL, NULL);
+
 --  ✅ Consultar cantidad de escritura y lectura (UPDATE,DELETE,INSERT,SELECT):
 -- ⚠ **Notas importantes:**
 -- 
