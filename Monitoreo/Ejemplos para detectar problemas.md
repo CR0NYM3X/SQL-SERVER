@@ -981,6 +981,16 @@ FROM sys.dm_exec_query_stats qs
 JOIN sys.dm_exec_requests r ON qs.plan_handle = r.plan_handle
 GROUP BY database_id
 ORDER BY CPU_ms DESC;
+
+
+-- Cantidad de peticiones por segundo
+-- [NOTA] ->  el valor de cntr_value NO significa que actualmente tienes esa cantidad peticiones por segundo.  
+-- ese contador es acumulativo, por lo que debes calcular la diferencia entre dos lecturas en un intervalo de tiempo. tomando un punto de referencia y despues restar 
+SELECT
+   cntr_value AS BatchRequestsPerSec
+FROM sys.dm_os_performance_counters
+WHERE counter_name = 'Batch Requests/sec';
+
 ```
 
 
