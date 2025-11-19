@@ -3,6 +3,8 @@
 ### 1. 🔋 Políticas de Energía
 
 **Ruta:** `Computer Configuration → Policies → Administrative Templates → System → Power Management`
+- **Turn off hard disk after**:  
+  Permite ahorrar energía apagando el disco físico tras un periodo de inactividad. Establecer en 0 minutos (nunca apagar) para servidores críticos, especialmente bases de datos
 
 - **High Performance Power Scheme – ESENCIAL:**  
   ✔️ **Verificado.** Microsoft y expertos como Pinal Dave recomiendan cambiar el plan de energía a "Alto rendimiento" para evitar que el sistema reduzca la frecuencia del CPU, lo cual puede afectar negativamente el rendimiento de SQL Server.  
