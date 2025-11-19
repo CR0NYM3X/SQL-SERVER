@@ -493,6 +493,46 @@ Problemas comunes si no se controla:
 *   **Impacto en queries:** Identificar qué procesos generan más I/O para optimizarlos.
 
 ```sql
+--  ✅ Consultar cantidad de escritura y lectura (UPDATE,DELETE,INSERT,SELECT):
+-- ⚠ **Notas importantes:**
+-- 
+-- *   Estas estadísticas se reinician al reiniciar SQL Server.
+-- *   Solo reflejan actividad desde el último reinicio.
+-- *   Si quieres ver actividad en tiempo real, necesitarías Extended Events o Profiler.
+
+ 
+--- Ver por toda por objeto
+SELECT 
+    OBJECT_NAME(s.[object_id]) AS Tabla,
+    SUM(s.leaf_insert_count) AS Cantidad_Inserts,
+    SUM(s.leaf_update_count) AS Cantidad_Updates,
+    SUM(s.leaf_delete_count) AS Cantidad_Deletes,
+    SUM(u.user_seeks + u.user_scans + u.user_lookups) AS Cantidad_Lecturas
+FROM sys.dm_db_index_operational_stats(DB_ID(), NULL, NULL, NULL) AS s
+INNER JOIN sys.dm_db_index_usage_stats AS u
+    ON s.[object_id] = u.[object_id] AND s.index_id = u.index_id
+INNER JOIN sys.objects AS o ON s.[object_id] = o.[object_id]
+WHERE o.type = 'U' -- Solo tablas de usuario
+GROUP BY s.[object_id]
+ORDER BY (SUM(s.leaf_insert_count) + SUM(s.leaf_update_count) + SUM(s.leaf_delete_count)) DESC;
+
+
+--- Ver por toda la base de datos 
+SELECT 
+    DB_NAME(u.database_id) as  [dbname],
+    SUM(s.leaf_insert_count) AS Cantidad_Inserts,
+    SUM(s.leaf_update_count) AS Cantidad_Updates,
+    SUM(s.leaf_delete_count) AS Cantidad_Deletes,
+    SUM(u.user_seeks + u.user_scans + u.user_lookups) AS Cantidad_Lecturas
+FROM sys.dm_db_index_operational_stats(DB_ID(), NULL, NULL, NULL) AS s
+INNER JOIN sys.dm_db_index_usage_stats AS u
+    ON s.[object_id] = u.[object_id] AND s.index_id = u.index_id
+INNER JOIN sys.objects AS o ON s.[object_id] = o.[object_id]
+ WHERE u.database_id= DB_ID()  -- o.type = 'U' -- Solo tablas de usuario
+GROUP BY u.database_id
+ORDER BY (SUM(s.leaf_insert_count) + SUM(s.leaf_update_count) + SUM(s.leaf_delete_count)) DESC;
+
+
 
 --  **Identificar consultas que consumen más I/O**:
  
