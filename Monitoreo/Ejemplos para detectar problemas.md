@@ -550,6 +550,10 @@ ORDER BY (SUM(s.leaf_insert_count) + SUM(s.leaf_update_count) + SUM(s.leaf_delet
 
 
 -- SQL Server NUMA Node information  (Query 13) (SQL Server NUMA Info)
+-- Cada nodo NUMA tiene su propio conjunto de CPU y memoria local.
+-- SQL Server optimiza el acceso a memoria y CPU según estos nodos.
+-- Permite ver cómo SQL Server distribuye el buffer pool y otras estructuras por nodo.
+-- Útil para diagnosticar problemas de rendimiento en servidores con NUMA.
 SELECT osn.node_id, osn.node_state_desc, osn.memory_node_id, osn.processor_group, osn.cpu_count, osn.online_scheduler_count, 
        osn.idle_scheduler_count, osn.active_worker_count, 
 	   osmn.pages_kb/1024 AS [Committed Memory (MB)], 
@@ -824,6 +828,18 @@ SELECT TOP(10) mc.[type] AS [Memory Clerk Type],
 FROM sys.dm_os_memory_clerks AS mc WITH (NOLOCK)
 GROUP BY mc.[type]  
 ORDER BY SUM(mc.pages_kb) DESC OPTION (RECOMPILE);
+
+
+
+/* Estatus de  Lock pages in memory */
+SELECT 
+    a.memory_node_id,  -- 0 Nodo principal. 
+    node_state_desc, -- ONLINE  Nodo principal. | ONLINE DAC Nodo activo para DAC.
+    a.locked_page_allocations_kb --  páginas bloqueadas en memoria gracias al LPIM 
+FROM sys.dm_os_memory_nodes AS a
+INNER JOIN sys.dm_os_nodes AS b
+    ON a.memory_node_id = b.memory_node_id;
+
 ```
  
 
