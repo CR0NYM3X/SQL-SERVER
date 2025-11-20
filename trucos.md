@@ -388,6 +388,10 @@ https://sql-listo.com/t-sql/exec-vs-sp_executesql/
 ### ✅ **(Hint) Opciones más usadas en la cláusula `OPTION` de SQL Server**
 un hint es una instrucción especial que se agrega a una consulta para influir en el optimizador de consultas y modificar cómo se ejecuta. Normalmente, el optimizador elige el mejor plan automáticamente, pero con hints puedes forzar ciertas decisiones.
 
+#### Elimina en caso de que ya exista 
+```sql
+CREATE CLUSTERED INDEX IX_MiTabla ON MiTabla(Col1) WITH (DROP_EXISTING = ON) ON FG_DatosExtra;
+```
 
 #### **1. RECOMPILE**
 - **¿Para qué sirve?**  
