@@ -840,6 +840,16 @@ FROM sys.dm_os_memory_nodes AS a
 INNER JOIN sys.dm_os_nodes AS b
     ON a.memory_node_id = b.memory_node_id;
 
+SELECT
+    physical_memory_in_use_kb / 1024 AS [Memoria Física en Uso (MB)],
+    locked_page_allocations_kb / 1024 AS [Páginas Bloqueadas por LPI (MB)],
+    (locked_page_allocations_kb / 1024.0) / 1024.0 AS [Páginas Bloqueadas por LPI (GB)]
+FROM
+    sys.dm_os_process_memory;
+
+
+
+
 ```
  
 
