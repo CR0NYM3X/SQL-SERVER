@@ -83,6 +83,10 @@ SQL Performance Tuning: A Comprehensive Guide -> https://dikmenonur.medium.com/s
 SQL Query Optimization Techniques -> https://medium.com/@srghimire061/sql-query-optimization-techniques-b9de937dafa7  
 SQL Performance Tuning Scenario #1: Understanding Execution Plans -> https://medium.com/itversity/sql-performance-tuning-scenario-1-understanding-execution-plans-5c2227b40cdb
 
+SQL 2022 TEMPDB mejoras en la Performance -> https://www.youtube.com/watch?v=X4EHEOsxoBo
+Como Optimizar Una Maquina Virtual VMware Workstation -> https://www.youtube.com/watch?v=ASoon5actT8
+Como acelerar tus Máquinas Virtuales en VirtualBox y VMware -> https://www.youtube.com/watch?v=ulfdJsNc4Ts
+MSSQLtips Webinar: SQL Server on VMWare Performance Optimization 2020.03.12 -> https://www.youtube.com/watch?v=PtzC_wsU_YU
 
    # auditorias 
 SQL 2022 LEDGER (Auditorias y BlockChain) -> https://www.youtube.com/watch?v=Py0QjdMKt9w
@@ -136,9 +140,15 @@ Tutorial SQL Server docker: Como modificar parámetros de instancia -> https://w
 # Configuraciones
 
 SQL SERVER RESOURCE GOVERNOR -> https://medium.com/@murat_sari/sql-server-resource-governor-e15be1375cad
+Limitando el uso de la TEMPDB RESOURCE GOVERNOR en SQL Server 2025 -> https://www.youtube.com/watch?v=hCB4qxDF6Dw&t=1s
 Resource Governor in SQL Server -> https://www.youtube.com/watch?v=G_y_TW1TeE0
 
 Taller de configuración Database-Mail -> https://www.youtube.com/watch?v=w2xYTTg9mP0
+
+
+
+
+
 
 
 ``` 
