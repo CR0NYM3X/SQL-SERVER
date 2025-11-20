@@ -71,7 +71,7 @@ GO
 Validar y comparar una vez se mueva la información a los NDF 
 ```sql
 -- Validar en qué filegroup está la tabla y su tamaño
-SELECT
+ SELECT
     TOP 10
     s.name AS SchemaName,
     t.name AS TableName,
@@ -86,13 +86,15 @@ SELECT
         WHEN COUNT(DISTINCT p.partition_number) > 1 THEN 'Sí'
         ELSE 'No'
     END AS IsPartitioned,
-    COUNT(DISTINCT p.partition_number) AS PartitionCount
+    COUNT(DISTINCT p.partition_number) AS PartitionCount,
+    SUM(ps.row_count) AS TotalRows
 FROM sys.tables AS t
 LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
 LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
 LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
 LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
 WHERE OBJECT_NAME(p.object_id) = 'ClientesTest'
 GROUP BY s.name, t.name, fg.name;
 
@@ -148,7 +150,7 @@ Ahora la tabla y sus datos están en los .ndf.
 
 ```sql
 -- Validar en qué filegroup está la tabla y su tamaño
-SELECT
+ SELECT
     TOP 10
     s.name AS SchemaName,
     t.name AS TableName,
@@ -163,13 +165,15 @@ SELECT
         WHEN COUNT(DISTINCT p.partition_number) > 1 THEN 'Sí'
         ELSE 'No'
     END AS IsPartitioned,
-    COUNT(DISTINCT p.partition_number) AS PartitionCount
+    COUNT(DISTINCT p.partition_number) AS PartitionCount,
+    SUM(ps.row_count) AS TotalRows
 FROM sys.tables AS t
 LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
 LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
 LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
 LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
 WHERE OBJECT_NAME(p.object_id) = 'ClientesTest'
 GROUP BY s.name, t.name, fg.name;
 
