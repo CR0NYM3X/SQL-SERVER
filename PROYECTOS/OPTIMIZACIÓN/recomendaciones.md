@@ -490,6 +490,56 @@ El archivo queda “partido” en varias zonas → el cabezal del HDD debe mover
 *   Esto afecta directamente el rendimiento del motor SQL, incluso si el disco está perfectamente desfragmentado.
  
 ---
+# 💾 Estructuras de Asignación de Espacio
+**PFS**, **GAM**, y **SGAM** son estructuras críticas de metadatos internas de **SQL Server** que se encuentran en las páginas de datos. Su función principal es rastrear la **asignación y el estado del espacio libre** dentro de los archivos de la base de datos (tanto datos de usuario como TempDB).
+  
+Estas páginas existen cada cierto intervalo dentro de los archivos de datos (MDF/NDF) y organizan el espacio en unidades lógicas llamadas **Extensiones** (*Extents*). Una Extensión es una unidad de 8 páginas contiguas (64 KB).
+
+ 
+
+### 1. PFS: Page Free Space (Espacio Libre de Página)
+
+| Concepto | Detalle |
+| :--- | :--- |
+| **Función** | Rastrea la **cantidad de espacio libre** dentro de cada página de datos. |
+| **Frecuencia** | Existe una página PFS por cada **8,088 páginas** (aproximadamente 64 MB de datos). |
+| **Contenido** | Para cada página de datos que rastrea, PFS almacena información sobre: * Si la página está asignada. * Si la página está libre (y qué porcentaje: 0%, 1%-50%, 51%-80%, 81%-95%, 96%-100%). |
+| **Rol Clave** | Permite a SQL Server saber rápidamente si hay espacio en una página para un nuevo registro sin tener que leer la página de datos real. |
+
+ 
+### 2. GAM: Global Allocation Map (Mapa de Asignación Global)
+
+| Concepto | Detalle |
+| :--- | :--- |
+| **Función** | Rastrea qué **Extensiones** están **libres** y listas para ser usadas. |
+| **Frecuencia** | Existe una página GAM por cada **64,000 Extensiones** (aproximadamente 4 GB de datos). |
+| **Contenido** | Para cada Extensión que rastrea, la GAM almacena información de **asignación**: * Si la Extensión está completamente libre (sin asignar). * Si la Extensión está parcialmente o completamente en uso. |
+| **Rol Clave** | Cuando SQL Server necesita una **Extensión nueva y vacía**, consulta la GAM para encontrar rápidamente un bloque de 64 KB disponible. |
+
+ 
+### 3. SGAM: Shared Global Allocation Map (Mapa de Asignación Global Compartida)
+
+| Concepto | Detalle |
+| :--- | :--- |
+| **Función** | Rastrea qué **Extensiones** están **parcialmente llenas** y disponibles para que sean compartidas por varios objetos. |
+| **Frecuencia** | Existe una página SGAM por cada **64,000 Extensiones** (misma frecuencia que GAM). |
+| **Contenido** | Para cada Extensión que rastrea, la SGAM almacena: * Si la Extensión está siendo utilizada por varias tablas (es decir, es una **Extensión mixta** y tiene espacio libre). * Si la Extensión está completamente utilizada (llena). |
+| **Rol Clave** | SQL Server consulta SGAM para encontrar **espacio disponible** dentro de Extensiones que ya están en uso, pero que no están llenas. |
+
+ 
+## 💥 Contención en TempDB
+
+En tu servidor **super transaccional** con 64 *cores* y alto TPS, estas páginas son una fuente común de contención, especialmente en **TempDB**.
+
+* Múltiples procesos (hilos) intentan modificar el estado de estas páginas simultáneamente (por ejemplo, actualizando una página SGAM para marcar una Extensión como usada).
+* SQL Server utiliza **latches** (bloqueos ligeros y rápidos) para proteger estas páginas de metadatos.
+* Si muchos procesos necesitan acceder a la **misma página PFS, GAM o SGAM** al mismo tiempo, se genera una cola conocida como contención de **PAGELATCH_EX** o **PAGELATCH_SH**.
+
+La solución estándar para este problema, que mencionaste, es crear **múltiples archivos de datos (`.ndf`)** para TempDB. Esto distribuye las páginas PFS, GAM y SGAM en varios archivos, reduciendo la posibilidad de que muchos *threads* necesiten acceder a la misma página de metadatos simultáneamente.
+
+---
+
+
 
 # Links 
 ```
