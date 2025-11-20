@@ -1,16 +1,118 @@
+ ### ✅ Este laboratorio incluye:
+
+✔ Creación de función y esquema de partición.  
+✔ Tabla particionada por fecha mensual.  
+✔ Inserción masiva de 10,000 registros con fechas aleatorias.  
+✔ Validación de distribución y tamaño por partición.
+
+
+***
+
+##  **Ver si existen tablas particionadas**
+```sql
  
+-- las tablas ,  PartitionSchema y Partitionfunction
+SELECT
+    Distinct 
+    s.name AS SchemaName,
+    t.name AS TableName,
+    ps.name AS PartitionScheme,
+    pf.name AS PartitionFunction,
+    ds.name AS FileGroup
+FROM sys.tables AS t
+JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+JOIN sys.indexes AS i ON t.object_id = i.object_id
+JOIN sys.partition_schemes AS ps ON i.data_space_id = ps.data_space_id
+JOIN sys.partition_functions AS pf ON ps.function_id = pf.function_id
+JOIN sys.destination_data_spaces AS dds ON ps.data_space_id = dds.partition_scheme_id
+JOIN sys.filegroups AS ds ON dds.data_space_id = ds.data_space_id
+WHERE i.index_id IN (0,1)  -- heap o índice clustered
+ORDER BY t.name;
+
+---- Ver tamaño total de la tabla y su indice
+ SELECT
+    TOP 10
+    s.name AS SchemaName,
+    t.name AS TableName,
+    fg.name AS FileGroupName,
+    -- Tamaño total (datos + índices)
+    CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
+    -- Solo datos (heap o índice clustered)
+    CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
+    -- Solo índices (nonclustered, XML, spatial, etc.)
+    CAST(SUM(CASE WHEN i.type NOT IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS IndexSizeKB,
+    CASE 
+        WHEN COUNT(DISTINCT p.partition_number) > 1 THEN 'Sí'
+        ELSE 'No'
+    END AS IsPartitioned,
+    COUNT(DISTINCT p.partition_number) AS PartitionCount,
+    SUM(ps.row_count) AS TotalRows
+FROM sys.tables AS t
+LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
+LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
+GROUP BY s.name, t.name, fg.name
+having COUNT(DISTINCT p.partition_number) > 1 ;
+
+
+
+---- Ver tamaño por partición de la tabla y sus índices
+ SELECT
+    s.name AS SchemaName,
+    t.name AS TableName,
+    fg.name AS FileGroupName,
+    p.partition_number AS PartitionNumber,
+    CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
+    CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
+    CAST(SUM(CASE WHEN i.type NOT IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS IndexSizeKB,
+    SUM(ps.row_count) AS TotalRows
+FROM sys.tables AS t
+LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
+LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
+LEFT JOIN sys.data_spaces ds ON i.data_space_id = ds.data_space_id
+LEFT JOIN sys.filegroups fg ON ds.data_space_id = fg.data_space_id
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
+WHERE t.name = 'ClientesTest'
+GROUP BY s.name, t.name, fg.name, p.partition_number
+ORDER BY p.partition_number;
+
+
+ --- Ver los indices de la tabla 
+SELECT
+    i.name AS Indice,
+    i.type_desc AS TipoIndice,  -- Clustered o Nonclustered
+    fg.name AS Filegroup,
+    SUM(a.total_pages) * 8 AS Tamaño_KB
+FROM sys.indexes i
+LEFT JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
+WHERE OBJECT_NAME(i.object_id) = 'ClientesTest'
+GROUP BY i.name, i.type_desc, fg.name;
+
+
+```
+
+---
 
 ## ✅ **Objetivo del laboratorio**
 
 Aprender a crear una tabla particionada por fecha mensual en SQL Server, asignar las particiones a un esquema de partición y una función de partición, y realizar inserciones masivas para validar la distribución de datos.
 
-***
-
 ## **1. Crear la función de partición**
 
 Esta función divide los datos por rangos mensuales:
+RANGE LEFT significa que el límite es Menor o igual a la partición izquierda.
 
 ```sql
+-- Partición 1: valores <= '2025-02-01'
+-- Partición 2: valores > '2025-02-01' AND <= '2025-03-01'
+
 -- Crear función de partición por mes
 CREATE PARTITION FUNCTION pfClientesTest (DATE)
 AS RANGE LEFT FOR VALUES (
@@ -79,6 +181,8 @@ GO
 Consulta para ver cuántos registros hay en cada partición:
 
 ```sql
+
+--  Cantidad de filas por particion
 SELECT
     $PARTITION.pfClientesTest(Fecha) AS PartitionNumber,
     COUNT(*) AS TotalRows
@@ -86,6 +190,18 @@ FROM dbo.ClientesTest
 GROUP BY $PARTITION.pfClientesTest(Fecha)
 ORDER BY PartitionNumber;
 GO
+
+-- ver las fechas de cada particion 
+SELECT
+    $PARTITION.pfClientesTest(Fecha) AS PartitionNumber,
+    MIN(Fecha) AS MinDate,
+    MAX(Fecha) AS MaxDate,
+    COUNT(*) AS RowsCount
+FROM dbo.ClientesTest
+GROUP BY $PARTITION.pfClientesTest(Fecha)
+ORDER BY PartitionNumber;
+
+
 
 SELECT  TOP 100 *   FROM dbo.ClientesTest 
 ```
@@ -108,44 +224,21 @@ GO
 
 ***
 
-### ✅ Este laboratorio incluye:
-
-✔ Creación de función y esquema de partición.  
-✔ Tabla particionada por fecha mensual.  
-✔ Inserción masiva de 10,000 registros con fechas aleatorias.  
-✔ Validación de distribución y tamaño por partición.
-
-***
-
-¿Quieres que ahora te redacte **el objetivo, alcance, requisitos previos y pasos del laboratorio en formato profesional para tu manual**?  
-¿O prefieres que también agregue **una sección de cómo mover esta tabla particionada a otro filegroup** como parte del laboratorio?
 
 
-
------------------
-
-
-### ✅ **Caso 1: Tabla con índice clustered**
-
-Puedes mover el índice clustered (que contiene los datos) al nuevo filegroup:
-
-```sql
-CREATE CLUSTERED INDEX IX_ClientesTest_ID
-ON dbo.ClientesTest(ID)
-WITH (DROP_EXISTING = ON)
-ON [NuevoFileGroup];
+## **7. Borrar laboratorio**
+```SQL
+ drop TABLE dbo.ClientesTest;
+ drop PARTITION SCHEME psClientesTest;
+ drop PARTITION FUNCTION pfClientesTest;
 ```
 
-*   `DROP_EXISTING = ON` → Reorganiza el índice existente sin cambiar el esquema.
-*   Esto mueve **los datos** al filegroup indicado.
+--- 
 
+# Info Extra 
 
-
-
-----------------------------------------------------------
-
-### ✅  General para índice en tabla particionada:
-debes especificar la función de partición y el esquema de partición en la cláusula ON
+###   Generar índice NONCLUSTERED en tabla particionada:
+debes especificar el esquema de partición en la cláusula ON
 ```sql
 --  General para índice en tabla particionada
 CREATE NONCLUSTERED INDEX IX_ClientesTest_Ciudad
@@ -154,39 +247,23 @@ ON psClientesTest(Fecha);  -- psClientesTest es el esquema de partición
 ```
 
 
-select * from sys.schemas
-
-SELECT name AS PartitionSchemeName,* FROM sys.partition_schemes;
-
-
-SELECT 
-       DISTINCT 
-       ps.name AS PartitionScheme,
-       pf.name AS PartitionFunction,
-       ds.name AS FileGroup
-FROM sys.partition_schemes ps
-INNER JOIN sys.partition_functions pf ON ps.function_id = pf.function_id
-INNER JOIN sys.destination_data_spaces dds ON ps.data_space_id = dds.partition_scheme_id
-INNER JOIN sys.filegroups ds ON dds.data_space_id = ds.data_space_id;
+### Agregar un rango más 
+```SQL 
+ALTER PARTITION FUNCTION pfClientesTest()
+SPLIT RANGE ('2026-01-01');
+```
 
 
-SELECT
-    t.name AS TableName,
-    i.name AS IndexName,
-    p.partition_number,
-    --p.rows AS RowCount,
-    au.total_pages * 8 AS SizeKB
-FROM sys.tables t
-INNER JOIN sys.indexes i ON t.object_id = i.object_id
-INNER JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
-INNER JOIN sys.allocation_units au ON p.partition_id = au.container_id
-WHERE t.name = 'ClientesTest'
-ORDER BY p.partition_number;
-
-
-
-
--- consultar la información de una particion en especifico 
+### Consultar la información de una particion en especifico 
+```SQL
 SELECT *
 FROM dbo.ClientesTest
-WHERE $PARTITION.pfClientesTest(Fecha) = 13
+WHERE $PARTITION.pfClientesTest(Fecha) = 13;
+```
+
+ 
+
+
+ 
+
+
