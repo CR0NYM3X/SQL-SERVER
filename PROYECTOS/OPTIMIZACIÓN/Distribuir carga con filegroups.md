@@ -105,9 +105,9 @@ SELECT
     fg.name AS Filegroup,
     SUM(a.total_pages) * 8 AS Tamaño_KB
 FROM sys.indexes i
-JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
-JOIN sys.allocation_units a ON p.partition_id = a.container_id
-JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
+LEFT JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
 WHERE OBJECT_NAME(i.object_id) = 'ClientesTest'
 GROUP BY i.name, i.type_desc, fg.name;
 
@@ -182,9 +182,9 @@ SELECT
     fg.name AS Filegroup,
     SUM(a.total_pages) * 8 AS Tamaño_KB
 FROM sys.indexes i
-JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
-JOIN sys.allocation_units a ON p.partition_id = a.container_id
-JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
+LEFT JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
 WHERE OBJECT_NAME(i.object_id) = 'ClientesTest'
 GROUP BY i.name, i.type_desc, fg.name;
 
