@@ -543,6 +543,8 @@ La solución estándar para este problema, que mencionaste, es crear **múltiple
 
 # Links 
 ```
+Extensiones de SQL Server, PFS, GAM, SGAM e IAM y corrupciones relacionadas -> https://techcommunity.microsoft.com/blog/sqlserversupport/sql-server-extents-pfs-gam-sgam-and-iam-and-related-corruptions/1606011
+
 Lista de verificación: Mejores prácticas para SQL Server en máquinas virtuales -> https://learn.microsoft.com/en-us/azure/azure-sql/virtual-machines/windows/performance-guidelines-best-practices-checklist?view=azuresql#sql-server-features
 Recommended updates and configuration options for SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommended-updates-configuration-options
 Recomendaciones para reducir la contención de asignación en la base de datos tempdb de SQL Server -> https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/performance/recommendations-reduce-allocation-contention#resolution
