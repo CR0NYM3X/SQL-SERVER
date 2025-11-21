@@ -89,6 +89,7 @@ Como acelerar tus Máquinas Virtuales en VirtualBox y VMware -> https://www.yout
 MSSQLtips Webinar: SQL Server on VMWare Performance Optimization 2020.03.12 -> https://www.youtube.com/watch?v=PtzC_wsU_YU
 
 what is sql page split | sql server page split | Sql server performance tuning Part 9 -> https://www.youtube.com/watch?v=GjVVHsHYvH4
+Fill Factor and page splits explained:- Primer -> https://www.youtube.com/watch?v=ON4fy7_mbUQ
 
    # auditorias 
 SQL 2022 LEDGER (Auditorias y BlockChain) -> https://www.youtube.com/watch?v=Py0QjdMKt9w
