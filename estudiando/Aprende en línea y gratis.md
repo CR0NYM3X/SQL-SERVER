@@ -88,6 +88,8 @@ Como Optimizar Una Maquina Virtual VMware Workstation -> https://www.youtube.com
 Como acelerar tus Máquinas Virtuales en VirtualBox y VMware -> https://www.youtube.com/watch?v=ulfdJsNc4Ts
 MSSQLtips Webinar: SQL Server on VMWare Performance Optimization 2020.03.12 -> https://www.youtube.com/watch?v=PtzC_wsU_YU
 
+what is sql page split | sql server page split | Sql server performance tuning Part 9 -> https://www.youtube.com/watch?v=GjVVHsHYvH4
+
    # auditorias 
 SQL 2022 LEDGER (Auditorias y BlockChain) -> https://www.youtube.com/watch?v=Py0QjdMKt9w
 Como crear auditorías de seguridad en SQL Server -> https://www.youtube.com/watch?v=_ht_HgqZ8Vc
