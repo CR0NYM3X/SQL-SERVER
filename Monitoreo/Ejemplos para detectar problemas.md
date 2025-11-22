@@ -388,16 +388,21 @@ ORDER BY TiempoAcumulado_ms DESC;
  
 -- Estadísticas históricas de todos los tipos de espera con descripción y causa
 WITH Waits AS (
-    SELECT 
-        wait_type,
-        waiting_tasks_count,
-        wait_time_ms,
-        signal_wait_time_ms
-    FROM sys.dm_os_wait_stats
-    WHERE wait_type NOT IN (
-        'SLEEP_TASK','BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR',
-        'SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE'
-    )
+	SELECT
+		wait_type, -- Tipo de espera
+		waiting_tasks_count, -- Número de tareas que han experimentado este tipo de espera
+		wait_time_ms, -- Tiempo total  acumulado en milisegundos 
+		CAST(100.0 * wait_time_ms / SUM(wait_time_ms) OVER() AS DECIMAL(10,2)) AS pct, --  Porcentaje del tiempo total de WAITS ayuda a saber quien tiene mucho acumulado de tiempo
+		CAST(wait_time_ms / NULLIF(waiting_tasks_count, 0) AS DECIMAL(18,2)) AS avg_wait_ms, --  Promedio de tiempo de espera por tarea/transaccion en milisegundos
+		CAST(
+			( (100.0 * wait_time_ms / SUM(wait_time_ms) OVER()) * 
+			  (wait_time_ms / NULLIF(waiting_tasks_count, 0)) ) AS DECIMAL(38,2)
+		) AS critical_index -- Índice crítico: pondera el porcentaje y el promedio para priorizar análisis
+	FROM sys.dm_os_wait_stats WHERE wait_type NOT IN (
+			'SLEEP_TASK','BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR',
+			'SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE'
+		)
+	-- ORDER BY critical_index DESC;
 ),
 WaitTypes AS (
     SELECT *
@@ -457,12 +462,15 @@ SELECT
     WT.CausaComun,
     W.waiting_tasks_count AS CantidadWaits,
     W.wait_time_ms AS DuracionTotalMS,
-    CAST(W.wait_time_ms * 100.0 / SUM(W.wait_time_ms) OVER() AS DECIMAL(5,2)) AS Porcentaje
+	W.pct,
+	W.avg_wait_ms,
+	CAST(W.avg_wait_ms / 1000 / 60 AS DECIMAL(18,2))  as avg_wait_min,
+	CAST(W.avg_wait_ms / 1000 / 60 / 60 AS  DECIMAL(18,2)) as avg_wait_hr,
+	critical_index
 FROM Waits W
 LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
- ORDER BY Porcentaje  DESC;
+ ORDER BY critical_index  DESC;
 -- ORDER BY W.wait_time_ms DESC;
-
 ```
 
 
