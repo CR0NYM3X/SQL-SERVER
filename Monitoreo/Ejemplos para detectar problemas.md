@@ -451,9 +451,45 @@ WaitTypes AS (
 		('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
 		('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
 		('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
-		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.')
+		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.'),		
+		('HADR_NOTIFICATION_DEQUEUE', 'Espera relacionada con la cola de notificaciones AlwaysOn.', 'Procesamiento interno de notificaciones de disponibilidad en grupos AlwaysOn.'),
+		('PREEMPTIVE_XE_DISPATCHER', 'Espera preemptiva del despachador de Extended Events.', 'Procesamiento de eventos en sesiones XE, normalmente bajo carga alta de eventos.'),
+		('ASYNC_IO_COMPLETION', 'Espera por finalización de operaciones de I/O asíncronas.', 'Operaciones de disco o red que tardan en completarse.'),
+		('LCK_M_IS', 'Espera por bloqueo de intención compartida (Intent Shared).', 'Lecturas concurrentes que compiten con actualizaciones.'),
+		('WAITFOR', 'Espera por comando WAITFOR.', 'Uso explícito de WAITFOR en procedimientos o scripts.'),
+		('LCK_M_IX', 'Espera por bloqueo de intención exclusiva (Intent Exclusive).', 'Actualizaciones concurrentes en filas o páginas.'),
+		('BROKER_TASK_STOP', 'Espera por detener tareas del Service Broker.', 'Finalización de tareas internas del Service Broker.'),
+		('HADR_WORK_QUEUE', 'Espera en la cola de trabajo AlwaysOn.', 'Procesamiento de tareas de sincronización en grupos de disponibilidad.'),
+		('HADR_TIMER_TASK', 'Espera en tareas temporizadas AlwaysOn.', 'Operaciones programadas para sincronización o monitoreo de disponibilidad.'),
+		('HTMEMO', 'Espera en operaciones de hash table (memoria).', 'Procesamiento de hash joins o agregaciones complejas.'),
+		('HADR_CLUSAPI_CALL', 'Espera en llamadas a la API del clúster AlwaysOn.', 'Comunicación con el clúster de Windows para grupos de disponibilidad.'),
+		('HTBUILD', 'Espera durante la construcción de hash tables.', 'Operaciones de hash join que requieren memoria significativa.'),
+		('LCK_M_BU', 'Espera por bloqueo de actualización masiva (Bulk Update).', 'Operaciones BULK INSERT o actualizaciones masivas.'),
+		('LCK_M_SCH_S', 'Espera por bloqueo compartido en esquema.', 'Consultas que requieren estabilidad en el esquema mientras otras lo modifican.'),
+		('EXECSYNC', 'Espera por sincronización de ejecución.', 'Sincronización interna entre hilos durante ejecución de consultas.'),
+		('HTREPARTITION', 'Espera por redistribución en hash tables.', 'Operaciones paralelas que requieren reorganización de datos en hash joins.'),
+		('BACKUPBUFFER', 'Espera por buffer durante respaldo.', 'Operaciones de BACKUP que esperan espacio en buffer para escribir datos.'),
+		('COLUMNSTORE_BUILD_THROTTLE', 'Espera por limitación en construcción de índices columnstore.', 'Creación de índices columnstore bajo control de recursos.'),		
+		('HTDELETE', 'Espera durante eliminación en estructuras hash.', 'Operaciones paralelas que requieren liberar memoria en hash joins.'),
+		('PREEMPTIVE_OS_WRITEFILEGATHER', 'Espera preemptiva al escribir datos en disco.', 'Operaciones de escritura masiva en archivos, como backups o cargas grandes.'),
+		('SLEEP_BPOOL_STEAL', 'Espera por recuperación de páginas del buffer pool.', 'SQL Server está liberando páginas para asignar memoria a nuevas solicitudes.'),
+		('LATCH_EX', 'Espera por latch exclusivo.', 'Contención en estructuras internas como allocation maps o páginas del buffer pool.'),
+		('PREEMPTIVE_OLEDBOPS', 'Espera preemptiva en operaciones OLE DB.', 'Consultas que acceden a proveedores OLE DB externos.'),
+		('PAGELATCH_UP', 'Espera por latch de página en modo actualización.', 'Contención en páginas en memoria, no en disco (normalmente en tempdb).'),
+		('BACKUPTHREAD', 'Espera en hilos de backup.', 'Operaciones de respaldo que esperan recursos internos.'),
+		('LATCH_SH', 'Espera por latch compartido.', 'Lecturas concurrentes en estructuras internas del motor.'),
+		('QUERY_EXECUTION_INDEX_SORT_EVENT_OPEN', 'Espera durante ordenamiento para índices.', 'Creación o reconstrucción de índices que requieren ordenar datos.'),
+		('BPSORT', 'Espera por ordenamiento en buffer pool.', 'Operaciones que requieren ordenar datos en memoria antes de escribir.'),
+		('LCK_M_SCH_M', 'Espera por bloqueo de modificación en esquema.', 'Cambios en estructura de tablas mientras otras sesiones acceden al esquema.'),
+		('SLEEP_BUFFERPOOL_HELPLW', 'Espera por tareas internas del buffer pool.', 'Procesos internos de mantenimiento de memoria en SQL Server.'),
+		('OLEDB', 'Espera por operaciones OLE DB.', 'Consultas que acceden a fuentes externas mediante OLE DB.'),
+		('MSQL_DQ', 'Espera en operaciones de cola distribuida.', 'Procesamiento interno de colas distribuidas en consultas paralelas.'),
+		('BMPBUILD', 'Espera durante construcción de bitmap.', 'Operaciones paralelas que requieren estructuras bitmap para joins o filtros.'),
+		('SLEEP_BPOOL_FLUSH', 'Espera por vaciado del buffer pool.', 'Liberación de páginas sucias hacia disco durante checkpoints.'),
+		('CLR_MANUAL_EVENT', 'Espera en eventos CLR.', 'Operaciones que usan código CLR y esperan sincronización interna.'),
+		('PREEMPTIVE_COM_QUERYINTERFACE', 'Espera preemptiva en COM Query Interface.', 'Interacción con componentes COM externos.'),
+		('PREEMPTIVE_OS_DEVICEOPS', 'Espera preemptiva en operaciones de dispositivo.', 'Acceso a dispositivos de almacenamiento o red a nivel OS.')
 
-        
     ) AS WT(WaitType, Descripcion, CausaComun)
 )
 SELECT 
@@ -469,6 +505,12 @@ SELECT
 	critical_index
 FROM Waits W
 LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
+WHERE wait_type IN (
+    'ASYNC_IO_COMPLETION','IO_COMPLETION',
+    'PAGEIOLATCH_SH','PAGEIOLATCH_EX','PAGEIOLATCH_UP',
+    'WRITELOG','BACKUPIO','BACKUPBUFFER',
+    'PREEMPTIVE_OS_WRITEFILEGATHER','PREEMPTIVE_OS_DEVICEOPS'
+)
  ORDER BY critical_index  DESC;
 -- ORDER BY W.wait_time_ms DESC;
 ```
