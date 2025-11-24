@@ -161,7 +161,72 @@ WHERE
 ORDER BY MinutosTranscurridos DESC;
  ```
 
+
+
+ ---
+
+### ✅ **¿Qué es un latch en SQL Server?**
+
+Un **latch** es un **mecanismo interno de sincronización que bloquea temporalmente el acceso físico** se usa SQL Server para **proteger estructuras en memoria** (como páginas del buffer pool, allocation maps) cuando varios hilos (threads) acceden a ellas **al mismo tiempo**.
+
+Piensa en un latch como un **candado rápido y ligero** que asegura que nadie modifique una página mientras otro la está leyendo o escribiendo.  
+Es **más bajo nivel que un lock** y **no está asociado a transacciones ni a aislamiento lógico.**, sino con la **integridad física de los datos en memoria**.
+
  
+
+### ✅ **¿Para qué sirve?**
+
+*   Evita **corrupción de datos** en memoria.
+*   Garantiza que las operaciones sobre páginas (lectura/escritura) sean **seguras y consistentes**.
+*   Controla la concurrencia en estructuras internas como:
+    *   **Páginas de datos** (Buffer Pool).
+    *   **Índices**.
+    *   **Mapas de asignación** (PFS, GAM, SGAM).
+ 
+
+### ✅ **Tipos de latch más comunes**
+
+*   **PAGELATCH\_SH** → Lectura compartida en memoria.
+*   **PAGELATCH\_EX** → Escritura exclusiva en memoria.
+*   **PAGEIOLATCH\_SH / EX** → Similar, pero esperando I/O (disco).
+
+ 
+
+### ✅ **Diferencia entre latch y lock**
+
+| **Latch**                              | **Lock**                              |
+| -------------------------------------- | ------------------------------------- |
+| Protege estructuras físicas en memoria | Protege datos lógicos (filas, tablas) |
+| No depende de transacciones            | Depende del aislamiento transaccional |
+| Muy rápido, de corta duración          | Puede durar más tiempo                |
+| Ejemplo: PAGELATCH                     | Ejemplo: LCK\_M\_X                    |
+
+
+### ✅ **¿Por qué es importante?**
+
+Si ves muchas esperas **PAGELATCH\_**\* en `sys.dm_os_wait_stats`, significa que hay **contención en memoria**, normalmente por:
+
+*   Alta concurrencia en la misma página (hot page).
+*   Tablas con **IDENTITY** o secuencias muy usadas.
+*   Operaciones masivas en índices.
+
+*   **PAGELATCH** → Protege **páginas en memoria** (Buffer Pool).
+    *   Se usa cuando la página **ya está cargada en RAM**.
+    *   Ejemplo: múltiples sesiones intentando leer/escribir la misma página en memoria.
+    *   Tipos: `PAGELATCH_SH`, `PAGELATCH_EX`, `PAGELATCH_UP`.
+
+*   **PAGEIOLATCH** → Protege **operaciones de I/O** (lectura/escritura en disco).
+    *   Se usa cuando la página **no está en memoria y debe leerse del disco**.
+    *   Tipos: `PAGEIOLATCH_SH`, `PAGEIOLATCH_EX`.
+
+ 
+
+### 🔍 **Cómo interpretarlo**
+
+*   Si ves **PAGELATCH** alto → Contención interna en memoria (hot pages).
+*   Si ves **PAGEIOLATCH** alto → Problemas de I/O (disco lento, falta de RAM, exceso de lectura).
+
+ ---
 
 
 
@@ -310,6 +375,16 @@ ORDER BY TiempoBloqueado_Minutos DESC;
 
 Porque las **esperas (waits)** indican que una tarea en SQL Server está detenida esperando un recurso (CPU, memoria, disco, red, bloqueos, etc.). Son una señal directa de cuellos de botella en el sistema y ayudan a entender dónde está el problema de rendimiento.
 
+### **¿Para qué sirven?**
+
+Los waits son **indicadores de dónde está el cuello de botella** en tu sistema.  
+Analizando los tipos y tiempos de espera, puedes saber si el problema está en:
+
+*   **CPU** (signal waits altos → falta de CPU).
+*   **Disco / I/O** (esperas como `PAGEIOLATCH` → acceso lento a disco).
+*   **Bloqueos** (esperas como `LCK_M_...` → contención entre transacciones).
+*   **Memoria** (esperas como `RESOURCE_SEMAPHORE` → falta de memoria para ejecutar consultas).
+
 Si no se controlan, pueden provocar:
 
 *   Lentitud general en consultas.
@@ -326,6 +401,26 @@ Si no se controlan, pueden provocar:
 *   **Sesión y query involucrada:** Para saber qué proceso está afectado y optimizarlo.
 *   **Patrones repetitivos:** Si siempre ocurre el mismo tipo de espera, hay un problema estructural (ej. falta de índices, hardware insuficiente).
 
+### **Analogía del restaurante:**
+
+Imagina que eres un cliente en un restaurante:
+
+1.  **Llegas y pides una mesa**:
+    *   Aquí empieza tu **espera total** (`wait_time_ms`).
+    *   No hay mesas libres , así que esperas en la lista posiblemente porque esta lleno, no hay comida o otra cosas (Bloqueo, Memoria, I/O o CPU).
+
+2.  **Te asignan una mesa, pero el mesero está ocupado**:
+    *   Ahora ya tienes el recurso (la mesa), pero el mesero no puede atenderte todavía.
+    *   Este tiempo es el **signal wait** (`signal_wait_time_ms`): tienes la mesa, pero esperas la señal del mesero para comenzar a ordenar.
+
+3.  **Finalmente el mesero viene y toma tu orden**:
+    *   Termina la espera.
+
+
+### **Relación práctica:**
+
+*   Si **`signal_wait_time_ms`** es alto, significa que el CPU está saturado: las tareas tienen recursos listos, pero no hay suficiente CPU para atenderlas.
+*   Si **`wait_time_ms`** es alto y **`signal_wait_time_ms`** es bajo, el problema está en la disponibilidad del recurso (por ejemplo, bloqueos, I/O lento).
 
 ```sql
 -- select * from sys.all_objects  where name like '%wait%'
@@ -388,21 +483,47 @@ ORDER BY TiempoAcumulado_ms DESC;
  
 -- Estadísticas históricas de todos los tipos de espera con descripción y causa
 WITH Waits AS (
-	SELECT
-		wait_type, -- Tipo de espera
-		waiting_tasks_count, -- Número de tareas que han experimentado este tipo de espera
-		wait_time_ms, -- Tiempo total  acumulado en milisegundos 
-		CAST(100.0 * wait_time_ms / SUM(wait_time_ms) OVER() AS DECIMAL(10,2)) AS pct, --  Porcentaje del tiempo total de WAITS ayuda a saber quien tiene mucho acumulado de tiempo
-		CAST(wait_time_ms / NULLIF(waiting_tasks_count, 0) AS DECIMAL(18,2)) AS avg_wait_ms, --  Promedio de tiempo de espera por tarea/transaccion en milisegundos
-		CAST(
-			( (100.0 * wait_time_ms / SUM(wait_time_ms) OVER()) * 
-			  (wait_time_ms / NULLIF(waiting_tasks_count, 0)) ) AS DECIMAL(38,2)
-		) AS critical_index -- Índice crítico: pondera el porcentaje y el promedio para priorizar análisis
-	FROM sys.dm_os_wait_stats WHERE wait_type NOT IN (
-			'SLEEP_TASK','BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR',
-			'SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE'
-		)
-	-- ORDER BY critical_index DESC;
+    select 
+	    wait_type, -- Tipo de Wait
+	    waiting_tasks_count, -- Cantidad de transacciones que esperaron 
+	    wait_time_ms / 1000 as total_time_seg, -- Tiempo total en ms de un wait por tema de algun (Bloqueo +  I/O + Memoria + CPU )
+	    (wait_time_ms - signal_wait_time_ms) / 1000 as total_time_seg_no_cpu , -- Tiempo  total en ms de un wait por tema de algun (Bloqueo + I/O + Memoria  ) pero no de CPU 
+        signal_wait_time_ms / 1000 as total_time_cpu_seg, -- Tiempo de espera solo de CPU 
+	    CAST((wait_time_ms / NULLIF(waiting_tasks_count, 0)) / 1000  AS DECIMAL(18,2))  AS avg_wait_seg, -- promedio de espera en ms por un wait
+	    CAST(signal_wait_time_ms * 100.0 / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) AS signal_ratio_percent, -- Porcentaje de % de espera por CPU
+        -- Diagnóstico basado en signal wait
+        CASE 
+            WHEN CAST(100.0 * signal_wait_time_ms / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) > 30 
+                THEN 'URGENTE: Cuello de botella en CPU'
+            WHEN CAST(100.0 * signal_wait_time_ms / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) BETWEEN 15 AND 30 
+                THEN 'ATENCIÓN: Posible presión de CPU'
+            ELSE 'Investigación: Recurso externo (Disco, Memoria, Lock y CPU)'
+        END AS prioridad_diagnostico,
+		-- 100.0 * [wait_time_ms] / SUM ([wait_time_ms]) OVER() AS [Percentage],
+        ROW_NUMBER() OVER(ORDER BY [wait_time_ms] DESC) AS [RowNum]
+    FROM sys.dm_os_wait_stats as ws
+    WHERE 
+    waiting_tasks_count > 0 AND
+    wait_type NOT IN (
+		'SLEEP_TASK','SLEEP_SYSTEMTASK','LAZYWRITER_SLEEP',
+		'CHECKPOINT_QUEUE','LOGMGR_QUEUE','REQUEST_FOR_DEADLOCK_SEARCH',
+		'XE_TIMER_EVENT','FT_IFTS_SCHEDULER_IDLE_WAIT',
+		'BROKER_EVENTHANDLER','BROKER_RECEIVE_WAITFOR',
+		'SQLTRACE_INCREMENTAL_FLUSH_SLEEP','SQLTRACE_WAIT_ENTRIES',
+		'DIRTY_PAGE_POLL','LOGMGR_RESERVE_APPEND','LOGMGR_FLUSH',
+		'DISPATCHER_QUEUE_SEMAPHORE','FT_IFTSHC_MUTEX','XE_DISPATCHER_JOIN',
+		'XE_DISPATCHER_WAIT','XE_DISPATCHER_SHUTDOWN','XE_SESSION_CREATE',
+		'XE_SESSION_TERMINATE','XE_BUFFERMGR_ALLPROCESSED_EVENT',
+		'XE_BUFFERMGR_FREEBUF_EVENT','XE_BUFFERMGR_FREEBUF_SINGLE_EVENT',
+		'XE_BUFFERMGR_FREEBUF_WAIT','XE_BUFFERMGR_FREEBUF_SINGLE_WAIT',
+		'XE_BUFFERMGR_FREEBUF_SHUTDOWN','XE_BUFFERMGR_FREEBUF_SHUTDOWN_WAIT',
+		'HADR_FILESTREAM_IOMGR_IOCOMPLETION','HADR_WORK_QUEUE','HADR_TIMER_TASK',
+		'BROKER_TO_FLUSH','BROKER_TASK_STOP','BROKER_TRANSMITTER',
+		'BROKER_CONNECTION_RECEIVE','BROKER_CONNECTION_SEND',
+		'BROKER_CONNECTION_ACCEPT','BROKER_CONNECTION_CLOSE','SQLTRACE_BUFFER_FLUSH','CLR_SEMAPHORE'
+      )
+
+
 ),
 WaitTypes AS (
     SELECT *
@@ -451,67 +572,26 @@ WaitTypes AS (
 		('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
 		('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
 		('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
-		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.'),		
-		('HADR_NOTIFICATION_DEQUEUE', 'Espera relacionada con la cola de notificaciones AlwaysOn.', 'Procesamiento interno de notificaciones de disponibilidad en grupos AlwaysOn.'),
-		('PREEMPTIVE_XE_DISPATCHER', 'Espera preemptiva del despachador de Extended Events.', 'Procesamiento de eventos en sesiones XE, normalmente bajo carga alta de eventos.'),
-		('ASYNC_IO_COMPLETION', 'Espera por finalización de operaciones de I/O asíncronas.', 'Operaciones de disco o red que tardan en completarse.'),
-		('LCK_M_IS', 'Espera por bloqueo de intención compartida (Intent Shared).', 'Lecturas concurrentes que compiten con actualizaciones.'),
-		('WAITFOR', 'Espera por comando WAITFOR.', 'Uso explícito de WAITFOR en procedimientos o scripts.'),
-		('LCK_M_IX', 'Espera por bloqueo de intención exclusiva (Intent Exclusive).', 'Actualizaciones concurrentes en filas o páginas.'),
-		('BROKER_TASK_STOP', 'Espera por detener tareas del Service Broker.', 'Finalización de tareas internas del Service Broker.'),
-		('HADR_WORK_QUEUE', 'Espera en la cola de trabajo AlwaysOn.', 'Procesamiento de tareas de sincronización en grupos de disponibilidad.'),
-		('HADR_TIMER_TASK', 'Espera en tareas temporizadas AlwaysOn.', 'Operaciones programadas para sincronización o monitoreo de disponibilidad.'),
-		('HTMEMO', 'Espera en operaciones de hash table (memoria).', 'Procesamiento de hash joins o agregaciones complejas.'),
-		('HADR_CLUSAPI_CALL', 'Espera en llamadas a la API del clúster AlwaysOn.', 'Comunicación con el clúster de Windows para grupos de disponibilidad.'),
-		('HTBUILD', 'Espera durante la construcción de hash tables.', 'Operaciones de hash join que requieren memoria significativa.'),
-		('LCK_M_BU', 'Espera por bloqueo de actualización masiva (Bulk Update).', 'Operaciones BULK INSERT o actualizaciones masivas.'),
-		('LCK_M_SCH_S', 'Espera por bloqueo compartido en esquema.', 'Consultas que requieren estabilidad en el esquema mientras otras lo modifican.'),
-		('EXECSYNC', 'Espera por sincronización de ejecución.', 'Sincronización interna entre hilos durante ejecución de consultas.'),
-		('HTREPARTITION', 'Espera por redistribución en hash tables.', 'Operaciones paralelas que requieren reorganización de datos en hash joins.'),
-		('BACKUPBUFFER', 'Espera por buffer durante respaldo.', 'Operaciones de BACKUP que esperan espacio en buffer para escribir datos.'),
-		('COLUMNSTORE_BUILD_THROTTLE', 'Espera por limitación en construcción de índices columnstore.', 'Creación de índices columnstore bajo control de recursos.'),		
-		('HTDELETE', 'Espera durante eliminación en estructuras hash.', 'Operaciones paralelas que requieren liberar memoria en hash joins.'),
-		('PREEMPTIVE_OS_WRITEFILEGATHER', 'Espera preemptiva al escribir datos en disco.', 'Operaciones de escritura masiva en archivos, como backups o cargas grandes.'),
-		('SLEEP_BPOOL_STEAL', 'Espera por recuperación de páginas del buffer pool.', 'SQL Server está liberando páginas para asignar memoria a nuevas solicitudes.'),
-		('LATCH_EX', 'Espera por latch exclusivo.', 'Contención en estructuras internas como allocation maps o páginas del buffer pool.'),
-		('PREEMPTIVE_OLEDBOPS', 'Espera preemptiva en operaciones OLE DB.', 'Consultas que acceden a proveedores OLE DB externos.'),
-		('PAGELATCH_UP', 'Espera por latch de página en modo actualización.', 'Contención en páginas en memoria, no en disco (normalmente en tempdb).'),
-		('BACKUPTHREAD', 'Espera en hilos de backup.', 'Operaciones de respaldo que esperan recursos internos.'),
-		('LATCH_SH', 'Espera por latch compartido.', 'Lecturas concurrentes en estructuras internas del motor.'),
-		('QUERY_EXECUTION_INDEX_SORT_EVENT_OPEN', 'Espera durante ordenamiento para índices.', 'Creación o reconstrucción de índices que requieren ordenar datos.'),
-		('BPSORT', 'Espera por ordenamiento en buffer pool.', 'Operaciones que requieren ordenar datos en memoria antes de escribir.'),
-		('LCK_M_SCH_M', 'Espera por bloqueo de modificación en esquema.', 'Cambios en estructura de tablas mientras otras sesiones acceden al esquema.'),
-		('SLEEP_BUFFERPOOL_HELPLW', 'Espera por tareas internas del buffer pool.', 'Procesos internos de mantenimiento de memoria en SQL Server.'),
-		('OLEDB', 'Espera por operaciones OLE DB.', 'Consultas que acceden a fuentes externas mediante OLE DB.'),
-		('MSQL_DQ', 'Espera en operaciones de cola distribuida.', 'Procesamiento interno de colas distribuidas en consultas paralelas.'),
-		('BMPBUILD', 'Espera durante construcción de bitmap.', 'Operaciones paralelas que requieren estructuras bitmap para joins o filtros.'),
-		('SLEEP_BPOOL_FLUSH', 'Espera por vaciado del buffer pool.', 'Liberación de páginas sucias hacia disco durante checkpoints.'),
-		('CLR_MANUAL_EVENT', 'Espera en eventos CLR.', 'Operaciones que usan código CLR y esperan sincronización interna.'),
-		('PREEMPTIVE_COM_QUERYINTERFACE', 'Espera preemptiva en COM Query Interface.', 'Interacción con componentes COM externos.'),
-		('PREEMPTIVE_OS_DEVICEOPS', 'Espera preemptiva en operaciones de dispositivo.', 'Acceso a dispositivos de almacenamiento o red a nivel OS.')
+		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.')
 
+        
     ) AS WT(WaitType, Descripcion, CausaComun)
 )
 SELECT 
     W.wait_type,
-    WT.Descripcion,
-    WT.CausaComun,
     W.waiting_tasks_count AS CantidadWaits,
-    W.wait_time_ms AS DuracionTotalMS,
-	W.pct,
-	W.avg_wait_ms,
-	CAST(W.avg_wait_ms / 1000 / 60 AS DECIMAL(18,2))  as avg_wait_min,
-	CAST(W.avg_wait_ms / 1000 / 60 / 60 AS  DECIMAL(18,2)) as avg_wait_hr,
-	critical_index
+	W.total_time_seg,
+	W.total_time_seg_no_cpu,
+	W.total_time_cpu_seg,
+	W.avg_wait_seg,
+	W.signal_ratio_percent,
+	W.prioridad_diagnostico,
+	WT.Descripcion,
+    WT.CausaComun
+	-- W.[RowNum]
 FROM Waits W
 LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
-WHERE wait_type IN (
-    'ASYNC_IO_COMPLETION','IO_COMPLETION',
-    'PAGEIOLATCH_SH','PAGEIOLATCH_EX','PAGEIOLATCH_UP',
-    'WRITELOG','BACKUPIO','BACKUPBUFFER',
-    'PREEMPTIVE_OS_WRITEFILEGATHER','PREEMPTIVE_OS_DEVICEOPS'
-)
- ORDER BY critical_index  DESC;
+order by avg_wait_seg desc ;
 -- ORDER BY W.wait_time_ms DESC;
 ```
 
