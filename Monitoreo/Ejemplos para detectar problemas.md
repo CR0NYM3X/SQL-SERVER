@@ -1180,6 +1180,91 @@ SELECT
 FROM sys.dm_os_performance_counters
 WHERE counter_name = 'Batch Requests/sec';
 
+
+-- las tablas ,  PartitionSchema y Partitionfunction
+SELECT
+    Distinct 
+    s.name AS SchemaName,
+    t.name AS TableName,
+    ps.name AS PartitionScheme,
+    pf.name AS PartitionFunction,
+    ds.name AS FileGroup
+FROM sys.tables AS t
+JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+JOIN sys.indexes AS i ON t.object_id = i.object_id
+JOIN sys.partition_schemes AS ps ON i.data_space_id = ps.data_space_id
+JOIN sys.partition_functions AS pf ON ps.function_id = pf.function_id
+JOIN sys.destination_data_spaces AS dds ON ps.data_space_id = dds.partition_scheme_id
+JOIN sys.filegroups AS ds ON dds.data_space_id = ds.data_space_id
+WHERE i.index_id IN (0,1)  -- heap o índice clustered
+ORDER BY t.name;
+
+---- Ver tamaño total de la tabla y su indice
+ SELECT
+    TOP 10
+    s.name AS SchemaName,
+    t.name AS TableName,
+    fg.name AS FileGroupName,
+    -- Tamaño total (datos + índices)
+    CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
+    -- Solo datos (heap o índice clustered)
+    CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
+    -- Solo índices (nonclustered, XML, spatial, etc.)
+    CAST(SUM(CASE WHEN i.type NOT IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS IndexSizeKB,
+    CASE 
+        WHEN COUNT(DISTINCT p.partition_number) > 1 THEN 'Sí'
+        ELSE 'No'
+    END AS IsPartitioned,
+    COUNT(DISTINCT p.partition_number) AS PartitionCount,
+    SUM(ps.row_count) AS TotalRows
+FROM sys.tables AS t
+LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
+LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
+GROUP BY s.name, t.name, fg.name
+having COUNT(DISTINCT p.partition_number) > 1 ;
+
+
+
+---- Ver tamaño por partición de la tabla y sus índices
+ SELECT
+    s.name AS SchemaName,
+    t.name AS TableName,
+    fg.name AS FileGroupName,
+    p.partition_number AS PartitionNumber,
+    CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
+    CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
+    CAST(SUM(CASE WHEN i.type NOT IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS IndexSizeKB,
+    SUM(ps.row_count) AS TotalRows
+FROM sys.tables AS t
+LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
+LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
+LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
+LEFT JOIN sys.data_spaces ds ON i.data_space_id = ds.data_space_id
+LEFT JOIN sys.filegroups fg ON ds.data_space_id = fg.data_space_id
+LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
+WHERE t.name = 'ClientesTest'
+GROUP BY s.name, t.name, fg.name, p.partition_number
+ORDER BY p.partition_number;
+
+
+ --- Ver los indices de la tabla 
+SELECT
+    i.name AS Indice,
+    i.type_desc AS TipoIndice,  -- Clustered o Nonclustered
+    fg.name AS Filegroup,
+    SUM(a.total_pages) * 8 AS Tamaño_KB
+FROM sys.indexes i
+LEFT JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+LEFT JOIN sys.allocation_units a ON p.partition_id = a.container_id
+LEFT JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
+WHERE OBJECT_NAME(i.object_id) = 'ClientesTest'
+GROUP BY i.name, i.type_desc, fg.name;
+
 ```
 
 
