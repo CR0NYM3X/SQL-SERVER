@@ -1265,6 +1265,37 @@ LEFT JOIN sys.filegroups fg ON i.data_space_id = fg.data_space_id
 WHERE OBJECT_NAME(i.object_id) = 'ClientesTest'
 GROUP BY i.name, i.type_desc, fg.name;
 
+
+
+------- Ver index y sus fragmentacion y mas inforamción 
+SELECT 
+top 100
+    s.name AS SchemaName,
+    t.name AS TableName,
+    c.name AS ColumnName,
+    i.object_id,
+    i.name AS Index_Name,
+    i.index_id,
+    i.type_desc,
+    ius.user_seeks,
+    ius.user_scans,
+    ius.user_lookups,
+    ius.user_updates,
+    ips.avg_fragmentation_in_percent AS Fragmentacion_Porcentaje,
+    ic.is_descending_key AS Orden_Desc -- 1 = DESC, 0 = ASC
+FROM sys.schemas s
+INNER JOIN sys.tables t ON s.schema_id = t.schema_id
+INNER JOIN sys.indexes i ON t.object_id = i.object_id
+INNER JOIN sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+INNER JOIN sys.columns c ON ic.object_id = c.object_id AND ic.column_id = c.column_id
+LEFT JOIN sys.dm_db_index_usage_stats ius ON i.object_id = ius.object_id AND i.index_id = ius.index_id AND ius.database_id = DB_ID()
+LEFT JOIN sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'LIMITED') ips ON i.object_id = ips.object_id AND i.index_id = ips.index_id
+WHERE i.type_desc <> 'HEAP' 
+ORDER BY s.name, t.name, i.name, ic.key_ordinal;
+
+
+ 
+
 ```
 
 
