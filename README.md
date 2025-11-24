@@ -46,6 +46,7 @@ https://www.devart.com/dbforge/sql/
 https://www.red-gate.com/products/sql-monitor/resources/articles/monitor-sql-server-io
 https://www.red-gate.com/hub/product-learning
 
+https://aleson-itc.com/blog/
 https://dbadixit.com/
 
 https://soportesql.wordpress.com/
