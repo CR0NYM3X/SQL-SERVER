@@ -486,10 +486,10 @@ WITH Waits AS (
     select 
 	    wait_type, -- Tipo de Wait
 	    waiting_tasks_count, -- Cantidad de transacciones que esperaron 
-	    wait_time_ms / 1000 as total_time_seg, -- Tiempo total en ms de un wait por tema de algun (Bloqueo +  I/O + Memoria + CPU )
-	    (wait_time_ms - signal_wait_time_ms) / 1000 as total_time_seg_no_cpu , -- Tiempo  total en ms de un wait por tema de algun (Bloqueo + I/O + Memoria  ) pero no de CPU 
-        signal_wait_time_ms / 1000 as total_time_cpu_seg, -- Tiempo de espera solo de CPU 
-	    CAST((wait_time_ms / NULLIF(waiting_tasks_count, 0)) / 1000  AS DECIMAL(18,2))  AS avg_wait_seg, -- promedio de espera en ms por un wait
+	    CAST(wait_time_ms  / 1000.00 AS DECIMAL(18,2)) as total_time_seg, -- Tiempo total en ms de un wait por tema de algun (Bloqueo +  I/O + Memoria + CPU )
+	    CAST((wait_time_ms - signal_wait_time_ms) / 1000.00  AS DECIMAL(18,2)) as total_time_seg_no_cpu , -- Tiempo  total en ms de un wait por tema de algun (Bloqueo + I/O + Memoria  ) pero no de CPU 
+        CAST(signal_wait_time_ms / 1000.00  AS DECIMAL(18,2)) as total_time_cpu_seg, -- Tiempo de espera solo de CPU 
+	    CAST((wait_time_ms / NULLIF(waiting_tasks_count, 0)) / 1000.00  AS DECIMAL(18,2))  AS avg_wait_seg, -- promedio de espera en ms por un wait
 	    CAST(signal_wait_time_ms * 100.0 / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) AS signal_ratio_percent, -- Porcentaje de % de espera por CPU
         -- Diagnóstico basado en signal wait
         CASE 
@@ -572,8 +572,26 @@ WaitTypes AS (
 		('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
 		('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
 		('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
-		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.')
+		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.'),
 
+		   -- Nuevos Bloqueos y Latches
+        ('PAGELATCH_KP', 'Latch en páginas clave.', 'Contención interna en estructuras críticas en memoria.'),
+        ('LCK_M_IU', 'Bloqueo de intención de actualización.', 'Preparación para actualizar filas, puede generar contención.'),
+        ('PAGELATCH_EX', 'Latch exclusivo en página en memoria.', 'Alta concurrencia en operaciones de escritura en páginas en memoria.'),
+        ('PAGELATCH_SH', 'Latch compartido en página en memoria.', 'Lecturas concurrentes en páginas en memoria.'),
+        ('PAGELATCH_UP', 'Latch de actualización en página en memoria.', 'Operaciones que requieren actualización parcial en páginas en memoria.'),
+        ('LCK_M_SCH_M', 'Bloqueo de esquema (modificación).', 'Cambios en estructura de tabla o índice.'),
+        ('LCK_M_SCH_S', 'Bloqueo de esquema (lectura).', 'Consultas que requieren estabilidad en el esquema.'),
+        ('LCK_M_IS', 'Bloqueo de intención compartida.', 'Lecturas concurrentes que bloquean actualizaciones.'),
+        ('LCK_M_IX', 'Bloqueo de intención exclusiva.', 'Preparación para operaciones de escritura.'),
+        ('LCK_M_BU', 'Bloqueo de actualización masiva (Bulk Update).', 'Operaciones masivas que bloquean recursos.'),
+
+        -- I/O y CPU
+        ('ASYNC_IO_COMPLETION', 'Espera por operaciones de I/O asíncrono.', 'Disco lento o exceso de operaciones de lectura/escritura.'),
+        ('THREADPOOL', 'Espera por disponibilidad de hilos.', 'Alta concurrencia, falta de recursos en el pool de threads.'),
+
+        -- Memoria
+        ('MEMORY_ALLOCATION_EXT', 'Problemas internos de asignación de memoria.', 'Presión de memoria o fragmentación interna.')
         
     ) AS WT(WaitType, Descripcion, CausaComun)
 )
@@ -591,8 +609,23 @@ SELECT
 	-- W.[RowNum]
 FROM Waits W
 LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
-order by avg_wait_seg desc ;
--- ORDER BY W.wait_time_ms DESC;
+/*
+WHERE  W.wait_type IN (
+    /* CPU */
+    'SOS_SCHEDULER_YIELD','CXPACKET','CXCONSUMER','THREADPOOL',
+    
+    /* Memoria */
+    'RESOURCE_SEMAPHORE','RESOURCE_SEMAPHORE_QUERY_COMPILE','MEMORY_ALLOCATION_EXT',
+    
+    /* I/O */
+    'WRITELOG','IO_COMPLETION','ASYNC_IO_COMPLETION'
+)  
+OR W.wait_type LIKE 'PAGEIOLATCH%'  -- I/O
+OR W.wait_type LIKE 'LCK_M%'        -- Bloqueos
+OR W.wait_type LIKE 'PAGELATCH%'    -- Bloqueos internos
+OR W.wait_type = 'ASYNC_NETWORK_IO' -- Bloqueo por cliente
+*/
+order by  W.signal_ratio_percent desc ;
 ```
 
 
