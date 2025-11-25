@@ -1,13 +1,15 @@
  
 ## ✅ **¿Qué es la compresión en SQL Server?**
 
-La compresión en SQL Server es una característica que reduce el tamaño físico de los datos almacenados en tablas e índices mediante técnicas como:
+La compresión en SQL Server es una característica que reduce el tamaño físico de los datos almacenados en tablas e índices mediante diferentes técnicas, dependiendo del formato de almacenamiento:
 
-*   **Row Compression**: para indices y tablas rowstore -  Minimiza el espacio usado por cada fila eliminando bytes innecesarios. Menor impacto en CPU que PAGE. Ahorro de espacio menor.
-*   **Page Compression**:  para indices y tablas rowstore - Es el nivel más agresivo e incluye la Compresión de Filas. Agrega dos técnicas a nivel de página de datos: Reduce redundancias dentro de una página (8 KB) usando algoritmos como *prefix* y *dictionary*. Consume más CPU que ROW Compression. Reduce significativamente el tamaño en disco y mejora el rendimiento de lectura.
-* COLUMNSTORE → Índice columnstore no clustered ,  para indices y tablas COLUMNSTORE.
-*  COLUMNSTORE_ARCHIVE → Versión más agresiva de compresión (para datos históricos).Si ves ROW o PAGE, eso es compresión tradicional por filas o páginas.  ,  para indices y tablas COLUMNSTORE.
+Aquí tienes el contenido reorganizado y bien estructurado para que sea claro y profesional:
 
+* **Row Compression**: para indices y tablas rowstore -  Minimiza el espacio usado por cada fila eliminando bytes innecesarios. Menor impacto en CPU que PAGE. Ahorro de espacio menor.
+* **Page Compression**:  para indices y tablas rowstore - Es el nivel más agresivo e incluye la Compresión de Filas. Agrega dos técnicas a nivel de página de datos: Reduce redundancias dentro de una página (8 KB) usando algoritmos como *prefix* y *dictionary*. Consume más CPU que ROW Compression. Reduce significativamente el tamaño en disco y mejora el rendimiento de lectura.
+* **COLUMNSTORE** → Índice columnstore no clustered ,  para indices y tablas COLUMNSTORE.
+*  **COLUMNSTORE_ARCHIVE** → Versión más agresiva de compresión (para datos históricos).Si ves ROW o PAGE, eso es compresión tradicional por filas o páginas.  ,  para indices y tablas COLUMNSTORE."
+ 
 
 ## Consideraciones: 
 - El COLUMNSTORE se puede crear en indices CLUSTERED y NONCLUSTERED
@@ -64,6 +66,26 @@ Se aplica a:
 
 ***
 
+
+### ✅ **Ventajas de ROWSTORE (almacenamiento por filas)**
+
+*   **Ideal para OLTP**: operaciones rápidas de inserción, actualización y eliminación.
+*   **Acceso eficiente a filas completas**: perfecto para consultas que necesitan todos los datos de una fila.
+*   **Compatibilidad total**: soporta todas las características tradicionales (triggers, constraints, etc.).
+*   **Índices flexibles**: puedes crear múltiples índices nonclustered para optimizar búsquedas específicas.
+*   **Menor complejidad**: formato clásico, fácil de administrar.
+
+ 
+
+### ✅ **Ventajas de COLUMNSTORE (almacenamiento por columnas)**
+
+*   **Compresión muy alta**: reduce drásticamente el tamaño (hasta 90%).
+*   **Consultas analíticas rápidas**: ideal para agregaciones y escaneos masivos.
+*   **Menor I/O**: solo lee las columnas necesarias en una consulta.
+*   **Optimizado para OLAP**: excelente para Data Warehousing y análisis.
+*   **Batch execution**: aprovecha procesamiento vectorizado para mejorar rendimiento.
+
+---
 ### **Comparación semántica**
 
 | Aspecto       | Rowstore              | Columnstore                        |
