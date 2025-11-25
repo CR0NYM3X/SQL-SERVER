@@ -540,6 +540,22 @@ La solución estándar para este problema, que mencionaste, es crear **múltiple
 ---
 
 # VLF 
+¿Qué es un VLF?
+Un VLF (Virtual Log File) es una subdivisión interna del Transaction Log en SQL Server.
+   El Transaction Log se almacena en archivos `.ldf`.
+   Cada archivo de log se divide en múltiples VLFs para administrar las operaciones de registro (INSERT, UPDATE, DELETE, transacciones).
+Cada vez que el log crece, SQL Server crea más VLF.
+El número y tamaño de los VLF depende de cómo se configuró el crecimiento del log.
+   puedes usar la vista  sys.dm_db_log_info(DB_ID())  o DBCC LOGINFO para identificar la cantidad de VLF  
+    y   son muy importantes porque afectan directamente el rendimiento y la recuperación de la base de datos
+
+Función principal:  
+Permitir que SQL Server gestione el crecimiento y truncamiento del log de manera eficiente.
+
+ ¿Para qué sirve?
+   Controla cómo se escriben y reutilizan las porciones del log.
+   Facilita el truncamiento del log cuando se hace un checkpoint o backup de log.
+   Ayuda a la recuperación de transacciones en caso de fallo.
 
 
 ### ✅ Problemas principales por exceso de VLFs
