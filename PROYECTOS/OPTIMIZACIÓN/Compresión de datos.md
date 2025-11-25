@@ -96,6 +96,31 @@ EXEC sp_estimate_data_compression_savings
 
 ***
 
+
+### ✅ **¿Cómo revisar si hay tablas comprimidas en SQL Server?**
+
+Puedes consultar la vista del sistema `sys.partitions` junto con `sys.objects` y `sys.indexes` para ver el tipo de compresión aplicado:
+
+```sql
+SELECT 
+    o.name AS Tabla,
+    i.name AS Indice,
+    p.partition_number,
+    p.data_compression_desc AS TipoCompresion
+FROM sys.partitions p
+INNER JOIN sys.objects o ON p.object_id = o.object_id
+INNER JOIN sys.indexes i ON p.object_id = i.object_id AND p.index_id = i.index_id
+WHERE o.type = 'U'  -- Solo tablas de usuario
+ORDER BY o.name;
+```
+
+**Resultado:**
+
+*   `NONE` → Sin compresión
+*   `ROW` → Compresión por fila
+*   `PAGE` → Compresión por página
+
+
 ### ✅ **2. Aplicar compresión a una tabla completa**
 
 Para comprimir una tabla (incluyendo índices clustered):
