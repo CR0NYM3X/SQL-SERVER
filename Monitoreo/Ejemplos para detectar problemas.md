@@ -704,24 +704,26 @@ GROUP BY s.name, t.name, fg.name,t.create_date,p.data_compression_desc
 SELECT 
 top 10
     OBJECT_NAME(s.[object_id]) AS Tabla,
+    FileGroupName,
     SUM(s.leaf_insert_count) AS Cantidad_Inserts,
     SUM(s.leaf_update_count) AS Cantidad_Updates,
     SUM(s.leaf_delete_count) AS Cantidad_Deletes,
     SUM(u.user_seeks + u.user_scans + u.user_lookups) AS TotalLecturas,
     SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) AS totalEscrituras,
-    TotalSizeMB,DataSizeKB,IndexSizeKB, FechaCreacion,TipoCompresion
+    TotalSizeMB,DataSizeKB,IndexSizeKB, FechaCreacion,TipoCompresion,IsPartitioned,PartitionCount  ,TotalRows
 FROM sys.dm_db_index_operational_stats(DB_ID(), NULL, NULL, NULL) AS s
 INNER JOIN sys.dm_db_index_usage_stats AS u
     ON s.[object_id] = u.[object_id] AND s.index_id = u.index_id
 INNER JOIN sys.objects AS o ON s.[object_id] = o.[object_id]
 LEFT JOIN alltables AS J ON OBJECT_NAME(s.[object_id])= j.TableName
 WHERE o.type = 'U' -- Solo tablas de usuario
-GROUP BY s.[object_id], j.TotalSizeMB, j.DataSizeKB, j.IndexSizeKB,FechaCreacion,TipoCompresion
+GROUP BY s.[object_id], j.TotalSizeMB, j.DataSizeKB, j.IndexSizeKB,FechaCreacion,TipoCompresion,PartitionCount,IsPartitioned,PartitionCount ,TotalRows,FileGroupName
 -- HAVING j.TotalSizeMB > 500 -- ocupa mucho espacio (>500 MB)
 --   AND SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) < 10000 -- pocas escrituras
   -- AND SUM(u.user_seeks + u.user_scans + u.user_lookups) > 10000 -- muchas lecturas
 ORDER BY j.TotalSizeMB DESC, TotalLecturas DESC;
 --ORDER BY TotalSizeMg desc,  total_Cantidad_escrituras asc  , total_Cantidad_Lecturas desc  
+
 
 
 
