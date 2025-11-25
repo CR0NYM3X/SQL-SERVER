@@ -377,3 +377,129 @@ ORDER BY t.name, prv.boundary_id;
  
 
 
+--- 
+# Agregar una tabla extra pedidos con FK a ClientesTest
+```SQL
+
+/* 1) (Opcional) Revisión rápida de la PK en ClientesTest */
+-- Debe existir una PK clustered en (ID, Fecha) y la tabla debe estar en psClientesTest(Fecha)
+SELECT t.name AS Tabla, i.name AS Indice, i.type_desc, i.is_primary_key,
+       c.name AS Columna, ic.key_ordinal
+FROM sys.tables t
+JOIN sys.indexes i ON i.object_id = t.object_id
+JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+WHERE t.object_id = OBJECT_ID('dbo.ClientesTest')
+ORDER BY ic.key_ordinal;
+
+
+--------------------------------------------------------------------------------
+/* 2) Crear tabla hija dbo.Pedidos particionada por Fecha en psClientesTest(Fecha) */
+IF OBJECT_ID('dbo.Pedidos') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.Pedidos;
+END;
+GO
+
+CREATE TABLE dbo.Pedidos
+(
+    IDPedido     BIGINT IDENTITY(1,1) NOT NULL,
+    IDCliente    INT NOT NULL,       -- debe referenciar ClientesTest.ID
+    Fecha        DATE NOT NULL,      -- misma columna de partición que en ClientesTest
+    Monto        DECIMAL(12,2) NOT NULL,
+    Estado       VARCHAR(20) NOT NULL DEFAULT('CREADO'),
+    Observacion  VARCHAR(200) NULL,
+
+    CONSTRAINT PK_Pedidos PRIMARY KEY CLUSTERED (IDPedido ASC)  -- PK propia
+) ON psClientesTest(Fecha);  -- Alineado al mismo esquema de partición, pero no es extricto puede ser en el primario 
+GO
+
+/* 3) Crear índice sobre la clave que será FOREIGN KEY (recomendado para rendimiento) */
+CREATE NONCLUSTERED INDEX IX_Pedidos_IDCliente_Fecha
+ON dbo.Pedidos(IDCliente, Fecha)
+ON psClientesTest(Fecha);  -- también particionado por Fecha, pero no es extricto puede ser en el primario 
+GO
+
+
+--------------------------------------------------------------------------------
+/* 4) Poblar datos de ejemplo en ClientesTest si está vacío (opcional) */
+IF NOT EXISTS (SELECT 1 FROM dbo.ClientesTest)
+BEGIN
+    INSERT INTO dbo.ClientesTest (Nombre, Ciudad, Pais, Fecha)
+    VALUES
+      ('Ana López',     'Culiacán',   'México', '2025-10-01'),
+      ('Carlos Pérez',  'Guadalajara','México', '2025-10-01'),
+      ('María Ruiz',    'Monterrey',  'México', '2025-10-02'),
+      ('Juan Ortega',   'CDMX',       'México', '2025-10-03'),
+      ('Lucía Torres',  'Tijuana',    'México', '2025-10-03');
+END
+GO
+
+/* 5) Insertar pedidos de ejemplo alineados con la partición (usar la misma Fecha del cliente) */
+-- Crea 2 pedidos por cliente, en la misma Fecha para cumplir la FK (ID, Fecha)
+INSERT INTO dbo.Pedidos (IDCliente, Fecha, Monto, Estado, Observacion)
+SELECT c.ID, c.Fecha, CAST(ROUND(1000 + (ABS(CHECKSUM(NEWID())) % 5000), 2) AS DECIMAL(12,2)),
+       'CREADO', CONCAT('Pedido inicial para ', c.Nombre)
+FROM dbo.ClientesTest AS c;
+
+INSERT INTO dbo.Pedidos (IDCliente, Fecha, Monto, Estado, Observacion)
+SELECT c.ID, c.Fecha, CAST(ROUND(500 + (ABS(CHECKSUM(NEWID())) % 2500), 2) AS DECIMAL(12,2)),
+       'CREADO', CONCAT('Pedido adicional para ', c.Nombre)
+FROM dbo.ClientesTest AS c;
+GO
+
+
+--------------------------------------------------------------------------------
+/* 6) Crear la FOREIGN KEY alineada a la PK (ID, Fecha) de ClientesTest */
+/*
+Si no agregas la columna "fecha" marcara este error ->
+Mens. 1776, Nivel 16, Estado 0, Línea 72
+There are no primary or candidate keys in the referenced table 'dbo.ClientesTest' that match the referencing column list in the foreign key 'FK_Pedidos_ClientesTest'.
+Mens. 1750, Nivel 16, Estado 1, Línea 72
+Could not create constraint or index. See previous errors.
+
+*/
+ALTER TABLE dbo.Pedidos
+ADD CONSTRAINT FK_Pedidos_ClientesTest
+FOREIGN KEY (IDCliente, Fecha)
+REFERENCES dbo.ClientesTest (ID, Fecha);
+GO
+
+-- Agregar un unique
+/*
+Si no agregas la columna "fecha" marcara este error ->
+Mens. 1908, Nivel 16, Estado 1, Línea 108
+Column 'Fecha' is partitioning column of the index 'UQ_ClientesTest_Ciudad_Fecha'. Partition columns for a unique index must be a subset of the index key.
+Mens. 1750, Nivel 16, Estado 1, Línea 108
+Could not create constraint or index. See previous errors.
+*/
+ALTER TABLE dbo.ClientesTest
+ADD CONSTRAINT UQ_ClientesTest_Ciudad_Fecha UNIQUE (Ciudad, Fecha);
+
+--------------------------------------------------------------------------------
+/* 7) Validaciones: conteos y chequeo de alineación por partición */
+-- Conteo por Fecha en ambas tablas (muestra la alineación en particiones)
+SELECT 'ClientesTest' AS Tabla, Fecha, COUNT(*) AS Registros
+FROM dbo.ClientesTest
+GROUP BY Fecha
+ORDER BY Fecha;
+
+SELECT 'Pedidos' AS Tabla, Fecha, COUNT(*) AS Registros
+FROM dbo.Pedidos
+GROUP BY Fecha
+ORDER BY Fecha;
+
+-- Verifica que la FK quedó creada
+SELECT OBJECT_NAME(parent_object_id) AS TablaHija,
+       name AS ConstraintName, type_desc
+FROM sys.objects
+WHERE type = 'F' AND parent_object_id = OBJECT_ID('dbo.Pedidos');
+
+-- Verifica que el índice de la FK existe y está particionado en el mismo scheme
+SELECT i.name, i.type_desc, ds.name AS DataSpace, ps.name AS PartitionScheme
+FROM sys.indexes i
+JOIN sys.data_spaces ds ON ds.data_space_id = i.data_space_id
+LEFT JOIN sys.partition_schemes ps ON ps.data_space_id = i.data_space_id
+WHERE i.object_id = OBJECT_ID('dbo.Pedidos');
+
+```
