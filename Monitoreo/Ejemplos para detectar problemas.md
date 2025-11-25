@@ -1337,6 +1337,30 @@ WHERE i.type_desc <> 'HEAP'
 ORDER BY s.name, t.name, i.name, ic.key_ordinal;
 
 
+
+------------------------- Ver detalles de isolation --------------------
+DBCC USEROPTIONS;
+
+
+SELECT IsolationLevel,count(*) as cnt FROM
+(SELECT CASE transaction_isolation_level
+    WHEN 0 THEN 'Unspecified'
+    WHEN 1 THEN 'Read Uncommitted'
+    WHEN 2 THEN 'Read Committed'
+    WHEN 3 THEN 'Repeatable Read'
+    WHEN 4 THEN 'Serializable'
+    WHEN 5 THEN 'Snapshot'
+END AS IsolationLevel
+FROM sys.dm_exec_sessions
+WHERE session_id = @@SPID ) as a 
+group by IsolationLevel
+
+
+SELECT name, is_read_committed_snapshot_on
+FROM sys.databases
+-- WHERE name = 'TuBaseDeDatos';
+--------------------------------------------------------------------------------
+
  
 
 ```
