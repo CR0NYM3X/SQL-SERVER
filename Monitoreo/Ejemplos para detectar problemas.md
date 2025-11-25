@@ -1386,7 +1386,33 @@ FROM sys.databases
 -- WHERE name = 'TuBaseDeDatos';
 --------------------------------------------------------------------------------
 
- 
+
+--- Ver los   files, su % de  espacio disponible y usado , modo de recovery y porque no se puede libera el espacio "LogReuseWaitDesc"
+SELECT 
+    DB_NAME() AS DatabaseName,
+    df.name AS FileName,
+    df.type_desc AS FileType,  -- ROWS = datos, LOG = log
+    df.physical_name AS PhysicalPath,
+    CAST(df.size AS BIGINT) * 8 / 1024 AS SizeMB,  -- Tamaño actual en MB
+    CAST(FILEPROPERTY(df.name, 'SpaceUsed') AS BIGINT) * 8 / 1024 AS UsedSpaceMB,
+    CAST(100.0 * FILEPROPERTY(df.name, 'SpaceUsed') / df.size AS DECIMAL(5,2)) AS UsedPercent,
+    CAST(100.0 - (100.0 * FILEPROPERTY(df.name, 'SpaceUsed') / df.size) AS DECIMAL(5,2)) AS FreePercent,
+    CASE 
+        WHEN df.is_percent_growth = 1 THEN CAST(df.growth AS VARCHAR(10)) + ' %'
+        ELSE CAST(CAST(df.growth AS BIGINT) * 8 / 1024 AS VARCHAR(20)) + ' MB'
+    END AS GrowthSetting,
+    CASE 
+        WHEN df.max_size = -1 THEN 'Sin límite'
+        ELSE CAST(CAST(df.max_size AS BIGINT) * 8 / 1024 AS VARCHAR(20)) + ' MB'
+    END AS MaxSize,
+    df.state_desc AS FileState,
+    d.recovery_model_desc AS RecoveryModel,
+    d.log_reuse_wait_desc AS LogReuseWaitDesc
+FROM sys.database_files AS df
+CROSS JOIN sys.databases AS d
+WHERE d.database_id = DB_ID();
+
+
 
 ```
 
