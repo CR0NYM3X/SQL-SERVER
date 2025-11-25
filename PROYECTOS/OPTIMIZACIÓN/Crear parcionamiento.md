@@ -10,7 +10,17 @@
 
 ##  **Ver si existen tablas particionadas**
 ```sql
- 
+--- saber cuantas particiones existen 
+SELECT
+    db_name(),
+    COUNT(DISTINCT t.name) AS TotalTablasParticionadas
+FROM
+    sys.tables AS t
+INNER JOIN
+    sys.indexes AS i ON t.object_id = i.object_id
+WHERE
+    i.data_space_id IN (SELECT data_space_id FROM sys.partition_schemes);
+
 -- las tablas ,  PartitionSchema y Partitionfunction
 SELECT
     Distinct 
@@ -201,6 +211,21 @@ FROM dbo.ClientesTest
 GROUP BY $PARTITION.pfClientesTest(Fecha)
 ORDER BY PartitionNumber;
 
+-- Tambien ver las fechas de cada particion 
+SELECT 
+    t.name AS TableName,
+    i.name AS IndexName,
+    ps.name AS PartitionScheme,
+    pf.name AS PartitionFunction,
+    prv.boundary_id,
+    prv.value AS BoundaryValue,
+    prv.boundary_id AS PartitionNumber
+FROM sys.partition_range_values prv
+JOIN sys.partition_functions pf ON prv.function_id = pf.function_id
+JOIN sys.partition_schemes ps ON pf.function_id = ps.function_id
+JOIN sys.indexes i ON ps.data_space_id = i.data_space_id
+JOIN sys.tables t ON i.object_id = t.object_id
+ORDER BY t.name, prv.boundary_id;
 
 
 SELECT  TOP 100 *   FROM dbo.ClientesTest 
@@ -262,7 +287,92 @@ WHERE $PARTITION.pfClientesTest(Fecha) = 13;
 ```
 
  
+---
 
+# Eliminar una particion 
+
+```SQL
+-- 1 Validar información de la particion y sus fecha
+ SELECT 
+    t.name AS TableName,
+    i.name AS IndexName,
+    ps.name AS PartitionScheme,
+    pf.name AS PartitionFunction,
+    prv.boundary_id,
+    prv.value AS BoundaryValue,
+    prv.boundary_id AS PartitionNumber
+FROM sys.partition_range_values prv
+JOIN sys.partition_functions pf ON prv.function_id = pf.function_id
+JOIN sys.partition_schemes ps ON pf.function_id = ps.function_id
+JOIN sys.indexes i ON ps.data_space_id = i.data_space_id
+JOIN sys.tables t ON i.object_id = t.object_id
+where t.name  = 'ClientesTest' --and prv.boundary_id = 1 
+ORDER BY t.name, prv.boundary_id;
+ 
+  
+-- 2 Ver si tiene datos 
+SELECT count(*)
+FROM dbo.ClientesTest
+WHERE $PARTITION.pfClientesTest(Fecha) = 1; -- 84593
+
+
+
+--- 3 No puedes eliminar una partición si contiene datos. Primero debes vaciarla.
+-- Si la tabla tiene índices, asegúrate de que soporten la operación SWITCH.
+
+--   Crear tabla vacía con misma estructua y mismo filegroup que la original
+CREATE TABLE dbo.ClientesTest_particion1 (
+    ID INT IDENTITY(1,1) NOT NULL,
+    Nombre VARCHAR(100),
+    Ciudad VARCHAR(100),
+    Pais VARCHAR(100),
+    Fecha DATE NOT NULL,
+    PRIMARY KEY CLUSTERED (ID ASC, Fecha ASC)
+) ON [FG_DatosNuevo];
+ 
+
+-- 4 mover los datos de la  partición 1 a la tabla temporal
+ALTER TABLE ClientesTest SWITCH PARTITION 1 TO ClientesTest_particion1;
+
+-- 5 Revisar si ya tiene info 
+select count(*) from dbo.ClientesTest_particion1
+
+-- 6  Revisar si es cierto que ya no tiene datos 
+SELECT count(*) FROM dbo.ClientesTest WHERE $PARTITION.pfClientesTest(Fecha) = 1; -- 0 
+
+-- 7  en caso de no ocupar la info Ahora puedes eliminar la tabla temporal (y los datos) 
+DROP TABLE dbo.ClientesTest_particion1;
+
+
+--  8 Eliminar el rango de la función de partición Una vez que la partición está vacía:
+-- al eliminar quitar la particion del rango se recorre la particion ahora sera la particion 1 
+ALTER PARTITION FUNCTION pfClientesTest() MERGE RANGE ('2025-12-31');
+
+
+-- 9  Validar si se movio la información
+-- habra información ya que recordemos que se recorren las particiones
+SELECT count(*)
+FROM dbo.ClientesTest
+WHERE $PARTITION.pfClientesTest(Fecha) = 1; -- 0 
+
+-- 10 confirmar que ya no exista la particion 
+ SELECT 
+    t.name AS TableName,
+    i.name AS IndexName,
+    ps.name AS PartitionScheme,
+    pf.name AS PartitionFunction,
+    prv.boundary_id,
+    prv.value AS BoundaryValue,
+    prv.boundary_id AS PartitionNumber
+FROM sys.partition_range_values prv
+JOIN sys.partition_functions pf ON prv.function_id = pf.function_id
+JOIN sys.partition_schemes ps ON pf.function_id = ps.function_id
+JOIN sys.indexes i ON ps.data_space_id = i.data_space_id
+JOIN sys.tables t ON i.object_id = t.object_id
+where t.name  = 'ClientesTest' --and prv.boundary_id = 1 
+ORDER BY t.name, prv.boundary_id;
+
+```
 
  
 
