@@ -677,7 +677,7 @@ AS (
     t.name AS TableName,
     fg.name AS FileGroupName,
     -- Tamaño total (datos + índices)
-    CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS TotalSizeMb,
+    CAST(SUM(a.total_pages) * 8.0 / 1024 AS DECIMAL(18,2)) AS TotalSizeMB,
     -- Solo datos (heap o índice clustered)
     CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
     -- Solo índices (nonclustered, XML, spatial, etc.)
@@ -688,7 +688,8 @@ AS (
     END AS IsPartitioned,
     COUNT(DISTINCT p.partition_number) AS PartitionCount,
     SUM(ps.row_count) AS TotalRows,
-    t.create_date AS FechaCreacion
+    t.create_date AS FechaCreacion,
+    p.data_compression_desc AS TipoCompresion
 
 FROM sys.tables AS t
 LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
@@ -697,7 +698,7 @@ LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.in
 LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
 LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
 LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
-GROUP BY s.name, t.name, fg.name,t.create_date
+GROUP BY s.name, t.name, fg.name,t.create_date,p.data_compression_desc
 )
  
 SELECT 
@@ -708,19 +709,20 @@ top 10
     SUM(s.leaf_delete_count) AS Cantidad_Deletes,
     SUM(u.user_seeks + u.user_scans + u.user_lookups) AS TotalLecturas,
     SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) AS totalEscrituras,
-    TotalSizeMB,DataSizeKB,IndexSizeKB, FechaCreacion
+    TotalSizeMB,DataSizeKB,IndexSizeKB, FechaCreacion,TipoCompresion
 FROM sys.dm_db_index_operational_stats(DB_ID(), NULL, NULL, NULL) AS s
 INNER JOIN sys.dm_db_index_usage_stats AS u
     ON s.[object_id] = u.[object_id] AND s.index_id = u.index_id
 INNER JOIN sys.objects AS o ON s.[object_id] = o.[object_id]
 LEFT JOIN alltables AS J ON OBJECT_NAME(s.[object_id])= j.TableName
 WHERE o.type = 'U' -- Solo tablas de usuario
-GROUP BY s.[object_id], j.TotalSizeMB, j.DataSizeKB, j.IndexSizeKB,FechaCreacion
---HAVING j.TotalSizeMB > 500 -- ocupa mucho espacio (>500 MB)
-  -- AND SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) < 10000 -- pocas escrituras
+GROUP BY s.[object_id], j.TotalSizeMB, j.DataSizeKB, j.IndexSizeKB,FechaCreacion,TipoCompresion
+-- HAVING j.TotalSizeMB > 500 -- ocupa mucho espacio (>500 MB)
+--   AND SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) < 10000 -- pocas escrituras
   -- AND SUM(u.user_seeks + u.user_scans + u.user_lookups) > 10000 -- muchas lecturas
 ORDER BY j.TotalSizeMB DESC, TotalLecturas DESC;
 --ORDER BY TotalSizeMg desc,  total_Cantidad_escrituras asc  , total_Cantidad_Lecturas desc  
+
 
 
 
