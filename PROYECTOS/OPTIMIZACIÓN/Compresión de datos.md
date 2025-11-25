@@ -103,6 +103,15 @@ Puedes consultar la vista del sistema `sys.partitions` junto con `sys.objects` y
 
 ```sql
 SELECT 
+    p.data_compression_desc AS TipoCompresion,
+    count(*) as cnt_compres
+FROM sys.partitions p
+INNER JOIN sys.indexes i ON p.object_id = i.object_id AND p.index_id = i.index_id
+INNER JOIN sys.tables t ON i.object_id = t.object_id
+group by p.data_compression_desc
+
+
+SELECT 
     o.name AS Tabla,
     i.name AS Indice,
     p.partition_number,
@@ -111,6 +120,7 @@ FROM sys.partitions p
 INNER JOIN sys.objects o ON p.object_id = o.object_id
 INNER JOIN sys.indexes i ON p.object_id = i.object_id AND p.index_id = i.index_id
 WHERE o.type = 'U'  -- Solo tablas de usuario
+AND  p.data_compression_desc <> 'NONE' 
 ORDER BY o.name;
 ```
 
@@ -175,4 +185,77 @@ WHERE object_id = OBJECT_ID('dbo.TuTabla');
 
 *   **ROW** → mejor para tablas con muchas actualizaciones (menos CPU).
 *   **PAGE** → mejor para tablas grandes con datos repetitivos (más ahorro, más CPU).
+
+---
+
+# Ejemplos 
+```sql
+
+ --  drop table dbo.TablaRow
+-- Crear tabla de ejemplo ROW
+CREATE TABLE dbo.TablaRow (
+    ID INT IDENTITY(1,1),
+    Nombre VARCHAR(100),
+    Valor DECIMAL(10,2)
+);
+
+
+-- Crear índice clustered con compresión ROW
+ALTER TABLE dbo.TablaRow
+REBUILD PARTITION = ALL
+WITH (DATA_COMPRESSION = ROW);
+
  
+--  drop table dbo.TablaPage
+-- Crear tabla de ejemplo PAGE
+CREATE TABLE dbo.TablaPage (
+    ID INT IDENTITY(1,1),
+    Descripcion VARCHAR(200),
+    Precio DECIMAL(10,2)
+);
+
+
+-- Crear índice clustered con compresión PAGE
+ALTER TABLE dbo.TablaPage
+REBUILD PARTITION = ALL
+WITH (DATA_COMPRESSION = PAGE);
+
+
+--- drop table dbo.TablaColumnstore
+-- Crear tabla de ejemplo COLUMNSTORE
+CREATE TABLE dbo.TablaColumnstore (
+    ID INT IDENTITY(1,1),
+    Producto VARCHAR(100),
+    Cantidad INT,
+    Total DECIMAL(10,2)
+);
+
+
+--  DROP INDEX IX_Columnstore ON  dbo.TablaColumnstore
+--  (CCI): COLUMNSTORE -  Crear índice columnstore clustered (convierte la tabla)
+-- COLUMNSTORE → Índice columnstore no clustered.
+-- COLUMNSTORE_ARCHIVE → Versión más agresiva de compresión (para datos históricos).Si ves ROW o PAGE, eso es compresión tradicional por filas o páginas.
+
+CREATE CLUSTERED COLUMNSTORE INDEX IX_Columnstore
+ON dbo.TablaColumnstore;
+
+-- (NCCI) -  rowstore - DROP INDEX IX_Ventas_Columnstore ON  dbo.TablaColumnstore;
+CREATE NONCLUSTERED  INDEX IX_Ventas_Columnstore
+ON dbo.TablaColumnstore (Producto, Cantidad);
+
+-- Insertar 1000 registros de ejemplo en TablaColumnstore
+INSERT INTO dbo.TablaColumnstore (Producto, Cantidad, Total)
+SELECT TOP 1000
+    CONCAT('Producto_', CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR(10))) AS Producto,
+    ABS(CHECKSUM(NEWID())) % 100 + 1 AS Cantidad,  -- Valores entre 1 y 100
+    CAST((ABS(CHECKSUM(NEWID())) % 5000) / 100.0 AS DECIMAL(10,2)) AS Total  -- Valores entre 0 y 50.00
+FROM sys.objects AS o1
+CROSS JOIN sys.objects AS o2;
+
+
+-- This is not a valid data compression setting for a columnstore index. Please choose COLUMNSTORE or COLUMNSTORE_ARCHIVE compression.
+-- ALTER TABLE dbo.TablaColumnstore REBUILD PARTITION = ALL WITH (DATA_COMPRESSION = PAGE);
+
+ 
+ select  * from dbo.TablaColumnstore where Producto = 'Producto_6' and cantidad = 89
+```
