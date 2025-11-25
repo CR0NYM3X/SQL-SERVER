@@ -539,6 +539,167 @@ La solución estándar para este problema, que mencionaste, es crear **múltiple
 
 ---
 
+# VLF 
+
+
+### ✅ Problemas principales por exceso de VLFs
+
+1.  Inicio lento de la base de datos
+       Durante el arranque, SQL Server debe revisar todos los VLFs para la recuperación.
+       Si hay miles, el tiempo de inicio aumenta significativamente.
+	
+
+2.  Backups del log más lentos
+       El backup del log procesa cada VLF.
+       Más VLFs = más tiempo para recorrerlos.
+
+3.  Restauración y recuperación más lenta
+       Igual que el arranque, la restauración debe validar cada VLF.
+	Checkpoint y recuperación se vuelven lentos.
+
+4.  Operaciones de replicación y mirroring afectadas
+       Estas tecnologías dependen del log.
+       Muchos VLFs pueden causar retrasos en sincronización.
+
+5.  Fragmentación interna del log
+       Crecimientos pequeños y frecuentes → demasiados VLFs → fragmentación → menor eficiencia.
+
+6.  Impacto en AlwaysOn y Log Shipping
+       La lectura del log para enviar cambios se vuelve más costosa.
+	Mirroring, AlwaysOn, replicación pueden fallar por exceso de VLF.
+ 
+  ¿Por qué ocurre?
+
+
+   Autogrowth configurado en porcentaje o valores muy pequeños (ej. 1 MB).
+   Crecimientos frecuentes por falta de tamaño inicial adecuado.
+   Cada vez que el log crece poco, se crean muchos VLF pequeños → miles de VLF.
+ 
+ 
+ 
+
+### ✅ Buenas prácticas y recomendaciones 
+
+   Cantidad recomendada:
+       Idealmente menos de 100 VLFs por archivo de log.
+ 
+
+   Configurar tamaño inicial adecuado O grande (ej. 1 GB o más según carga).
+   Configurar autogrowth/crecimiento en MB grandes (ej. 512 MB o 1 GB, no en KB).
+   Evitar shrink frecuente (provoca fragmentación y más VLF) solo para corregir VLF excesivos.. 
+   Monitorear VLF con `DBCC LOGINFO` (o en versiones nuevas `sys.dm_db_log_info`)
+   
+
+
+
+
+### ✅ ¿Cuántos VLF son recomendados?
+
+No existe un número fijo universal, pero la regla práctica es:
+
+   Menos de 1,000 VLFs → aceptable.
+   Más de 10,000 VLFs → problema grave (impacta recuperación y rendimiento).
+   Ideal: entre 50 y 500 VLFs para la mayoría de bases de datos.
+
+
+### ✅ Cómo se crean los VLFs (algoritmo clásico hasta SQL Server 2019)
+
+   Crecimiento < 64 MB → 4 VLFs (cada uno ≈ ¼ del tamaño).
+   Crecimiento 64 MB – 1 GB → 8 VLFs (cada uno ≈ ⅛ del tamaño).
+   Crecimiento > 1 GB → 16 VLFs (cada uno ≈ 1/16 del tamaño).  
+
+
+En SQL Server 2022, el algoritmo se optimizó:
+
+   ≤ 64 MB → 1 VLF.
+   64 MB – 1 GB → 8 VLFs.
+   > 1 GB → 16 VLFs. 
+
+
+ 
+
+ 
+ 
+#  Correccion en caso de un problema de muchos VLF 
+
+ 
+ 
+
+### ✅ Técnicas para solucionar problemas de VLF
+
+1.  Identificar el número de VLFs
+    ```sql
+    DBCC LOGINFO;
+    ```
+    Si hay miles de VLFs, es un problema.
+
+
+hacer un checkpoint o backup dependiendo del metodo de recuperación
+
+2.  Reducir el número de VLFs
+       Shrink controlado:
+        ```sql
+        DBCC SHRINKFILE (NombreArchivoLog, TamañoDeseadoEnMB);
+        ```
+        ⚠️ Hazlo solo después de un backup del log para no perder datos.
+
+
+
+3.  Recrear el archivo de log con tamaño adecuado
+       Pasos recomendados:
+           Backup del log.
+           Shrink para reducirlo.
+           Aumentar el tamaño en un solo crecimiento grande:
+            ```sql
+            ALTER DATABASE [TuBase]
+            MODIFY FILE (NAME = NombreArchivoLog, SIZE = 4GB);
+            ```
+           Configurar autogrowth en MB grandes (ej. 512 MB o 1 GB) para evitar fragmentación.
+
+
+
+	 ¿definir el tamaño inicial adecuado?
+
+	Depende de: Tamaño esperado de la base de datos, Frecuencia de transacciones, Política de backups del log
+
+	Regla práctica:
+
+	   Para bases pequeñas (<10 GB): log inicial de 512 MB – 1 GB
+	   Para bases medianas (10–100 GB): log inicial de 2–4 GB
+	   Para bases grandes (>100 GB): log inicial de 8 GB o más
+
+
+
+4.  Evitar crecimiento automático pequeño
+       Ajusta el autogrowth:
+        ```sql
+        ALTER DATABASE [TuBase]
+        MODIFY FILE (NAME = NombreArchivoLog, FILEGROWTH = 512MB);
+        ```
+
+
+
+5.  Revisar periódicamente
+       Usa `DBCC LOGINFO` o en versiones recientes:
+        ```sql
+        SELECT COUNT() AS VLFCount FROM sys.dm_db_log_info(DB_ID());
+        ```
+
+ 
+ 
+### ✅ Recomendaciones según tipo de instancia y carga
+
+| Escenario                | Tamaño inicial recomendado                         | Autogrowth recomendado | VLF esperado |
+| ---------------------------- | ------------------------------------------------------ | -------------------------- | ---------------- |
+| Pequeña (bases <10 GB)   | 512 MB – 1 GB                                          | 256 MB                     | 50 – 100         |
+| Mediana (10–100 GB)      | 4 GB                                                   | 512 MB – 1 GB              | 100 – 500        |
+| Grande (>100 GB)         | 8–16 GB                                                | 4 GB                       | 500 – 1,000      |
+| Alta carga transaccional | Igual que grande, pero evitar autogrowth frecuente | 4 GB                       | Mantener <1,000  |
+
+ 
+
+---
+
 
 
 # Links 
