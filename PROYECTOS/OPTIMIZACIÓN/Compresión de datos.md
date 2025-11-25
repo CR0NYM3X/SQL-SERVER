@@ -370,6 +370,11 @@ CREATE TABLE dbo.TablaColumnstore (
 CREATE CLUSTERED COLUMNSTORE INDEX IX_Columnstore
 ON dbo.TablaColumnstore;
 
+-- Esto solo si quiere mejor usar el COLUMNSTORE_ARCHIVE
+CREATE CLUSTERED COLUMNSTORE INDEX IX_Ventas_ColumnstoreArchive
+ON dbo.TablaColumnstore
+WITH (DATA_COMPRESSION = COLUMNSTORE_ARCHIVE);
+
 -- (NCCI) -  rowstore - DROP INDEX IX_Ventas_Columnstore ON  dbo.TablaColumnstore;
 CREATE NONCLUSTERED  INDEX IX_Ventas_Columnstore
 ON dbo.TablaColumnstore (Producto, Cantidad);
