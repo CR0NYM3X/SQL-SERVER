@@ -1,3 +1,75 @@
+## ERRORLOG
+ 
+El **SQL Server Error Log** (`ERRORLOG`) es una serie de archivos de texto que registran:
+
+1.  **Eventos del sistema:** Arranque y apagado de la instancia.
+2.  **Mensajes de información:** Carga de bases de datos, inicio de la auditoría.
+3.  **Advertencias:** Advertencias de recursos, fallos en la conexión.
+4.  **Mensajes de errores críticos:** Fallos de hardware, violaciones de acceso, etc.
+
+
+## 📄 ¿Qué pasa con el Error Log al Reiniciar el Servidor?
+Cuando reinicias la instancia de SQL Server, los archivos del Error Log **sí se conservan**. De hecho, SQL Server realiza una acción específica con ellos: **rota los archivos**.
+Los archivos log se reciclan cada vez que el servicio de SQL Server se reinicia.
+
+### 2\. Rotación del Error Log
+
+Al arrancar, SQL Server hace lo siguiente:
+
+  * El archivo de log activo (el que se está escribiendo actualmente, llamado simplemente `ERRORLOG` sin extensión numérica) es **archivado**.
+  * Se le asigna el número **1** y se renombra (se convierte en `ERRORLOG.1`)  y así sucesivamente.
+  * Los archivos de log archivados previamente se **renombran** (por ejemplo, `ERRORLOG.1` pasa a ser `ERRORLOG.2`, `ERRORLOG.2` pasa a ser `ERRORLOG.3`, y así sucesivamente).
+  * Se crea un **nuevo** archivo `ERRORLOG` (el activo) para registrar los nuevos eventos, comenzando con la información del reinicio.
+  * El archivo más antiguo que supera el límite es **eliminado**, configurado (por defecto, **7** archivos en total: 1 activo + 6 archivados) .
+
+### 3\. Límite y Eliminación
+
+SQL Server mantiene un número **limitado** de archivos de log de errores rotados (por defecto, son **6** archivos archivados más el archivo activo, totalizando 7).
+
+  * Cuando se alcanza el límite (por ejemplo, ya tienes `ERRORLOG` activo más del 1 al 6), el archivo **más antiguo** (`ERRORLOG.6`) es **eliminado** para dar paso al nuevo archivo que se archiva.
+
+> **En resumen:** Al reiniciar el servidor, el contenido del Error Log **se conserva** porque los archivos antiguos se archivan y se mantienen hasta que se alcanza el límite de archivos configurado. El propósito es que puedas consultar el historial de eventos, incluido el proceso de apagado y el nuevo arranque.
+
+
+## 🔁 Procedimiento para Rotar (Reciclar) el Error Log
+
+El procedimiento para forzar la rotación y el reciclaje de los archivos de log sin reiniciar la instancia de SQL Server es:
+
+```sql
+EXEC sp_cycle_errorlog;
+```
+
+### ¿Qué hace `sp_cycle_errorlog`?
+
+Este procedimiento:
+
+1.  **Cierra** el archivo de log activo actual (`ERRORLOG`).
+2.  **Archiva** el archivo de log cerrado y lo renombra a `ERRORLOG.1`.
+3.  **Renombra** los archivos de log archivados previamente (2 pasa a ser 3, etc.).
+4.  **Crea** un nuevo archivo de log activo (sin número) y comienza a escribir los nuevos eventos en él.
+5.  **Elimina** el archivo más antiguo, si se ha alcanzado el límite de logs configurado.
+
+Este procedimiento es útil si necesitas empezar un nuevo log para fines de auditoría o para solucionar un problema específico sin interrumpir el servicio.
+
+
+ 
+
+
+## ⚙️ Cómo Cambiar el Número de Archivos de Log Conservados
+
+Puedes configurar el número máximo de archivos de Error Log que SQL Server conserva:
+
+### 1\. Usando SSMS (SQL Server Management Studio)
+
+1.  Conéctate a la instancia de SQL Server.
+2.  En el **Explorador de Objetos**, navega a **Management** $\rightarrow$ **SQL Server Logs**.
+3.  Haz clic derecho en **SQL Server Logs** y selecciona **Configure**.
+4.  En la ventana de configuración:
+      * Marca la opción **Limit the number of error log files**.
+      * Establece el número deseado en el campo **Maximum number of error log files** (por defecto es 6, lo que da un total de 7 archivos).
+
+---
+
 
 ### Archivos 
 En esta ruta por default sql server guarda sus log -->  C:/programFiles/Microsoft SQL Server /MSSQL13.MSSQLSERVER/MSSQL/LOG
@@ -38,6 +110,19 @@ xp_readerrorlog 0, 1, N'Logging SQL Server messages in file', NULL, NULL, N'asc'
 
 ****** Especificar un número de archivo de registro: ********
 EXEC sp_readerrorlog 0, 1
+
+los parámetros 0 y 1 tienen significados específicos:
+
+ Parámetro 0 
+Indica qué archivo de log quieres leer.
+0 = el log actual (el que está en uso en este momento).
+1 = el log inmediatamente anterior.
+2, 3, etc. = logs más antiguos, según cuántos archivos de error log conserve tu instancia.
+
+ Parámetro 1 
+Indica el tipo de log que quieres consultar.
+1 = SQL Server Error Log (el log del motor de SQL Server).
+2 = SQL Agent Log (el log del Agente de SQL Server).
 
 
 ****** Aplicar filtros de búsqueda: ******
