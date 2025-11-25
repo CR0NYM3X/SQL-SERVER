@@ -114,7 +114,7 @@ $$
 ***
 
 
-### ✅ **Ventajas de ROWSTORE (almacenamiento por filas)**
+### ✅ ** Ventajas de ROWSTORE (almacenamiento por filas)**
 
 *   **Ideal para OLTP**: operaciones rápidas de inserción, actualización y eliminación.
 *   **Acceso eficiente a filas completas**: perfecto para consultas que necesitan todos los datos de una fila.
