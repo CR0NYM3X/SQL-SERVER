@@ -29,6 +29,7 @@ Se aplica a:
 *   **Formato tradicional** usado por tablas heap o con índices clustered.
 *   **Unidad básica:** **Página de 8 KB**.
 *   **Estructura interna:**
+    *   el sistema agrupa y almacena **toda la información de una fila** contigua en el disco.
     *   Cada página contiene **filas completas** (todas las columnas de la fila).
     *   Las filas se almacenan secuencialmente dentro de la página.
     *   Si una fila es muy grande, puede usar páginas adicionales (overflow).
@@ -37,18 +38,29 @@ Se aplica a:
     2.  Cada página tiene un **header**, espacio para filas y un **slot array** para localizarlas.
 *   **Acceso:** Consultas OLTP son rápidas porque se leen pocas páginas para una fila específica.
 
-**Ejemplo visual:**
+**Representación Visual:**
 
-    Página 1: [Fila1 | Fila2 | Fila3]
-    Página 2: [Fila4 | Fila5 | Fila6]
+* **Fila 1 (Registro completo):** (1, Ana, Madrid, 100)
+* **Fila 2 (Registro completo):** (2, Luis, Barcelona, 50)
+* **Fila 3 (Registro completo):** (3, Carmen, Madrid, 80)
+* **Fila 4 (Registro completo):** (4, Pedro, Sevilla, 120)
+
+$$
+\begin{array}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\hline
+\mathbf{1} & \text{Ana} & \text{Madrid} & \mathbf{100} & \mathbf{2} & \text{Luis} & \text{Barcelona} & \mathbf{50} & \mathbf{3} & \text{Carmen} & \text{Madrid} & \mathbf{80} & \dots \\
+\hline
+\end{array}
+$$
 
 ***
 
 ## ✅ **2. Columnstore (almacenamiento por columnas)**
 
 *   **Formato columnar** optimizado para análisis.
-*   **Unidad básica:** **Segmentos de columna** (≈ 1 millón de filas por segmento).
+*   **Unidad básica:** **Segmentos de columna** (≈ 1 millón de filas por segmento). 
 *   **Estructura interna:**
+    * el sistema agrupa y almacena **todos los valores de una columna** contiguos en el disco (en bloques llamados "segmentos").
     *   Cada columna se divide en **segmentos** y se comprime independientemente.
     *   Los segmentos se agrupan en **rowgroups** (conjunto de columnas para un rango de filas).
     *   Cada segmento se almacena en páginas, pero **solo contiene datos de una columna**.
@@ -57,13 +69,48 @@ Se aplica a:
     2.  Cada rowgroup tiene metadatos y diccionarios para compresión.
 *   **Acceso:** Consultas analíticas son rápidas porque se leen solo las columnas necesarias.
 
-**Ejemplo visual:**
+**Representación Visual:**
 
-    Rowgroup 1:
-      Columna Producto → [Página con valores Producto]
-      Columna Cantidad → [Página con valores Cantidad]
-      Columna Precio   → [Página con valores Precio]
+El almacenamiento se divide en cuatro bloques físicos separados:
 
+* **Bloque Columna ID:** (1, 2, 3, 4)
+* **Bloque Columna Nombre:** (Ana, Luis, Carmen, Pedro)
+* **Bloque Columna Ciudad:** (Madrid, Barcelona, Madrid, Sevilla)
+* **Bloque Columna Ventas:** (100, 50, 80, 120)
+
+$$
+\begin{array}{|c|}
+\hline
+\mathbf{ID} \\
+\hline
+1 \\ 2 \\ 3 \\ 4 \\
+\hline
+\end{array}
+\quad
+\begin{array}{|c|}
+\hline
+\mathbf{Nombre} \\
+\hline
+\text{Ana} \\ \text{Luis} \\ \text{Carmen} \\ \text{Pedro} \\
+\hline
+\end{array}
+\quad
+\begin{array}{|c|}
+\hline
+\mathbf{Ciudad} \\
+\hline
+\text{Madrid} \\ \text{Barcelona} \\ \text{Madrid} \\ \text{Sevilla} \\
+\hline
+\end{array}
+\quad
+\begin{array}{|c|}
+\hline
+\mathbf{Ventas} \\
+\hline
+100 \\ 50 \\ 80 \\ 120 \\
+\hline
+\end{array}
+$$
 ***
 
 
