@@ -3,8 +3,8 @@
 
 La compresión en SQL Server es una característica que reduce el tamaño físico de los datos almacenados en tablas e índices mediante técnicas como:
 
-*   **Row Compression**: Minimiza el espacio usado por cada fila eliminando bytes innecesarios.
-*   **Page Compression**: Es el nivel más agresivo e incluye la Compresión de Filas. Agrega dos técnicas a nivel de página de datos: Reduce redundancias dentro de una página (8 KB) usando algoritmos como *prefix* y *dictionary*.
+*   **Row Compression**: Minimiza el espacio usado por cada fila eliminando bytes innecesarios. Menor impacto en CPU que PAGE. Ahorro de espacio menor.
+*   **Page Compression**: Es el nivel más agresivo e incluye la Compresión de Filas. Agrega dos técnicas a nivel de página de datos: Reduce redundancias dentro de una página (8 KB) usando algoritmos como *prefix* y *dictionary*. Consume más CPU que ROW Compression. Reduce significativamente el tamaño en disco y mejora el rendimiento de lectura.
 
 Se aplica a:
 
