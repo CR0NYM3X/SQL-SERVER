@@ -669,20 +669,23 @@ Problemas comunes si no se controla:
 -- *   Si quieres ver actividad en tiempo real, necesitarías Extended Events o Profiler.
 
  
---- Ver por toda por objeto
+--- Ver cantidad de lecutras y escrituras por tabla
 SELECT 
+top 10
     OBJECT_NAME(s.[object_id]) AS Tabla,
     SUM(s.leaf_insert_count) AS Cantidad_Inserts,
     SUM(s.leaf_update_count) AS Cantidad_Updates,
     SUM(s.leaf_delete_count) AS Cantidad_Deletes,
-    SUM(u.user_seeks + u.user_scans + u.user_lookups) AS Cantidad_Lecturas
+    SUM(u.user_seeks + u.user_scans + u.user_lookups) AS total_Cantidad_Lecturas,
+    SUM(s.leaf_insert_count + s.leaf_update_count + s.leaf_delete_count) AS total_Cantidad_escrituras
 FROM sys.dm_db_index_operational_stats(DB_ID(), NULL, NULL, NULL) AS s
 INNER JOIN sys.dm_db_index_usage_stats AS u
     ON s.[object_id] = u.[object_id] AND s.index_id = u.index_id
 INNER JOIN sys.objects AS o ON s.[object_id] = o.[object_id]
 WHERE o.type = 'U' -- Solo tablas de usuario
 GROUP BY s.[object_id]
-ORDER BY (SUM(s.leaf_insert_count) + SUM(s.leaf_update_count) + SUM(s.leaf_delete_count)) DESC;
+ORDER BY Cantidad_escrituras desc 
+ORDER BY (Cantidad_Lecturas) DESC;
 
 
 --- Ver por toda la base de datos 
