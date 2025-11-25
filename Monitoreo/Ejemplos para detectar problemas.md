@@ -1174,6 +1174,31 @@ ORDER BY TempdbAllocado_KB DESC;
 ```
 
 
+# VLF
+```
+-- Determine whether you will be able to shrink the transaction log file
+
+-- vlf_status Values
+-- 0 is inactive 
+-- 1 is initialized but unused 
+-- 2 is active
+
+
+SELECT TOP(1) DB_NAME(li.database_id) AS [Database Name], li.[file_id],
+              li.vlf_size_mb, li.vlf_sequence_number, li.vlf_active, li.vlf_status
+FROM sys.dm_db_log_info(DB_ID()) AS li 
+ORDER BY vlf_sequence_number DESC OPTION (RECOMPILE);
+
+
+-- Get VLF Counts for all databases on the instance (Query 34) (VLF Counts)
+SELECT [name] AS [Database Name], [VLF Count]
+FROM sys.databases AS db WITH (NOLOCK)
+CROSS APPLY (SELECT file_id, COUNT(*) AS [VLF Count]
+		     FROM sys.dm_db_log_info(db.database_id)
+			 GROUP BY file_id) AS li
+ORDER BY [VLF Count] DESC OPTION (RECOMPILE);
+```
+
 # **Otras querys que sirven**:
 ```SQL
 SELECT 'Top 10 por Espacio'
