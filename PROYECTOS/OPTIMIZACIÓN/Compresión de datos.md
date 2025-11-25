@@ -13,7 +13,7 @@ La compresión en SQL Server es una característica que reduce el tamaño físic
 - El COLUMNSTORE se puede crear en indices CLUSTERED y NONCLUSTERED
 - No se pueden crear más de un indice columnstore , marca error 'Multiple columnstore indexes are not supported.'
 - Se puede crear  INDEX COLUMNSTORE y despues crear indices no-clusteres rowstore
-
+- Se puede crear un indice NONCLUSTERED COLUMNSTORE y agregar más NONCLUSTERED ROWSTORE
 
 Se aplica a:
 
