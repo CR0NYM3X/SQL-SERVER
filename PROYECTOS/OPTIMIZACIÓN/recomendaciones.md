@@ -712,7 +712,20 @@ hacer un checkpoint o backup dependiendo del metodo de recuperación
 | Grande (>100 GB)         | 8–16 GB                                                | 4 GB                       | 500 – 1,000      |
 | Alta carga transaccional | Igual que grande, pero evitar autogrowth frecuente | 4 GB                       | Mantener <1,000  |
 
- 
+
+ ## 🚦 Rangos de VLF (Virtual Log File)
+
+No existe un número mágico, pero los DBAs y las directrices de Microsoft utilizan estos rangos para diagnosticar y prevenir problemas de rendimiento, especialmente en la recuperación de la base de datos:
+
+| Rango de VLFs | Estado de la Base de Datos | Impacto y Recomendación |
+| :--- | :--- | :--- |
+| **0 a 100** | **Óptimo / Normal** | Excelente. No se requiere ninguna acción. El rendimiento de la recuperación y la copia de seguridad será muy rápido. |
+| **100 a 300** | **Aceptable / Normal** | Bueno. Si bien no es ideal, es común en bases de datos con un crecimiento moderado. No debería causar problemas significativos. |
+| **300 a 1,000** | **Advertencia / Atención** | Moderado. El tiempo de recuperación después de un reinicio o fallo podría comenzar a ser notable. **Se recomienda una reestructuración (Shrink y Grow) en el próximo mantenimiento programado.** |
+| **Más de 1,000** | **Crítico / Problemático** | Alto. El tiempo de recuperación de la base de datos (e incluso la restauración de backups) puede volverse inaceptablemente largo, impactando la disponibilidad. **Se requiere una acción inmediata (reestructuración del archivo de registro).** |
+
+
+
 
 ---
 
