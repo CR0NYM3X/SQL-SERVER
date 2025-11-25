@@ -9,13 +9,65 @@ La compresión en SQL Server es una característica que reduce el tamaño físic
 *  COLUMNSTORE_ARCHIVE → Versión más agresiva de compresión (para datos históricos).Si ves ROW o PAGE, eso es compresión tradicional por filas o páginas.  ,  para indices y tablas COLUMNSTORE.
 
 
-
 Se aplica a:
 
 *   Tablas (heap o con índices clustered)
 *   Índices (clustered y non-clustered)
 *   Particiones específicas
- 
+
+
+## ✅ **1. Rowstore (almacenamiento por filas)**
+
+*   **Formato tradicional** usado por tablas heap o con índices clustered.
+*   **Unidad básica:** **Página de 8 KB**.
+*   **Estructura interna:**
+    *   Cada página contiene **filas completas** (todas las columnas de la fila).
+    *   Las filas se almacenan secuencialmente dentro de la página.
+    *   Si una fila es muy grande, puede usar páginas adicionales (overflow).
+*   **Flujo semántico:**
+    1.  **Tabla → Índice clustered → Páginas → Extents → Disco**.
+    2.  Cada página tiene un **header**, espacio para filas y un **slot array** para localizarlas.
+*   **Acceso:** Consultas OLTP son rápidas porque se leen pocas páginas para una fila específica.
+
+**Ejemplo visual:**
+
+    Página 1: [Fila1 | Fila2 | Fila3]
+    Página 2: [Fila4 | Fila5 | Fila6]
+
+***
+
+## ✅ **2. Columnstore (almacenamiento por columnas)**
+
+*   **Formato columnar** optimizado para análisis.
+*   **Unidad básica:** **Segmentos de columna** (≈ 1 millón de filas por segmento).
+*   **Estructura interna:**
+    *   Cada columna se divide en **segmentos** y se comprime independientemente.
+    *   Los segmentos se agrupan en **rowgroups** (conjunto de columnas para un rango de filas).
+    *   Cada segmento se almacena en páginas, pero **solo contiene datos de una columna**.
+*   **Flujo semántico:**
+    1.  **Tabla → Rowgroups → Segmentos → Páginas → Disco**.
+    2.  Cada rowgroup tiene metadatos y diccionarios para compresión.
+*   **Acceso:** Consultas analíticas son rápidas porque se leen solo las columnas necesarias.
+
+**Ejemplo visual:**
+
+    Rowgroup 1:
+      Columna Producto → [Página con valores Producto]
+      Columna Cantidad → [Página con valores Cantidad]
+      Columna Precio   → [Página con valores Precio]
+
+***
+
+### **Comparación semántica**
+
+| Aspecto       | Rowstore              | Columnstore                        |
+| ------------- | --------------------- | ---------------------------------- |
+| Unidad lógica | Fila completa         | Columna segmentada                 |
+| Página        | Contiene varias filas | Contiene datos de una sola columna |
+| Ideal para    | OLTP (transacciones)  | OLAP (análisis masivo)             |
+| Compresión    | ROW/PAGE              | Columnstore (diccionario, RLE)     |
+
+
 ## ✅ **Ventajas**
 
 1.  **Reducción de espacio en disco**
