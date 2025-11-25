@@ -9,6 +9,10 @@ La compresión en SQL Server es una característica que reduce el tamaño físic
 *  COLUMNSTORE_ARCHIVE → Versión más agresiva de compresión (para datos históricos).Si ves ROW o PAGE, eso es compresión tradicional por filas o páginas.  ,  para indices y tablas COLUMNSTORE.
 
 
+## Consideraciones: 
+- No se pueden crear un indices INDEX COLUMNSTORE por tabla  ya se CLUSTERED o No-CLUSTERED
+- Se puede crear un INDEX COLUMNSTORE y despues crear indices no-clusteres rowstore 
+
 Se aplica a:
 
 *   Tablas (heap o con índices clustered)
