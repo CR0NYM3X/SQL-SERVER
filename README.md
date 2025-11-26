@@ -33,6 +33,8 @@ https://erikdarling.com/
 https://www.brentozar.com/blog/
 https://sqlperformance.com/
 
+https://bertwagner.com/category/sql/internals.html
+
 https://github.com/MadeiraData/microsoft-dbas-club/tree/master <br> 
 https://blog.sqlauthority.com/ <br>
 https://www.mssqltips.com/sql-server-categories/ <br>
