@@ -1174,22 +1174,26 @@ WHERE tu.internal_objects_alloc_page_count > 0 OR tu.user_objects_alloc_page_cou
 ORDER BY TempdbAllocado_KB DESC;
 
 
+
 --- Saber las consultas que consumen mucha memoria y generan mucho spill
 SELECT 
     DB_NAME(qt.dbid) AS database_name,  -- Nombre de la base de datos
     qs.execution_count,
-    qs.total_grant_kb,        -- Memoria solicitada por la consulta
+    qs.total_grant_kb,        -- Total de memoria solicitada por todas las ejecuciones
     qs.min_grant_kb,
     qs.max_grant_kb,
     qs.total_used_grant_kb,   -- Memoria realmente usada
-    qs.total_spills,          -- Número de veces que la consulta tuvo que escribir en disco
+    qs.total_spills,          -- Número total de spills
+    -- Cálculos promedio por ejecución:
+    CASE WHEN qs.execution_count > 0 THEN qs.total_grant_kb / qs.execution_count ELSE 0 END AS avg_grant_kb_per_exec,
+    CASE WHEN qs.execution_count > 0 THEN qs.total_used_grant_kb / qs.execution_count ELSE 0 END AS avg_used_grant_kb_per_exec,
+    CASE WHEN qs.execution_count > 0 THEN qs.total_spills / qs.execution_count ELSE 0 END AS avg_spills_per_exec,
     qp.query_plan,
     qt.text
 FROM sys.dm_exec_query_stats AS qs
 CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
 WHERE qs.total_spills > 0;    -- Filtra consultas con spills
-
 
 ```
 
