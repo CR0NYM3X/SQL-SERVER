@@ -1154,6 +1154,7 @@ significa que SQL Server no puede mantener toda la información en memoria y nec
     *   Si hay crecimiento repentino en tempdb durante consultas grandes, es señal de spills.
 
 ```SQL
+-- ver las consultas ejecutadas actualmente 
 SELECT
     r.session_id,
     r.status,
@@ -1171,6 +1172,25 @@ JOIN sys.dm_db_task_space_usage AS tu
 CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS t
 WHERE tu.internal_objects_alloc_page_count > 0 OR tu.user_objects_alloc_page_count > 0
 ORDER BY TempdbAllocado_KB DESC;
+
+
+--- Saber las consultas que consumen mucha memoria y generan mucho spill
+SELECT 
+    DB_NAME(qt.dbid) AS database_name,  -- Nombre de la base de datos
+    qs.execution_count,
+    qs.total_grant_kb,        -- Memoria solicitada por la consulta
+    qs.min_grant_kb,
+    qs.max_grant_kb,
+    qs.total_used_grant_kb,   -- Memoria realmente usada
+    qs.total_spills,          -- Número de veces que la consulta tuvo que escribir en disco
+    qp.query_plan,
+    qt.text
+FROM sys.dm_exec_query_stats AS qs
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
+CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
+WHERE qs.total_spills > 0;    -- Filtra consultas con spills
+
+
 ```
 
 
