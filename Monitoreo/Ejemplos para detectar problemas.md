@@ -1176,7 +1176,8 @@ ORDER BY TempdbAllocado_KB DESC;
 
 
 --- Saber las consultas que consumen mucha memoria y generan mucho spill
-SELECT 
+SELECT
+	TOP 50
     DB_NAME(qt.dbid) AS database_name,  -- Nombre de la base de datos
     qs.execution_count,
     qs.total_grant_kb,        -- Total de memoria solicitada por todas las ejecuciones
@@ -1193,7 +1194,8 @@ SELECT
 FROM sys.dm_exec_query_stats AS qs
 CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
-WHERE qs.total_spills > 0;    -- Filtra consultas con spills
+WHERE qs.total_spills > 0    -- Filtra consultas con spills
+ORDER BY avg_spills_per_exec DESC;
 
 ```
 
