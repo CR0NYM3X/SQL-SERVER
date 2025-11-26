@@ -668,6 +668,87 @@ Problemas comunes si no se controla:
 -- *   Solo reflejan actividad desde el último reinicio.
 -- *   Si quieres ver actividad en tiempo real, necesitarías Extended Events o Profiler.
 
+
+---- Cantidad de lecutras, escrituras , promedio y tiempo de respuesta por files mdf , ldf y ndf  
+SELECT
+    DB_NAME(vfs.database_id) AS database_name,
+    mf.name AS file_name,
+    mf.type_desc AS file_type,
+    vfs.num_of_reads, -- número total de operaciones de lectura
+    vfs.num_of_writes,
+    vfs.io_stall_read_ms, -- tiempo total en ms que las lecturas esperaron
+    vfs.io_stall_write_ms,
+    (vfs.io_stall_read_ms + vfs.io_stall_write_ms) AS total_io_stall_ms, 
+    CASE WHEN vfs.num_of_reads > 0 THEN vfs.io_stall_read_ms / vfs.num_of_reads ELSE 0 END AS avg_read_latency_ms,
+    CASE WHEN vfs.num_of_writes > 0 THEN vfs.io_stall_write_ms / vfs.num_of_writes ELSE 0 END AS avg_write_latency_ms,
+
+    -- Nivel textual según el peor caso (read/write)
+    CASE 
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 500) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 500)
+             ) THEN 'Severe'
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 100) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 100)
+             ) THEN 'Critical'
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 20) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 20)
+             ) THEN 'Poor'
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 10) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 10)
+             ) THEN 'Fair'
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  >= 5) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes >= 5)
+             ) THEN 'Good'
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  >= 1) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes >= 1)
+             ) THEN 'Excellent'
+        ELSE 'Outstanding'
+    END AS nivel,
+
+    -- Ranking numérico (para ordenar: 7 = peor, 1 = mejor)
+    CASE 
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 500) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 500)
+             ) THEN 7  -- Severe - Grave
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 100) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 100)
+             ) THEN 6  -- Critical - Crítico
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 20) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 20)
+             ) THEN 5  -- Poor - Deficiente:
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  > 10) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes > 10)
+             ) THEN 4  -- Fair - Regular
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  >= 5) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes >= 5)
+             ) THEN 3  -- Good - Bueno
+        WHEN (
+              (vfs.num_of_reads  > 0 AND vfs.io_stall_read_ms  * 1.0 / vfs.num_of_reads  >= 1) OR
+              (vfs.num_of_writes > 0 AND vfs.io_stall_write_ms * 1.0 / vfs.num_of_writes >= 1)
+             ) THEN 2  -- Excellent - Excelente:
+        ELSE 1          -- Outstanding - Sobresaliente
+    END AS nivel_rank,
+
+    vfs.size_on_disk_bytes / 1024 / 1024 AS size_mb, -- tamaño actual del archivo en disco, expresado en bytes
+	mf.physical_name AS PhysicalFileName
+FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS vfs
+JOIN sys.master_files AS mf 
+  ON vfs.database_id = mf.database_id 
+ AND vfs.file_id     = mf.file_id
+ORDER BY nivel_rank DESC, total_io_stall_ms DESC;
+
+
  
 --- Ver cantidad de lecutras y escrituras por tabla
 WITH alltables
