@@ -670,6 +670,8 @@ Problemas comunes si no se controla:
 
 
 ---- Cantidad de lecutras, escrituras , promedio y tiempo de respuesta por files mdf , ldf y ndf  
+
+ 
 SELECT
     DB_NAME(vfs.database_id) AS database_name,
     mf.name AS file_name,
@@ -741,11 +743,26 @@ SELECT
     END AS nivel_rank,
 
     vfs.size_on_disk_bytes / 1024 / 1024 AS size_mb, -- tamaño actual del archivo en disco, expresado en bytes
-	mf.physical_name AS PhysicalFileName
+	mf.physical_name AS PhysicalFileName,
+    
+    --DATEDIFF(SECOND, sysinfo.sqlserver_start_time, GETDATE()) AS uptime_seconds,  -- Calcular segundos desde inicio
+    -- sample_ms : cantidad total de tiempo, en milisegundos (ms), que la instancia de SQL Server ha estado midiendo la actividad de E/S (Entrada/Salida)
+
+    -- NOTA: los IOPS representados son por archivo no por base de datos, para obtener el verdadero IOPS tienes que hacer la suma de todos sus files mdf y ldf o ndf 
+    -- Read IOPS (Lecturas por Segundo)
+    CAST((vfs.num_of_reads * 1000.0) / NULLIF(vfs.sample_ms, 0) AS DECIMAL(18,2)) AS read_iops,
+    
+    -- Write IOPS (Escrituras por Segundo)
+    CAST((vfs.num_of_writes * 1000.0) / NULLIF(vfs.sample_ms, 0) AS DECIMAL(18,2)) AS write_iops,
+    
+    -- Total IOPS
+    CAST(((vfs.num_of_reads + vfs.num_of_writes) * 1000.0) / NULLIF(vfs.sample_ms, 0) AS DECIMAL(18,2)) AS total_iops
+
 FROM sys.dm_io_virtual_file_stats(NULL, NULL) AS vfs
 JOIN sys.master_files AS mf 
   ON vfs.database_id = mf.database_id 
  AND vfs.file_id     = mf.file_id
+CROSS JOIN sys.dm_os_sys_info AS sysinfo
 ORDER BY nivel_rank DESC, total_io_stall_ms DESC;
 
 
