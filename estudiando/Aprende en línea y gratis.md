@@ -91,6 +91,8 @@ MSSQLtips Webinar: SQL Server on VMWare Performance Optimization 2020.03.12 -> h
 what is sql page split | sql server page split | Sql server performance tuning Part 9 -> https://www.youtube.com/watch?v=GjVVHsHYvH4
 Fill Factor and page splits explained:- Primer -> https://www.youtube.com/watch?v=ON4fy7_mbUQ
 ¿Cómo ahorrar miles de euros optimizando las consultas de Azure SQL? -> https://www.youtube.com/watch?v=apND4f6nlio
+Query Optimization Patterns: Writing Efficient SQL for High-Performance Applications -> https://medium.com/@artemkhrenov/query-optimization-patterns-writing-efficient-sql-for-high-performance-applications-8143e5028443
+
 
    # auditorias 
 SQL 2022 LEDGER (Auditorias y BlockChain) -> https://www.youtube.com/watch?v=Py0QjdMKt9w
