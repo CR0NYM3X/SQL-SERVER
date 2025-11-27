@@ -482,15 +482,19 @@ ORDER BY TiempoAcumulado_ms DESC;
  
  
 -- Estadísticas históricas de todos los tipos de espera con descripción y causa
+-- https://www.sqlskills.com/blogs/paul/wait-statistics-or-please-tell-me-where-it-hurts/
 WITH Waits AS (
     select 
 	    wait_type, -- Tipo de Wait
 	    waiting_tasks_count, -- Cantidad de transacciones que esperaron 
-	    CAST(wait_time_ms  / 1000.00 AS DECIMAL(18,2)) as total_time_seg, -- Tiempo total en ms de un wait por tema de algun (Bloqueo +  I/O + Memoria + CPU )
-	    CAST((wait_time_ms - signal_wait_time_ms) / 1000.00  AS DECIMAL(18,2)) as total_time_seg_no_cpu , -- Tiempo  total en ms de un wait por tema de algun (Bloqueo + I/O + Memoria  ) pero no de CPU 
-        CAST(signal_wait_time_ms / 1000.00  AS DECIMAL(18,2)) as total_time_cpu_seg, -- Tiempo de espera solo de CPU 
-	    CAST((wait_time_ms / NULLIF(waiting_tasks_count, 0)) / 1000.00  AS DECIMAL(18,2))  AS avg_wait_seg, -- promedio de espera en ms por un wait
-	    CAST(signal_wait_time_ms * 100.0 / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) AS signal_ratio_percent, -- Porcentaje de % de espera por CPU
+	    CAST(wait_time_ms  AS DECIMAL(18,2)) as total_time_ms, -- Tiempo total en ms de un wait por tema de algun (Bloqueo +  I/O + Memoria + CPU )
+	    CAST((wait_time_ms - signal_wait_time_ms)  AS DECIMAL(18,2)) as total_time_ms_no_cpu , -- Tiempo  total en ms de un wait por tema de algun (Bloqueo + I/O + Memoria  ) pero no de CPU 
+        CAST(signal_wait_time_ms  AS DECIMAL(18,2)) as total_time_cpu_ms, -- Tiempo de espera solo de CPU 
+		CAST(ws.wait_time_ms * 1.0 / NULLIF(ws.waiting_tasks_count, 0) AS DECIMAL(18,2)) AS avg_wait_ms,-- promedio de espera en ms por un wait junto con el CPU 
+		CAST((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0) AS DECIMAL(18,2)) AS avg_resource_wait_m, --- promedio de espera en ms por un wait solo de   (Bloqueo + I/O + Memoria  ) sin el CPU
+	    --CAST(signal_wait_time_ms * 100.0 / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) AS signal_ratio_percent, -- Porcentaje de % de espera por CPU
+
+
         -- Diagnóstico basado en signal wait
         CASE 
             WHEN CAST(100.0 * signal_wait_time_ms / NULLIF(wait_time_ms, 0) AS DECIMAL(10,2)) > 30 
@@ -500,7 +504,16 @@ WITH Waits AS (
             ELSE 'Investigación: Recurso externo (Disco, Memoria, Lock y CPU)'
         END AS prioridad_diagnostico,
 		-- 100.0 * [wait_time_ms] / SUM ([wait_time_ms]) OVER() AS [Percentage],
-        ROW_NUMBER() OVER(ORDER BY [wait_time_ms] DESC) AS [RowNum]
+        ROW_NUMBER() OVER(ORDER BY [wait_time_ms] DESC) AS [RowNum],
+		    CASE 
+        WHEN ws.wait_type LIKE 'PAGEIOLATCH_%' AND ((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0)) >= 20 THEN 'CRITICO'
+        WHEN ws.wait_type = 'WRITELOG' AND ((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0)) >= 10 THEN 'CRITICO'
+        WHEN ws.wait_type = 'LOGBUFFER' AND ((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0)) >= 5 THEN 'ALTO'
+        WHEN ws.wait_type IN ('ASYNC_IO_COMPLETION','IO_COMPLETION') AND ((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0)) >= 50 THEN 'ALTO'
+        WHEN ws.wait_type = 'BACKUPIO' AND ((ws.wait_time_ms - ws.signal_wait_time_ms) * 1.0 / NULLIF(ws.waiting_tasks_count, 0)) >= 100 THEN 'ALTO'
+        WHEN ws.wait_type = 'IO_RETRY' AND ws.waiting_tasks_count > 0 THEN 'CRITICO'
+        ELSE 'ESTABLE'
+    END AS criticidad
     FROM sys.dm_os_wait_stats as ws
     WHERE 
     waiting_tasks_count > 0 AND
@@ -526,106 +539,131 @@ WITH Waits AS (
 
 ),
 WaitTypes AS (
-    SELECT *
-    FROM (
-        VALUES
-        ('LCK_M_X', 'Espera por un bloqueo exclusivo (Exclusive Lock).', 'Contención por actualizaciones o eliminaciones en filas o páginas.'),
-        ('LCK_M_S', 'Espera por un bloqueo compartido (Shared Lock).', 'Lecturas bloqueadas por transacciones activas.'),
-        ('LCK_M_U', 'Espera por un bloqueo de actualización (Update Lock).', 'Contención cuando múltiples transacciones intentan actualizar la misma fila o página antes de convertir el bloqueo a exclusivo.'),
-        ('CXPACKET', 'Espera por sincronización entre hilos en ejecución paralela.', 'Paralelismo excesivo o desbalanceado en planes de ejecución.'),
-        ('CXCONSUMER', 'Espera por consumo de filas en paralelismo.', 'Procesamiento paralelo desbalanceado.'),
-        ('ASYNC_NETWORK_IO', 'Espera por envío de datos al cliente.', 'Aplicación cliente lenta en consumir resultados.'),
-        ('WRITELOG', 'Espera por escritura en el log de transacciones.', 'Problemas de I/O en el archivo de log, falta de optimización en discos.'),
-        ('SOS_SCHEDULER_YIELD', 'Espera por CPU, el hilo cede voluntariamente para que otros se ejecuten.', 'Alta presión de CPU, consultas costosas.'),
-        ('RESOURCE_SEMAPHORE', 'Espera por memoria para ejecutar consultas (Memory Grant).', 'Consultas grandes, falta de memoria disponible.'),
-        ('NETWORK_IO', 'Espera por operaciones de red.', 'Latencia en red, problemas de conectividad.'),
-        ('HADR_SYNC_COMMIT', 'Espera por confirmación en réplica secundaria (Always On).', 'Latencia entre réplicas en grupos de disponibilidad.'),
-        ('IO_COMPLETION', 'Espera por completar operaciones de I/O.', 'Problemas de disco o almacenamiento lento.'),
-        ('BACKUPIO', 'Espera durante operaciones de backup.', 'Discos lentos o contención durante backup.'),
-        ('LOGBUFFER', 'Espera por espacio en el buffer del log.', 'Alta actividad de transacciones, problemas de disco del log.'),
-        ('CXROWSET_SYNC', 'Sincronización en operaciones paralelas con rowsets.', 'Paralelismo en consultas complejas.'),
-        ('PREEMPTIVE_OS_AUTHENTICATION', 'Espera por autenticación en el sistema operativo.', 'Problemas de autenticación externa.'),
-		('PAGEIOLATCH_SH', 'Espera por lectura de página desde disco a memoria (Shared latch).', 'I/O lento en disco, falta de memoria o índices ineficientes.'),
-		('PAGEIOLATCH_EX', 'Espera por escritura de página desde memoria a disco (Exclusive latch).', 'Alta actividad de escritura, problemas de almacenamiento.'),
-		('PAGEIOLATCH_UP', 'Espera por actualización de página en disco.', 'Contención en páginas y problemas de I/O.'),
-		('PAGEIOLATCH_SH', 'Espera por lectura de página desde disco a memoria (Shared latch).', 'I/O lento en disco, falta de memoria o índices ineficientes.'),
-		('FT_IFTS_SCHEDULER_IDLE_WAIT', 'Espera en tareas de índice de texto completo.', 'Procesamiento de índices full-text.'),
-		('PREEMPTIVE_OS_AUTHENTICATION', 'Espera por autenticación en el sistema operativo.', 'Problemas de autenticación externa.'),
-		('BROKER_TRANSMITTER', 'Espera en transmisión de mensajes del Service Broker.', 'Procesamiento de colas o problemas de red.'),
-		('QDS_ASYNC_QUEUE', 'Espera en cola asíncrona del Query Data Store.', 'Carga alta en Query Store o mantenimiento.'),
-		('WAIT_XTP_HOST_WAIT', 'Espera relacionada con operaciones In-Memory OLTP.', 'Procesamiento de tablas optimizadas para memoria.'),
-		('XTP_PREEMPTIVE_TASK', 'Espera por tareas preemptivas en In-Memory OLTP.', 'Operaciones internas de memoria.'),
-		('PVS_PREALLOCATE', 'Espera por preasignación de recursos internos.', 'Inicialización de estructuras internas.'),
-		('FT_IFTSHC_MUTEX', 'Espera por mutex en índice de texto completo.', 'Contención en operaciones full-text.'),
-		('ONDEMAND_TASK_QUEUE', 'Espera en cola de tareas bajo demanda.', 'Procesamiento interno de tareas diferidas.'),
-		('KSOURCE_WAKEUP', 'Espera por activación de fuente de eventos.', 'Procesamiento interno de eventos.'),
-		('CLR_AUTO_EVENT', 'Espera por eventos automáticos en CLR.', 'Operaciones internas del CLR.'),
-		('SP_SERVER_DIAGNOSTICS_SLEEP', 'Espera durante diagnóstico del servidor.', 'Proceso interno de salud del servidor.'),
-		('QDS_PERSIST_TASK_MAIN_LOOP_SLEEP', 'Espera en persistencia de Query Store.', 'Grabación de datos en Query Store.'),
-		('CHECKPOINT_QUEUE', 'Espera en cola de checkpoints.', 'Procesamiento de páginas sucias en disco.'),
-		('SQLTRACE_INCREMENTAL_FLUSH_SLEEP', 'Espera en flush incremental de SQL Trace.', 'Procesamiento interno de trazas.'),
-		('REQUEST_FOR_DEADLOCK_SEARCH', 'Espera en búsqueda de deadlocks.', 'Proceso interno para detectar bloqueos.'),
-		('XE_DISPATCHER_WAIT', 'Espera en despachador de eventos extendidos.', 'Procesamiento de eventos XE.'),
-		('XE_TIMER_EVENT', 'Espera en temporizador de eventos extendidos.', 'Procesamiento interno de XE.'),
-		('LAZYWRITER_SLEEP', 'Espera del Lazy Writer.', 'Liberación de páginas en buffer pool.'),
-		('HADR_FILESTREAM_IOMGR_IOCOMPLETION', 'Espera en operaciones FILESTREAM en Always On.', 'Latencia en I/O FILESTREAM.'),
-		('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
-		('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
-		('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
-		('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.'),
-
-		   -- Nuevos Bloqueos y Latches
-        ('PAGELATCH_KP', 'Latch en páginas clave.', 'Contención interna en estructuras críticas en memoria.'),
-        ('LCK_M_IU', 'Bloqueo de intención de actualización.', 'Preparación para actualizar filas, puede generar contención.'),
-        ('PAGELATCH_EX', 'Latch exclusivo en página en memoria.', 'Alta concurrencia en operaciones de escritura en páginas en memoria.'),
-        ('PAGELATCH_SH', 'Latch compartido en página en memoria.', 'Lecturas concurrentes en páginas en memoria.'),
-        ('PAGELATCH_UP', 'Latch de actualización en página en memoria.', 'Operaciones que requieren actualización parcial en páginas en memoria.'),
-        ('LCK_M_SCH_M', 'Bloqueo de esquema (modificación).', 'Cambios en estructura de tabla o índice.'),
-        ('LCK_M_SCH_S', 'Bloqueo de esquema (lectura).', 'Consultas que requieren estabilidad en el esquema.'),
-        ('LCK_M_IS', 'Bloqueo de intención compartida.', 'Lecturas concurrentes que bloquean actualizaciones.'),
-        ('LCK_M_IX', 'Bloqueo de intención exclusiva.', 'Preparación para operaciones de escritura.'),
-        ('LCK_M_BU', 'Bloqueo de actualización masiva (Bulk Update).', 'Operaciones masivas que bloquean recursos.'),
-
-        -- I/O y CPU
-        ('ASYNC_IO_COMPLETION', 'Espera por operaciones de I/O asíncrono.', 'Disco lento o exceso de operaciones de lectura/escritura.'),
-        ('THREADPOOL', 'Espera por disponibilidad de hilos.', 'Alta concurrencia, falta de recursos en el pool de threads.'),
-
-        -- Memoria
-        ('MEMORY_ALLOCATION_EXT', 'Problemas internos de asignación de memoria.', 'Presión de memoria o fragmentación interna.')
-        
-    ) AS WT(WaitType, Descripcion, CausaComun)
+	SELECT
+	    WaitType,
+	    Descripcion,
+	    CausaComun
+	FROM (
+	    VALUES
+	    -- Bloqueos (Locks) y Latches en Memoria
+	    ('LCK_M_X', 'Esperando un Bloqueo Exclusivo para modificar un recurso (fila, página, tabla).', 'Transacciones largas o conflictos de escritura. Dos o más procesos quieren modificar lo mismo al mismo tiempo.'),
+	    ('LCK_M_S', 'Esperando un Bloqueo Compartido para leer un recurso.', 'Lectores bloqueados por Escritores. Una transacción de escritura (X) está reteniendo el recurso, impidiendo la lectura (S).'),
+	    ('LCK_M_U', 'Esperando un Bloqueo de Actualización. Bloqueo intermedio para evitar deadlocks antes de la escritura.', 'Contención por Actualización. Múltiples procesos intentan actualizar la misma fila o página.'),
+	    ('LCK_M_SCH_M', 'Esperando un Bloqueo de Modificación de Esquema.', 'Cambios de Estructura. Un proceso está realizando un ALTER TABLE o DROP INDEX, bloqueando cualquier acceso.'),
+	    ('LCK_M_SCH_S', 'Esperando un Bloqueo de Estabilidad de Esquema.', 'Consulta de Larga Duración. Una consulta compleja requiere garantizar que la estructura de la tabla no cambie.'),
+	    ('PAGELATCH_EX', 'Esperando un Latch Exclusivo en Memoria. Un proceso quiere modificar una página que ya está en el Buffer Pool.', 'Contención de Escritura en Memoria. Procesos con alta concurrencia intentan modificar la misma página ("página caliente").'),
+	    ('PAGELATCH_SH', 'Esperando un Latch Compartido en Memoria. Un proceso quiere leer una página que ya está en el Buffer Pool.', 'Contención de Lectura en Memoria. Múltiples procesos leen la misma página caliente constantemente.'),
+	    ('PAGELATCH_UP', 'Esperando un Latch de Actualización en Memoria. Un proceso quiere reservar la página para modificarla mientras otros la leen.', 'Contención en Memoria. Muchos lectores intentan convertirse en escritores en la misma página con alta frecuencia.'),
+	    ('PAGELATCH_KP', 'Latch en páginas clave (Key Pages).', 'Contención interna en estructuras críticas en memoria.'),
+	    ('LCK_M_IU', 'Bloqueo de intención de actualización.', 'Preparación para actualizar filas, puede generar contención.'),
+	    ('LCK_M_IS', 'Bloqueo de intención compartida.', 'Lecturas concurrentes que bloquean actualizaciones.'),
+	    ('LCK_M_IX', 'Bloqueo de intención exclusiva.', 'Preparación para operaciones de escritura.'),
+	    ('LCK_M_BU', 'Bloqueo de actualización masiva (Bulk Update).', 'Operaciones masivas que bloquean recursos.'),
+	
+	    -- I/O (Input/Output) y Disco
+	    ('WRITELOG', 'Esperando la confirmación de que la escritura en el Log de Transacciones está completa en el disco.', 'Log de Transacciones Lento. El disco que aloja el archivo .LDF tiene una latencia de escritura muy alta.'),
+	    ('PAGEIOLATCH_SH', 'Esperando Leer una página del disco a la memoria (Buffer Pool).', 'Latencia de I/O en Lectura. El disco es lento para responder a las solicitudes de lectura de datos.'),
+	    ('PAGEIOLATCH_EX', 'Esperando Cargar una página del disco a la memoria con el objetivo de escribir en ella.', 'Latencia de I/O en Escritura. El disco es lento para cargar la página previa a la modificación.'),
+	    ('PAGEIOLATCH_UP', 'Esperando Cargar una página del disco a la memoria con un latch de actualización (UP).', 'Combinación de Contención e I/O Lenta. Muchos procesos quieren modificar datos, y el disco lento amplifica la espera.'),
+	    ('ASYNC_IO_COMPLETION', 'Esperando la finalización de una operación de I/O Asíncrona (no bloqueante, ej. backup, restore).', 'Carga de I/O Pesada o Disco Lento. El sistema de almacenamiento está tardando en completar tareas grandes en segundo plano.'),
+	    ('IO_COMPLETION', 'Esperando la finalización de una operación de I/O Genérica o Síncrona.', 'Latencia General del Disco. Problemas de rendimiento en el almacenamiento fuera de la gestión del Buffer Pool.'),
+	    ('BACKUPIO', 'Esperando durante la transferencia de datos de un backup o restore.', 'Discos de Backup Lentos. El disco de destino es demasiado lento para la tasa de transferencia de datos.'),
+	    ('HADR_FILESTREAM_IOMGR_IOCOMPLETION', 'Espera en operaciones FILESTREAM en Always On.', 'Latencia en I/O FILESTREAM.'),
+	
+	    -- CPU y Paralelismo
+	    ('SOS_SCHEDULER_YIELD', 'El hilo de SQL Server cede voluntariamente la CPU para que otros hilos puedan ejecutarse.', 'Presión Alta de CPU. El servidor está saturado de trabajo y las consultas tienen que esperar su turno para procesar.'),
+	    ('CXPACKET', 'Esperando que los hilos paralelos en una consulta se sincronicen y avancen juntos.', 'Paralelismo Excesivo o Desbalanceado. El grado de paralelismo (MAXDOP) es demasiado alto, o el plan de ejecución está desequilibrado.'),
+	    ('CXCONSUMER', 'Un hilo consumidor de un plan paralelo está esperando que un hilo productor le entregue filas.', 'Procesamiento Paralelo Desbalanceado. La producción de datos entre los hilos no es uniforme (sesgo de datos).'),
+	    ('CXROWSET_SYNC', 'Sincronización en operaciones paralelas con rowsets.', 'Paralelismo en consultas complejas.'),
+	    ('THREADPOOL', 'Espera por disponibilidad de hilos.', 'Alta concurrencia, falta de recursos en el pool de threads.'),
+	
+	    -- Memoria
+	    ('RESOURCE_SEMAPHORE', 'Esperando que se le asigne memoria para ejecutar una consulta (Memory Grant).', 'Consultas Hambrientas de Memoria. Consultas grandes (ej. sorts, hashes) están esperando por la asignación de RAM disponible.'),
+	    ('LOGBUFFER', 'Esperando espacio en el buffer para escribir entradas del Log de Transacciones.', 'Log de I/O Lento y Transacciones Masivas. El buffer se llena porque la escritura en disco no lo vacía lo suficientemente rápido.'),
+	    ('MEMORY_ALLOCATION_EXT', 'Problemas internos de asignación de memoria.', 'Presión de memoria o fragmentación interna.'),
+	
+	    -- Red y Conectividad
+	    ('ASYNC_NETWORK_IO', 'Esperando la confirmación de que los datos fueron enviados y consumidos por el cliente.', 'Aplicación Cliente Lenta. El cliente está tardando en aceptar los resultados del servidor.'),
+	    ('NETWORK_IO', 'Esperando la finalización de operaciones de red genéricas.', 'Latencia o Saturación de la Red. Problemas de comunicación entre el servidor y el cliente.'),
+	
+	    -- Always On y Service Broker
+	    ('HADR_SYNC_COMMIT', 'Esperando la confirmación de que la transacción fue confirmada en la réplica secundaria sincrónica.', 'Latencia entre Réplicas. La red o el disco del servidor secundario son lentos.'),
+	    ('BROKER_TRANSMITTER', 'Espera en transmisión de mensajes del Service Broker.', 'Procesamiento de colas o problemas de red.'),
+	    ('BROKER_TO_FLUSH', 'Espera por vaciado de mensajes en Service Broker.', 'Procesamiento interno para enviar mensajes pendientes en colas.'),
+	
+	    -- Otros/Internos
+	    ('FT_IFTS_SCHEDULER_IDLE_WAIT', 'Espera en tareas de índice de texto completo.', 'Procesamiento de índices full-text.'),
+	    ('PREEMPTIVE_OS_AUTHENTICATION', 'Espera por autenticación en el sistema operativo.', 'Problemas de autenticación externa.'),
+	    ('QDS_ASYNC_QUEUE', 'Espera en cola asíncrona del Query Data Store.', 'Carga alta en Query Store o mantenimiento.'),
+	    ('WAIT_XTP_HOST_WAIT', 'Espera relacionada con operaciones In-Memory OLTP.', 'Procesamiento de tablas optimizadas para memoria.'),
+	    ('XTP_PREEMPTIVE_TASK', 'Espera por tareas preemptivas en In-Memory OLTP.', 'Operaciones internas de memoria.'),
+	    ('PVS_PREALLOCATE', 'Espera por preasignación de recursos internos.', 'Inicialización de estructuras internas.'),
+	    ('FT_IFTSHC_MUTEX', 'Espera por mutex en índice de texto completo.', 'Contención en operaciones full-text.'),
+	    ('ONDEMAND_TASK_QUEUE', 'Espera en cola de tareas bajo demanda.', 'Procesamiento interno de tareas diferidas.'),
+	    ('KSOURCE_WAKEUP', 'Espera por activación de fuente de eventos.', 'Procesamiento interno de eventos.'),
+	    ('CLR_AUTO_EVENT', 'Espera por eventos automáticos en CLR.', 'Operaciones internas del CLR.'),
+	    ('SP_SERVER_DIAGNOSTICS_SLEEP', 'Espera durante diagnóstico del servidor.', 'Proceso interno de salud del servidor.'),
+	    ('QDS_PERSIST_TASK_MAIN_LOOP_SLEEP', 'Espera en persistencia de Query Store.', 'Grabación de datos en Query Store.'),
+	    ('CHECKPOINT_QUEUE', 'Espera en cola de checkpoints.', 'Procesamiento de páginas sucias en disco.'),
+	    ('SQLTRACE_INCREMENTAL_FLUSH_SLEEP', 'Espera en flush incremental de SQL Trace.', 'Procesamiento interno de trazas.'),
+	    ('REQUEST_FOR_DEADLOCK_SEARCH', 'Espera en búsqueda de deadlocks.', 'Proceso interno para detectar bloqueos.'),
+	    ('XE_DISPATCHER_WAIT', 'Espera en despachador de eventos extendidos.', 'Procesamiento de eventos XE.'),
+	    ('XE_TIMER_EVENT', 'Espera en temporizador de eventos extendidos.', 'Procesamiento interno de XE.'),
+	    ('LAZYWRITER_SLEEP', 'Espera del Lazy Writer.', 'Liberación de páginas en buffer pool.'),
+	    ('LOGMGR_QUEUE', 'Espera en cola del Log Manager.', 'Procesamiento interno del log.'),
+	    ('DIRTY_PAGE_POLL', 'Espera en sondeo de páginas sucias.', 'Proceso interno para escribir páginas modificadas.'),
+	    ('SOS_WORK_DISPATCHER', 'Espera en el despachador de trabajos del Scheduler.', 'Procesamiento interno de tareas en el motor de SQL Server.')
+	
+	) AS WT(WaitType, Descripcion, CausaComun)
+ 
 )
 SELECT 
     W.wait_type,
     W.waiting_tasks_count AS CantidadWaits,
-	W.total_time_seg,
-	W.total_time_seg_no_cpu,
-	W.total_time_cpu_seg,
-	W.avg_wait_seg,
-	W.signal_ratio_percent,
+	W.total_time_ms,
+	W.total_time_ms_no_cpu,
+	W.total_time_cpu_ms,
+	W.avg_wait_ms,
+	W.avg_resource_wait_m,
+	--W.signal_ratio_percent,
 	W.prioridad_diagnostico,
 	WT.Descripcion,
-    WT.CausaComun
-	-- W.[RowNum]
+    WT.CausaComun,
+	criticidad
+	,W.[RowNum]
 FROM Waits W
 LEFT JOIN WaitTypes WT ON W.wait_type = WT.WaitType
 /*
-WHERE  W.wait_type IN (
-    /* CPU */
-    'SOS_SCHEDULER_YIELD','CXPACKET','CXCONSUMER','THREADPOOL',
-    
-    /* Memoria */
-    'RESOURCE_SEMAPHORE','RESOURCE_SEMAPHORE_QUERY_COMPILE','MEMORY_ALLOCATION_EXT',
-    
-    /* I/O */
-    'WRITELOG','IO_COMPLETION','ASYNC_IO_COMPLETION'
-)  
-OR W.wait_type LIKE 'PAGEIOLATCH%'  -- I/O
-OR W.wait_type LIKE 'LCK_M%'        -- Bloqueos
-OR W.wait_type LIKE 'PAGELATCH%'    -- Bloqueos internos
-OR W.wait_type = 'ASYNC_NETWORK_IO' -- Bloqueo por cliente
+WHERE 
+    -- PAGEIOLATCH_*: Espera por lectura de páginas desde DISCO al buffer pool (indica almacenamiento lento o falta de memoria).
+	--     Acciones: Aumentar **RAM** para reducir lecturas desde disco, revisar **missing indexes**, optimizar consultas, validar **latencias del storage** y **read throughput**.
+    W.wait_type LIKE 'PAGEIOLATCH_%'
+    OR 
+    -- WRITELOG: Espera para escribir el TRANSACTION LOG (cuello de botella en el disco del log).
+	-- Acciones: Asegurar que el **log esté en un volumen dedicado y rápido** (idealmente SSD), revisar **tamaño inicial** y **autogrowth** (evitar muchos crecimientos pequeños), confirmar que no haya **contenión** por VMs/host.
+    W.wait_type = 'WRITELOG'
+    OR
+    -- LOGBUFFER: Espera para copiar datos al buffer del log antes de escribir en disco (si sube junto con WRITELOG, problemático).
+	--     Acciones: Corrobora el cuello en log. Revisa **flushes**, **tamaño del buffer**, frecuencia de **commits**.
+    W.wait_type = 'LOGBUFFER'
+    OR 
+    -- BACKUPIO: Espera durante operaciones de backup (disco de destino lento o red lenta si es backup a share).
+	--     Acciones: Optimiza ventana y destino de **backup**, usa `COPY_ONLY` en escenarios específicos, valida velocidad del almacenamiento o share.
+    W.wait_type = 'BACKUPIO'
+    OR 
+    -- IO_COMPLETION: Espera por operaciones de I/O asincrónicas (backups/restores/operaciones de archivos).
+	--     Acciones: Optimiza ventana y destino de **backup**, usa `COPY_ONLY` en escenarios específicos, valida velocidad del almacenamiento o share.
+    W.wait_type = 'IO_COMPLETION'
+    OR 
+    -- ASYNC_IO_COMPLETION: Espera por I/O asincrónico en archivos de BD (crecimiento, creación de archivos).
+	--     Acciones: Configurar **autogrowth grande y fijo**, pre-crear tamaño adecuado, revisar **instant file initialization** (solo para data files; no aplica a log).
+    W.wait_type = 'ASYNC_IO_COMPLETION'
+    OR 
+    -- IO_RETRY: SQL Server reintenta operaciones de I/O por errores temporales (posibles fallos físicos del disco o controlador).
+	--     Acciones: Revisar **event logs**, **firmware de storage**, **drivers**, **multipathing**, **timeouts**; posible problema **físico**.
+    W.wait_type = 'IO_RETRY'
 */
-order by  W.signal_ratio_percent desc ;
+order by  avg_resource_wait_m desc ;
 ```
 
 
