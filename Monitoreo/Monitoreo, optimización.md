@@ -1168,6 +1168,10 @@ https://www.mssqltips.com/sqlservertip/6230/memoryoptimized-tempdb-metadata-in-s
 
  # comandos DBCC
 ```sql
+
+-- eset the aggregated statistics using this code:
+DBCC SQLPERF (N'sys.dm_os_wait_stats', CLEAR);
+
 -- Ver el número de páginas en caché
  DBCC SHOW_STATISTICS( 'Orders' ); 
  
