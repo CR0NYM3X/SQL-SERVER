@@ -22,6 +22,7 @@ LIFE CYCLES VOLTDB		https://www.voltactivedata.com/company/customers/support/
 LIFE CYCLES ORACLE		https://www.oracle.com/us/assets/lifetime-support-technology-069183.pdf													
 LIFE CYCLES MYSQL		https://endoflife.software/applications/databases/mysql
 
+historial de update de windows -> https://learn.microsoft.com/es-es/windows/release-health/windows11-release-information
 ```
 
 
