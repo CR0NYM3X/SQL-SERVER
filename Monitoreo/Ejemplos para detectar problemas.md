@@ -1479,7 +1479,7 @@ LEFT JOIN sys.filegroups fg ON ds.data_space_id = fg.data_space_id
 LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
 WHERE t.name = 'ClientesTest'
 GROUP BY s.name, t.name, fg.name, p.partition_number
-ORDER BY p.partition_number;
+ORDER BY t.name,p.partition_number
 
 
  --- Ver los indices de la tabla 
