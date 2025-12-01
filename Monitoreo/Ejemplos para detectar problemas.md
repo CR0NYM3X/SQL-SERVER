@@ -1392,13 +1392,14 @@ ORDER BY BufferPoolMB DESC;
 
 
 SELECT 'Top 10 por CPU'
-SELECT TOP 10
-	CONNECTIONPROPERTY('local_net_address') AS IPServidor,
-    DB_NAME(database_id) AS DatabaseName,
-    SUM(total_worker_time) / 1000 AS CPU_ms
-FROM sys.dm_exec_query_stats qs
-JOIN sys.dm_exec_requests r ON qs.plan_handle = r.plan_handle
-GROUP BY database_id
+SELECT 
+    DB_NAME(st.dbid) AS BaseDeDatos,
+    SUM(qs.total_worker_time) / 1000 AS CPU_ms,
+    SUM(qs.execution_count) AS CantidadEjecuciones,
+    SUM(qs.total_elapsed_time) / 1000 AS TiempoTotal_ms
+FROM sys.dm_exec_query_stats AS qs
+CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS st
+GROUP BY DB_NAME(st.dbid)
 ORDER BY CPU_ms DESC;
 
 
