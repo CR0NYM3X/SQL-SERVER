@@ -1434,7 +1434,8 @@ ORDER BY t.name;
     TOP 10
     s.name AS SchemaName,
     t.name AS TableName,
-    fg.name AS FileGroupName,
+    --fg.name AS FileGroupName,
+	CASE WHEN fg.name IS NULL THEN 'PRIMARY' ELSE fg.name END AS FileGroupName ,
     -- Tamaño total (datos + índices)
     CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
     -- Solo datos (heap o índice clustered)
@@ -1463,7 +1464,8 @@ having COUNT(DISTINCT p.partition_number) > 1 ;
  SELECT
     s.name AS SchemaName,
     t.name AS TableName,
-    fg.name AS FileGroupName,
+    -- fg.name AS FileGroupName,
+	CASE WHEN fg.name IS NULL THEN 'PRIMARY' ELSE fg.name END AS FileGroupName ,
     p.partition_number AS PartitionNumber,
     CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
     CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
