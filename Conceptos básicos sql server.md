@@ -593,3 +593,250 @@ En SQL Server:
 
  
 ---
+
+
+ 
+
+# **Memoria RAM: Conceptos Clave y Uso**
+
+##  **¿Qué es la Memoria RAM?**
+
+La **RAM (Random Access Memory)** es un tipo de memoria volátil que almacena datos e instrucciones de forma temporal mientras el procesador ejecuta tareas.
+
+*   **Volátil:** Pierde la información al apagar el equipo.
+*   **Acceso aleatorio:** Permite leer y escribir datos en cualquier posición con la misma velocidad.
+
+**Función principal:**
+
+*   Servir como espacio de trabajo rápido para el CPU, evitando depender del disco (mucho más lento).
+
+
+
+##  **¿Para qué sirve?**
+
+*   Almacenar programas y datos en ejecución.
+*   Mejorar la velocidad del sistema.
+*   Permitir multitarea (varias aplicaciones abiertas).
+
+
+
+##  **Partes físicas y lógicas del procesador relacionadas con RAM**
+
+*   **Físicas:**
+    *   **Módulos DIMM/SODIMM:** Tarjetas donde se monta la RAM.
+    *   **Chips DRAM:** Donde se almacenan los datos.
+*   **Lógicas:**
+    *   **Controlador de memoria:** Gestiona el acceso entre CPU y RAM.
+    *   **Caches (L1, L2, L3):** Memoria ultrarrápida integrada en CPU para reducir latencia.
+    *   **Bus de memoria:** Canal de comunicación entre CPU y RAM.
+
+
+
+##  **Términos técnicos y conceptos clave**
+
+*   **Latencia:** Tiempo que tarda en acceder a un dato.
+*   **Ancho de banda:** Cantidad de datos que puede transferir por segundo.
+*   **DDR (Double Data Rate):** Tecnología que transfiere datos dos veces por ciclo.
+*   **Dual Channel:** Configuración que duplica el ancho de banda usando dos módulos.
+*   **Memoria volátil:** Pierde datos al apagar el equipo.
+
+
+
+##  **Características importantes**
+
+*   **Capacidad:** Cantidad total (GB).
+*   **Velocidad:** Medida en MHz (ej. DDR4-3200).
+*   **Tipo:** DDR3, DDR4, DDR5.
+*   **Latencia CAS:** Tiempo de respuesta del módulo.
+*   **Consumo energético:** Importante en servidores y laptops.
+
+
+
+##  **¿Por qué y cuándo usar más RAM?**
+
+*   **Por qué:** Mejora rendimiento, reduce uso de disco (swap).
+*   **Cuándo:**
+    *   Aplicaciones pesadas (edición, bases de datos, virtualización).
+    *   Servidores con alta concurrencia.
+    *   Juegos y software gráfico.
+
+ 
+
+##  **Consideraciones**
+
+*   Compatibilidad con placa madre y CPU.
+*   Número de slots disponibles.
+*   Configuración en canales (dual, quad).
+*   Balance entre velocidad y latencia.
+
+
+
+##  **Ventajas**
+
+*   Mayor velocidad de ejecución.
+*   Permite multitarea fluida.
+*   Reduce cuellos de botella en CPU.
+
+##  **Desventajas**
+
+*   Volátil (pierde datos al apagar).
+*   Costo elevado en grandes capacidades.
+*   No sustituye almacenamiento permanente.
+ 
+
+##  **Tipos de Memoria RAM**
+
+*   **DRAM (Dynamic RAM):** Base de la mayoría de módulos.
+*   **SDRAM (Synchronous DRAM):** Sincronizada con el reloj del sistema.
+*   **DDR (DDR3, DDR4, DDR5):** Estándar actual.
+*   **ECC RAM:** Corrige errores, usada en servidores.
+*   **SRAM:** Más rápida, usada en cachés.
+*   **VRAM:** Memoria para tarjetas gráficas.
+
+
+
+
+
+ 
+
+# **Memoria en SQL Server: Conceptos Clave**
+
+##  **1. Buffer Pool**
+
+*   **¿Qué es?**  
+    Es la **zona principal de memoria** en SQL Server donde se almacenan páginas de datos y planes de ejecución para evitar accesos al disco.
+*   **¿Para qué sirve?**  
+    Reduce I/O en disco, acelerando consultas.
+*   **Función:**  
+    Mantener datos y objetos en memoria para acceso rápido.
+*   **Ventajas:**
+    *   Disminuye latencia.
+    *   Mejora rendimiento en OLTP y OLAP.
+*   **¿Se activa?**  
+    Automático. Se ajusta con `max server memory` y `min server memory`.
+*   **Nivel:**  
+    Software (SQL Server administra la memoria física del hardware).
+*   **Consideraciones:**
+    *   Ajustar tamaño según carga.
+    *   Evitar que el OS quede sin memoria.
+*   **¿Cuándo usar?**  
+    Siempre, es parte del motor.
+
+
+
+##  **2. Memory Grants**
+
+*   **¿Qué es?**  
+    Cantidad de memoria que SQL Server asigna a una consulta para operaciones como **sort** o **hash join**.
+*   **¿Para qué sirve?**  
+    Evitar que consultas grandes saturen la memoria.
+*   **Función:**  
+    Controlar uso de memoria en operaciones intensivas.
+*   **Ventajas:**
+    *   Previene bloqueos por falta de memoria.
+*   **¿Se activa?**  
+    Automático, pero se puede monitorear con `sys.dm_exec_query_memory_grants`.
+*   **Nivel:**  
+    Software.
+*   **Consideraciones:**
+    *   Consultas mal optimizadas pueden pedir más memoria.
+    *   Ajustar `workload` y estadísticas.
+*   **¿Cuándo usar?**  
+    Siempre, es interno.
+
+
+
+##  **3. Memory Clerk**
+
+*   **¿Qué es?**  
+    Componentes internos que **administran diferentes áreas de memoria** (Buffer Pool, Cache, etc.).
+*   **¿Para qué sirve?**  
+    Controlar y reportar consumo de memoria por tipo.
+*   **Función:**  
+    Cada clerk gestiona una parte específica (ej. `CACHESTORE_SQLCP` para planes).
+*   **Ventajas:**
+    *   Permite diagnóstico detallado.
+*   **¿Se activa?**  
+    Automático.
+*   **Nivel:**  
+    Software.
+*   **Consulta:**
+    ```sql
+    SELECT type, pages_kb FROM sys.dm_os_memory_clerks ORDER BY pages_kb DESC;
+    ```
+
+
+
+##  **4. Cache (Plan Cache y Data Cache)**
+
+*   **¿Qué es?**
+    *   **Plan Cache:** Almacena planes de ejecución compilados.
+    *   **Data Cache:** Páginas de datos en memoria.
+*   **¿Para qué sirve?**  
+    Evitar recompilar consultas y reducir I/O.
+*   **Función:**  
+    Mejorar rendimiento reutilizando recursos.
+*   **Ventajas:**
+    *   Ahorra CPU.
+    *   Reduce latencia.
+*   **¿Se activa?**  
+    Automático.
+*   **Nivel:**  
+    Software.
+*   **Consideraciones:**
+    *   Consultas ad-hoc pueden fragmentar el cache.
+    *   Usar parámetros para reutilización.
+
+
+
+##  **Otros términos importantes**
+
+*   **Stolen Memory:** Memoria tomada del Buffer Pool para otras tareas.
+*   **Reserved Memory:** Memoria reservada para operaciones críticas.
+*   **Target Memory:** Memoria que SQL Server intenta alcanzar según carga.
+
+
+
+##  **Características importantes**
+
+*   SQL Server **no usa toda la RAM física** automáticamente → se configura con `max server memory`.
+*   Desde SQL Server 2016, el motor es **NUMA-aware** y gestiona memoria por nodos.
+*   Usa **Lazy Writer** para liberar páginas no usadas.
+
+
+
+##  **Ventajas del manejo de memoria en SQL Server**
+
+*   Optimiza rendimiento sin intervención manual.
+*   Escala en servidores grandes.
+*   Reduce I/O y CPU.
+
+##  **Desventajas**
+
+*   Configuración incorrecta puede causar:
+    *   Paginación en OS.
+    *   Bloqueos por falta de memoria.
+*   Consultas mal diseñadas pueden consumir excesiva memoria.
+
+
+
+##  **¿Es hardware o software?**
+
+*   **Hardware:** La RAM física.
+*   **Software:** SQL Server administra la memoria asignada por el OS.
+
+
+
+##  **Tipos de memoria en SQL Server**
+
+*   **Buffer Pool:** Datos y planes.
+*   **Query Workspace:** Para operaciones complejas.
+*   **Plan Cache:** Planes compilados.
+*   **Log Cache:** Para transacciones.
+*   **Columnstore Object Pool:** Para índices columnstore.
+ 
+ 
+ 
+
+
+ 
