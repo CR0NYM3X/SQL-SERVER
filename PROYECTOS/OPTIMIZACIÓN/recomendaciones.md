@@ -839,6 +839,10 @@ Suprime los mensajes de backup exitoso en el error log. Los backups fallidos sí
 ---
 
 
+# Max Server Memory 
+ [usar la pagina](https://bornsql.ca/s/memory/)
+--- 
+
 # Links 
 ```
 Extensiones de SQL Server, PFS, GAM, SGAM e IAM y corrupciones relacionadas -> https://techcommunity.microsoft.com/blog/sqlserversupport/sql-server-extents-pfs-gam-sgam-and-iam-and-related-corruptions/1606011
