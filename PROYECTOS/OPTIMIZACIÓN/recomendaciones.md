@@ -744,6 +744,61 @@ No existe un número mágico, pero los DBAs y las directrices de Microsoft utili
 
 ---
 
+# Query Store 
+
+ 
+ 
+El **Query Store** es más que una herramienta de monitoreo; es la **memoria histórica persistente** de tu base de datos SQL Server, ofreciendo una gestión de rendimiento fundamentalmente superior a las DMVs o estadísticas tradicionales, especialmente en tu entorno **OLTP (Transaccional)**.
+ 
+### 1. El "Grabador de Vuelo" Persistente  
+
+A diferencia de las **DMVs**, cuyas métricas se borran al reiniciar el servicio de SQL Server, el Query Store **almacena continuamente** el texto de las consultas, sus planes de ejecución y sus métricas de rendimiento (CPU, I/O, duración) en disco.
+
+* **Beneficio:** Proporciona un **historial completo y persistente** que te permite analizar el rendimiento a lo largo del tiempo, sobreviviendo a los reinicios del servidor y cambios en el código o hardware.
+
+ 
+
+### 2. Gestión Proactiva de Planes de Ejecución  
+
+Esta es su funcionalidad más crítica y la principal diferencia con `pg_stat_statements` de PostgreSQL.
+
+* **Identificación de Regresiones:** El Query Store permite identificar rápidamente cuándo una consulta se vuelve lenta (regresión) debido a que el **Optimizador de Consultas** eligió un plan de ejecución peor.
+* **Plan Forcing:** Te permite **forzar** al motor a utilizar un plan de ejecución conocido como bueno, estabilizando el rendimiento de consultas volátiles y previniendo futuros problemas.
+
+ 
+
+### 3  Forzado Automático - Funcionamiento Después de la Configuración
+
+
+Una vez que estableces `FORCE_LAST_GOOD_PLAN = ON`, el motor de SQL Server se encarga de la automatización:
+
+1.  **Monitoreo Continuo:** SQL Server monitorea el rendimiento de las consultas y sus planes utilizando los datos del Query Store.
+2.  **Identificación de Regresión:** Si el tiempo de ejecución (CPU, duración) de un nuevo plan se degrada significativamente (ej. se vuelve más lento en un 10% o más) en comparación con el plan anterior, lo marca como una regresión.
+3.  **Acción Automática:** El motor automáticamente **fuerza** el uso del plan anterior y más eficiente (el "último plan bueno") sin requerir ninguna acción o *hint* en la consulta de tu aplicación.
+
+**En resumen:** Lo **configuras manualmente una vez** a nivel de base de datos, y luego el **motor de SQL Server lo gestiona y aplica automáticamente** a nivel de consulta para estabilizar el rendimiento.
+
+
+```
+---- ********** ACTIVAR AUTOMATICACION ***********
+-- ocupas >  SQL Server 2017 o posterior. 
+-- Automatic Tuning is available only in the Enterprise and Developer editions of SQL Server. Mens. 5069, Nivel 16, Estado 1, Línea 12 ALTER DATABASE statement failed.
+ALTER DATABASE northwind
+SET AUTOMATIC_TUNING (
+    FORCE_LAST_GOOD_PLAN = ON
+);
+
+--- validar si esta activado automaticcamente 
+SELECT 
+    *
+FROM 
+    sys.database_automatic_tuning_options AS t
+WHERE 
+    t.name = 'FORCE_LAST_GOOD_PLAN';
+ 
+```
+
+---
 
 
 # Links 
