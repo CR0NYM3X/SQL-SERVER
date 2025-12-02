@@ -1579,6 +1579,16 @@ WHERE d.database_id = DB_ID();
 
 
 
+--- saber cuando inicio el servidor 
+SELECT 
+    sqlserver_start_time AS FechaInicio,
+    DATEDIFF(HOUR, sqlserver_start_time, GETDATE()) AS HorasUptime,
+    DATEDIFF(MINUTE, sqlserver_start_time, GETDATE()) AS MinutosUptime,
+    DATEDIFF(DAY, sqlserver_start_time, GETDATE()) AS DiasUptime   
+    --CONVERT(VARCHAR(50), GETDATE() - sqlserver_start_time, 108) AS TiempoLevantado
+FROM sys.dm_os_sys_info;
+
+
 ```
 
 
