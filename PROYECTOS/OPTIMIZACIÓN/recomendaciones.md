@@ -199,6 +199,21 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
     SELECT name, buckets_count FROM sys.dm_os_memory_cache_hash_tables WHERE name IN ('SQL Plans','Object Plans','Bound Trees');
 
  	select name, type, pages_kb, entries_count from sys.dm_os_memory_cache_counters where name IN ( 'SQL Plans' , 'Object Plans' ,  'Bound Trees' );
+	
+	-- Consulta para detectar contención en spinlocks:
+	-- Si ves valores altos en collisions y spins, hay contención.
+	SELECT *  FROM sys.dm_os_spinlock_stats WHERE name LIKE '%CACHESTORE%';
+	
+	-- Consulta para ver uso del plan cache:
+	-- Si hay muchos planes ad-hoc y alta presión en cache, es candidato.
+	SELECT cacheobjtype, objtype, COUNT(*) AS Cantidad FROM sys.dm_exec_cached_plans GROUP BY cacheobjtype, objtype;
+	
+	-- Monitorear waits CXPACKET y SOS_SCHEDULER_YIELD:
+	-- Si son muy altos, indica problemas de paralelismo y contención.
+	SELECT wait_type, waiting_tasks_count, wait_time_ms FROM sys.dm_os_wait_stats WHERE wait_type IN ('CXPACKET','SOS_SCHEDULER_YIELD');
+	
+
+
     ```
 
 ### **Desventajas**
