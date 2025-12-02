@@ -800,6 +800,44 @@ WHERE
 
 ---
 
+# Flag 3226 
+Suprime los mensajes de backup exitoso en el error log. Los backups fallidos sí se registran y el historial completo sigue en msdb.dbo.backupset.
+
+
+ 
+###   **Cómo revisar si lo necesitas**
+
+1.  **Verifica el tamaño del error log y la cantidad de mensajes de backup**:
+    ```sql
+    EXEC sp_readerrorlog 0, 1, 'BACKUP';
+    ```
+    *   Si ves **miles de entradas de backups exitosos**, tu log está saturado.
+
+2.  **Revisa la frecuencia de backups**:
+    ```sql
+    SELECT database_name, COUNT(*) AS CantidadBackups
+    FROM msdb.dbo.backupset
+    WHERE backup_start_date > DATEADD(DAY, -1, GETDATE())
+    GROUP BY database_name;
+    ```
+    *   Si haces **muchos backups por día** (ej. log cada 5 minutos), el error log se llenará rápido.
+
+3.  **Evalúa el impacto**:
+    *   Si el error log crece demasiado y dificulta encontrar errores críticos, **activar el flag es recomendable**.
+ 
+
+###  **Conclusión**
+
+*   Si tu servidor tiene **muchas bases** y **backups frecuentes** (FULL, DIFF, LOG), **activa el Trace Flag 3226** para reducir ruido en el error log.
+*   Activación:
+    ```sql
+    DBCC TRACEON(3226, -1); -- Global
+    ```
+    O como parámetro de inicio:
+        -T3226
+
+---
+
 
 # Links 
 ```
