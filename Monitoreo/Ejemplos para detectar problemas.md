@@ -823,7 +823,7 @@ AS (
         ELSE 'No'
     END AS IsPartitioned,
     COUNT(DISTINCT p.partition_number) AS PartitionCount,
-    SUM(ps.row_count) AS TotalRows,
+    SUM(CASE WHEN i.index_id < 2 THEN ps.row_count ELSE 0 END) AS TotalRows, -- asegurar que solo se cuenten las filas que pertenecen a la estructura principal de la tabla, y no a sus índices secundarios. (0= Heap | 1 = Clustered Index | >= 2  Non-Clustered Index) 
     t.create_date AS FechaCreacion,
     p.data_compression_desc AS TipoCompresion
 
@@ -1448,7 +1448,7 @@ ORDER BY t.name;
         ELSE 'No'
     END AS IsPartitioned,
     COUNT(DISTINCT p.partition_number) AS PartitionCount,
-    SUM(ps.row_count) AS TotalRows
+    SUM(CASE WHEN i.index_id < 2 THEN ps.row_count ELSE 0 END) AS TotalRows -- asegurar que solo se cuenten las filas que pertenecen a la estructura principal de la tabla, y no a sus índices secundarios. (0= Heap | 1 = Clustered Index | >= 2  Non-Clustered Index) 
 FROM sys.tables AS t
 LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
@@ -1456,6 +1456,7 @@ LEFT JOIN sys.partitions AS p ON i.object_id = p.object_id AND i.index_id = p.in
 LEFT JOIN sys.allocation_units AS a ON p.partition_id = a.container_id
 LEFT JOIN sys.filegroups AS fg ON i.data_space_id = fg.data_space_id 
 LEFT JOIN sys.dm_db_partition_stats AS ps ON p.partition_id = ps.partition_id
+-- WHERE t.name = 'nombre_tabla'
 GROUP BY s.name, t.name, fg.name
 having COUNT(DISTINCT p.partition_number) > 1 ;
 
@@ -1471,7 +1472,7 @@ having COUNT(DISTINCT p.partition_number) > 1 ;
     CAST(SUM(a.total_pages) * 8.0 AS DECIMAL(18,2)) AS TotalSizeKB,
     CAST(SUM(CASE WHEN i.type IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS DataSizeKB,
     CAST(SUM(CASE WHEN i.type NOT IN (0,1) THEN a.total_pages ELSE 0 END) * 8.0 AS DECIMAL(18,2)) AS IndexSizeKB,
-    SUM(ps.row_count) AS TotalRows
+    SUM(CASE WHEN i.index_id < 2 THEN ps.row_count ELSE 0 END) AS TotalRows -- asegurar que solo se cuenten las filas que pertenecen a la estructura principal de la tabla, y no a sus índices secundarios. (0= Heap | 1 = Clustered Index | >= 2  Non-Clustered Index) 
 FROM sys.tables AS t
 LEFT JOIN sys.schemas AS s ON t.schema_id = s.schema_id
 LEFT JOIN sys.indexes AS i ON t.object_id = i.object_id
