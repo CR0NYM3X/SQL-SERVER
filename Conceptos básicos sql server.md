@@ -333,3 +333,263 @@ Un **data mart** es un **subconjunto especializado de un almacén de datos (data
     *   **Lógico:** Integra datos sin almacenarlos físicamente.
  
  
+---
+
+
+# ¿Qué es un procesador (CPU)?
+
+Un **procesador (CPU)** es el cerebro del computador, encargado de ejecutar instrucciones y procesar datos. Interpreta y ejecuta operaciones aritméticas, lógicas y de control.
+ 
+
+### ¿Para qué sirve?
+
+- Ejecutar programas y coordinar el funcionamiento del sistema.
+- Procesar datos provenientes de memoria y dispositivos.
+- Controlar el flujo de instrucciones.
+
+
+
+### Partes físicas del procesador
+
+1. **Núcleos (Cores físicos y lógicos)**  
+   Cada núcleo puede ejecutar instrucciones de forma independiente.
+2. **Unidad de Control (CU)**  
+   Interpreta instrucciones y coordina operaciones.
+3. **Unidad Aritmético-Lógica (ALU)**  
+   Realiza cálculos matemáticos y operaciones lógicas.
+4. **Registros**  
+   Memoria ultrarrápida para datos temporales.
+5. **Cache**  
+   Niveles L1, L2, L3 para acelerar acceso a datos.
+6. **Bus interno**  
+   Conecta componentes internos.
+7. **Socket**  
+   Punto físico donde se instala el procesador en la placa madre.
+
+
+
+### Términos técnicos y conceptos clave
+
+- **Clock Speed (Frecuencia):** Velocidad de ejecución (GHz).
+- **Pipeline:** Flujo de instrucciones dividido en etapas.
+- **Hyper-Threading:** Tecnología para ejecutar múltiples hilos por núcleo.
+- **NUMA:** Arquitectura de memoria no uniforme.
+- **Cache Miss / Hit:** Acceso exitoso o fallido a la cache.
+- **Instruction Set (ISA):** Conjunto de instrucciones soportadas (x86, ARM).
+- **Overclock:** Práctica de aumentar la frecuencia de reloj (medida en GHz).
+
+
+
+### Características importantes
+
+- **Número de núcleos:** Más núcleos = más paralelismo.
+- **Cache:** L1 (rápida, pequeña), L2 (intermedia), L3 (grande, compartida).
+- **Socket:** Define compatibilidad con la placa madre.
+- **TDP (Thermal Design Power):** Consumo y disipación térmica.
+- **Arquitectura:** 32-bit vs 64-bit.
+
+
+
+### ¿Por qué y cuándo usar ciertas características?
+
+- **Más núcleos** → Servidores, multitarea pesada.
+- **Alta frecuencia** → Juegos, aplicaciones que dependen de velocidad por hilo.
+- **Cache grande** → Procesamiento intensivo de datos.
+
+
+
+### Consideraciones
+
+- Balance entre núcleos, frecuencia y consumo.
+- Compatibilidad con placa madre y memoria.
+- Refrigeración adecuada para evitar throttling.
+- No siempre más núcleos = mejor → depende del software.
+- Overclock sin refrigeración adecuada → riesgo de daño (genera más calor, aumento en voltaje, reduce la vida útil).
+
+
+
+## Cores físicos vs lógicos
+
+- **Cores físicos:** Núcleos reales dentro del procesador. Cada uno ejecuta instrucciones de manera independiente.
+- **Cores lógicos:** Se crean mediante tecnologías como Hyper-Threading (Intel) o SMT (AMD).
+  - Cada núcleo físico se divide en dos hilos lógicos, permitiendo ejecutar más tareas en paralelo.
+  - Ejemplo: Un CPU con 8 núcleos físicos y Hyper-Threading activado tendrá 16 hilos lógicos.
+
+**Ventaja de los hilos lógicos:**
+- Mejor aprovechamiento del tiempo muerto del núcleo físico.
+- Mayor rendimiento en cargas multitarea y paralelismo.
+
+**Consideración:**
+- No duplica el rendimiento, solo mejora la eficiencia (ganancia típica: 20-30%).
+
+
+
+## Tipos de caché en un procesador
+
+Los procesadores modernos tienen cachés multinivel para reducir la latencia entre CPU y memoria RAM:
+
+### 1. Caché L1 (Nivel 1)
+- **Ubicación:** Dentro de cada núcleo.
+- **Tamaño:** Muy pequeña (16 KB a 128 KB por núcleo).
+- **Velocidad:** La más rápida.
+- **Función:** Almacena instrucciones y datos más usados por el núcleo.
+- **Ventaja:** Acceso casi inmediato → mejora el rendimiento en operaciones repetitivas.
+
+### 2. Caché L2 (Nivel 2)
+- **Ubicación:** Dentro del núcleo o compartida entre pocos núcleos.
+- **Tamaño:** Mayor que L1 (256 KB a 1 MB por núcleo).
+- **Velocidad:** Más lenta que L1, pero más rápida que RAM.
+- **Función:** Almacena datos que no caben en L1.
+- **Ventaja:** Reduce la dependencia de la RAM → mejora eficiencia en multitarea.
+
+### 3. Caché L3 (Nivel 3)
+- **Ubicación:** Compartida entre todos los núcleos del procesador.
+- **Tamaño:** Grande (2 MB a 64 MB).
+- **Velocidad:** Más lenta que L2, pero mucho más rápida que RAM.
+- **Función:** Almacena datos comunes para todos los núcleos.
+- **Ventaja:** Mejora la comunicación entre núcleos y reduce accesos a memoria principal.
+
+### 4. Caché L4 (opcional en algunos procesadores)
+- **Ubicación:** Puede estar en el chip o en la placa madre.
+- **Función:** Actúa como buffer entre CPU y RAM.
+- **Ventaja:** Aumenta rendimiento en cargas muy grandes (servidores, HPC).
+
+
+
+## Beneficios generales de la caché
+- Reduce latencia: Acceso más rápido que la RAM.
+- Mejora rendimiento: Menos ciclos de espera.
+- Optimiza multitarea: Cada nivel almacena datos estratégicamente.
+
+
+
+## Consideraciones
+- Más caché = mejor rendimiento, pero también mayor costo y consumo.
+- Caché L1 es crítica para velocidad por núcleo.
+- Caché L3 es clave en servidores y cargas paralelas.
+
+
+
+## ¿Qué es NUMA?
+
+**NUMA (Non-Uniform Memory Access)** es una arquitectura de hardware que divide la memoria en nodos asociados a grupos de CPU.
+
+*   Cada nodo tiene su propia memoria RAM local.
+*   Acceder a memoria local es más rápido que acceder a memoria de otro nodo.
+
+**Objetivo:** Mejorar el rendimiento en servidores con muchos procesadores evitando cuellos de botella en acceso a memoria.
+
+### Ventajas de NUMA
+
+*   Menor latencia al acceder a memoria local.
+*   Mejor escalabilidad en servidores multiprocesador.
+*   Optimiza cargas paralelas (OLTP, OLAP).
+
+### Desventajas
+
+*   Acceso a memoria remota es más lento.
+*   Requiere que el software (SQL Server, OS) sea NUMA-aware.
+*   Configuración incorrecta puede causar desequilibrio.
+
+### ¿Cuándo usarlo?
+
+*   Siempre que el hardware lo soporte (servidores grandes).
+*   SQL Server lo detecta automáticamente.
+
+### ¿Cuándo no?
+
+*   No se puede desactivar si el hardware es NUMA.
+*   No tiene sentido en servidores pequeños (pocos cores).
+
+
+## ¿Qué es Soft-NUMA?
+
+**Soft-NUMA** es una característica de software en SQL Server que divide nodos NUMA físicos en nodos lógicos más pequeños para mejorar la distribución de carga.  
+Soft-NUMA **no crea memoria local nueva**, solo divide la asignación lógica de CPUs y schedulers dentro del mismo nodo físico.
+
+**Objetivo:**
+
+*   Reducir contención en servidores con muchos cores (ej. 64).
+*   Balancear schedulers y memoria.
+
+### Ventajas de Soft-NUMA
+
+*   Mejor paralelismo en cargas OLTP.
+*   Reduce contención en spinlocks.
+*   Permite ajustar `MAXDOP` por nodo lógico.
+
+### Desventajas
+
+*   Configuración manual puede ser compleja.
+*   No siempre necesario si la carga está bien balanceada.
+
+### ¿Cuándo usarlo?
+
+*   Servidores con más de 8 cores por nodo NUMA físico.
+*   Alta concurrencia y problemas de contención.
+
+### ¿Cuándo no?
+
+*   Servidores pequeños.
+*   Si la carga no presenta problemas de escalabilidad.
+
+
+
+## Consideraciones
+
+*   **NUMA = hardware (nivel físico).**
+*   **Soft-NUMA = software (nivel SQL Server).**
+*   SQL Server crea Soft-NUMA automáticamente desde 2016 si detecta muchos cores.
+
+**Ver configuración:**
+
+```sql
+SELECT node_id, memory_node_id, online_scheduler_count, processor_group
+FROM sys.dm_os_nodes
+WHERE node_state_desc = 'ONLINE';
+```
+
+
+## Cómo se activa Soft-NUMA
+
+*   Automático en SQL Server 2016+.
+*   Manual: Configuración avanzada o parámetros de inicio.
+*   No requiere cambios en hardware.
+
+
+## Ejemplo práctico de Soft-NUMA
+
+Supongamos:
+
+*   Servidor con 64 cores físicos y 2 nodos NUMA físicos (32 cores cada uno).
+*   SQL Server detecta que cada nodo NUMA físico tiene más de 8 cores → entonces crea Soft-NUMA dividiendo cada nodo físico en 4 nodos lógicos (8 cores cada uno).
+
+**Resultado:**
+
+*   En vez de 2 nodos NUMA físicos grandes, tienes 8 nodos NUMA lógicos.
+*   Cada nodo lógico tiene su propio scheduler group y memory node.
+*   Esto reduce contención interna y mejora paralelismo.
+
+## ¿Por qué usar Soft-NUMA si ya tengo NUMA físico?
+
+*   NUMA físico agrupa CPUs y memoria en nodos grandes.
+*   Si cada nodo tiene muchos cores, puede haber contención en spinlocks y plan cache.
+*   Soft-NUMA subdivide esos nodos para:
+    *   Mejor balanceo de schedulers.
+    *   Menos competencia por recursos internos.
+    *   Optimización en cargas OLTP muy concurrentes.
+
+ 
+### Scheduler
+
+*   Es el planificador de tareas dentro del sistema operativo y SQL Server.
+*   Decide qué hilo se ejecuta en qué núcleo y cuándo.
+
+En SQL Server:
+
+*   Cada scheduler se asigna a un CPU lógico.
+*   Si tienes 64 cores lógicos, tendrás 64 schedulers.
+*   Problemas comunes: `SOS_SCHEDULER_YIELD` (espera por CPU).
+
+ 
+---
