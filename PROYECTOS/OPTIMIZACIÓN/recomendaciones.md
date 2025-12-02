@@ -969,6 +969,140 @@ WHERE object_id = OBJECT_ID('TuTabla');
 ---
 
 
+# Nivel de aislamiento
+
+## 🛠️ Sintaxis General
+
+La sintaxis es la siguiente:
+
+```sql
+SET TRANSACTION ISOLATION LEVEL {
+    READ UNCOMMITTED
+  | READ COMMITTED
+  | REPEATABLE READ
+  | SNAPSHOT
+  | SERIALIZABLE
+}
+```
+ 
+
+## 💡 Niveles de Aislamiento Comunes
+
+Aquí tienes una breve descripción de los niveles de aislamiento más comunes y cómo los estableces:
+
+  * **READ UNCOMMITTED:** Permite que una transacción lea datos que han sido modificados por otras transacciones, pero aún no han sido *commitidos* (confirmados). Esto puede resultar en **lecturas sucias** (*dirty reads*).
+
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+    ```
+
+  * **READ COMMITTED:** Es el nivel por defecto en SQL Server. Una transacción solo puede leer datos que han sido *commitidos* por otras transacciones, previniendo lecturas sucias. Sin embargo, puede experimentar **lecturas no repetibles** (*non-repeatable reads*) o **filas fantasma** (*phantom rows*).
+
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    ```
+
+  * **REPEATABLE READ:** Una transacción puede leer repetidamente los mismos datos y ve los mismos valores hasta que finaliza. Previene las lecturas no repetibles, pero aún puede experimentar filas fantasma.
+
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+    ```
+
+  * **SERIALIZABLE:** Es el nivel más restrictivo. Garantiza que si la transacción se ejecutara en serie (una tras otra), produciría los mismos resultados. Previene lecturas sucias, no repetibles y filas fantasma.
+
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+    ```
+
+  * **SNAPSHOT:** Utiliza un mecanismo basado en versiones para proveer consistencia a nivel de sentencia o transacción. Las transacciones leen los datos tal como existían al inicio de la transacción, evitando que las operaciones de lectura bloqueen las escrituras.
+
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+    ```
+
+    (Nota: Para usar **SNAPSHOT**, la base de datos debe tener habilitada la opción `ALLOW_SNAPSHOT_ISOLATION`).
+
+
+
+## 📝 Ejemplo de Uso
+
+Generalmente, estableces el nivel de aislamiento **antes** de iniciar una transacción explícita:
+
+```sql
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+BEGIN TRANSACTION;
+    -- Aquí van tus sentencias SELECT, INSERT, UPDATE, DELETE
+    SELECT * FROM MiTabla WHERE ID = 1;
+    UPDATE MiTabla SET Columna = 'NuevoValor' WHERE ID = 1;
+
+COMMIT TRANSACTION;
+```
+
+
+ 
+
+###  ¿Cómo ver si están habilitados?
+
+Ejecuta esta consulta en la base de datos que quieres revisar:
+
+```sql
+SELECT name, is_read_committed_snapshot_on, snapshot_isolation_state_desc
+FROM sys.databases
+WHERE name = 'TuBaseDeDatos';
+```
+
+*   **is\_read\_committed\_snapshot\_on**
+    *   `1` = **READ\_COMMITTED\_SNAPSHOT** habilitado
+    *   `0` = deshabilitado
+
+*   **snapshot\_isolation\_state\_desc**
+    *   `ON` = **ALLOW\_SNAPSHOT\_ISOLATION** habilitado
+    *   `OFF` = deshabilitado
+
+
+
+###  ¿Para qué sirve cada uno?
+
+#### **1. ALLOW\_SNAPSHOT\_ISOLATION**
+
+*   Permite que las transacciones usen el nivel de aislamiento **SNAPSHOT**.
+*   Este nivel evita bloqueos de lectura porque las lecturas se hacen sobre una versión consistente de los datos (versionado en tempdb).
+*   Se activa por transacción con:
+    ```sql
+    SET TRANSACTION ISOLATION LEVEL SNAPSHOT;
+    ```
+*   **Uso típico:** sistemas con alta concurrencia donde se quiere evitar bloqueos entre lectores y escritores.
+
+
+
+#### **2. READ\_COMMITTED\_SNAPSHOT**
+
+*   Cambia el comportamiento del nivel **READ COMMITTED** para usar **versionado de filas** en lugar de bloqueos.
+*   Se aplica automáticamente a todas las transacciones que usan READ COMMITTED (por defecto en SQL Server).
+*   **Beneficio:** reduce bloqueos sin necesidad de cambiar el código de la aplicación.
+*   Se habilita a nivel de base de datos:
+    ```sql
+    ALTER DATABASE TuBaseDeDatos SET READ_COMMITTED_SNAPSHOT ON;
+    ```
+
+
+
+###  ¿Tienen relación?
+
+Sí, ambos usan **versionado en tempdb**, pero:
+
+*   **READ\_COMMITTED\_SNAPSHOT** afecta el nivel por defecto (READ COMMITTED).
+*   **ALLOW\_SNAPSHOT\_ISOLATION** habilita un nivel adicional (SNAPSHOT) que debe ser solicitado explícitamente.
+
+**En resumen:**
+
+*   Si habilitas **READ\_COMMITTED\_SNAPSHOT**, todas las lecturas en READ COMMITTED serán con versión.
+*   Si habilitas **ALLOW\_SNAPSHOT\_ISOLATION**, puedes usar SNAPSHOT en tus transacciones.
+
+
+ 
+
 # Links 
 ```
 Extensiones de SQL Server, PFS, GAM, SGAM e IAM y corrupciones relacionadas -> https://techcommunity.microsoft.com/blog/sqlserversupport/sql-server-extents-pfs-gam-sgam-and-iam-and-related-corruptions/1606011
