@@ -50,6 +50,8 @@ Crea tus primeros planes de mantenimiento en SQL Server -> https://www.youtube.c
 
 
 	# Optimiazación
+Uso del SQL Server Query Store para optimizacion -> https://www.youtube.com/watch?v=AV24wNRJINs
+
 Optimizando SQL Server - Tipos de datos -> https://www.youtube.com/watch?v=C0wgE-3UIyE&list=PL4xPHdgInKcFrHdFeLgt4Lmi8aS9QlHtA&index=8
 Tablas en memoria -> https://www.youtube.com/watch?v=aPcVxYUqymw&t=474s
 Part 1: SQL Performance Tuning: 10 Real-World Scenarios -> https://www.youtube.com/live/iTQ9etIFomM
