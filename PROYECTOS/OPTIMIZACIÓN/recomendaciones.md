@@ -1,3 +1,4 @@
+
 # Revisar Consumo de memoria 
 Vista dinámica que te da información detallada sobre cómo el motor está usando la memoria internamente.
 
@@ -843,8 +844,126 @@ Suprime los mensajes de backup exitoso en el error log. Los backups fallidos sí
  [usar la pagina](https://bornsql.ca/s/memory/)
 --- 
 
+ 
+
+ 
+# **Estadísticas en SQL Server: Claves para Rendimiento**
+
+Las **estadísticas** son fundamentales para que el **optimizador de consultas** elija el mejor plan de ejecución. Si están desactualizadas o mal gestionadas, el rendimiento se degrada, especialmente en sistemas transaccionales con alta concurrencia.
 
 
+
+##  **1. AUTO_CREATE_STATISTICS**
+
+*   **¿Qué es?**  
+    Permite que SQL Server cree automáticamente estadísticas en columnas usadas en predicados (WHERE, JOIN) cuando no existen.
+*   **¿Para qué sirve?**  
+    Ayuda al optimizador a tener información precisa sin intervención manual.
+*   **Ventajas:**
+    *   Mejora planes de ejecución sin esfuerzo.
+    *   Reduce necesidad de crear estadísticas manualmente.
+*   **Desventajas:**
+    *   Puede generar muchas estadísticas en entornos con consultas ad-hoc.
+    *   Incrementa uso de CPU y disco al crearlas.
+*   **¿Cuándo usar?**
+    *   **Sí:** En la mayoría de los entornos OLTP y OLAP.
+    *   **No:** Si tienes un diseño muy controlado y creas estadísticas manualmente.
+*   **Consideraciones críticas:**
+    *   No desactivar en sistemas dinámicos.
+    *   Monitorear cantidad de estadísticas para evitar sobrecarga.
+
+
+
+##  **2. AUTO_UPDATE_STATISTICS**
+
+*   **¿Qué es?**  
+    Actualiza automáticamente estadísticas cuando detecta cambios significativos en los datos.
+*   **¿Para qué sirve?**  
+    Mantiene estadísticas frescas para planes óptimos.
+*   **Ventajas:**
+    *   Reduce riesgo de planes obsoletos.
+    *   Automático, sin intervención manual.
+*   **Desventajas:**
+    *   Puede causar **pausas** en consultas cuando se actualizan sincrónicamente.
+*   **¿Cuándo usar?**
+    *   **Sí:** Siempre en entornos OLTP y OLAP.
+    *   **No:** Nunca desactivar, salvo casos muy específicos con mantenimiento manual.
+*   **Consideraciones críticas:**
+    *   Actualización es **sincrónica** → puede afectar tiempos de respuesta.
+    *   Ajustar umbrales con `trace flags` o `ALTER DATABASE SET AUTO_UPDATE_STATISTICS`.
+
+
+
+##  **3. AUTO_UPDATE_STATISTICS_ASYNC**
+
+*   **¿Qué es?**  
+    Permite que la actualización de estadísticas ocurra **asíncronamente**, evitando que la consulta espere.
+*   **¿Para qué sirve?**  
+    Evita bloqueos por actualización de estadísticas.
+*   **Ventajas:**
+    *   Mejora concurrencia en sistemas muy transaccionales.
+    *   Reduce tiempos de espera.
+*   **Desventajas:**
+    *   La primera consulta después del cambio puede usar estadísticas obsoletas.
+*   **¿Cuándo usar?**
+    *   **Sí:** En sistemas con alta concurrencia y consultas críticas.
+    *   **No:** Si necesitas máxima precisión en cada ejecución.
+*   **Consideraciones críticas:**
+    *   Activar junto con `AUTO_UPDATE_STATISTICS`.
+    *   Monitorear impacto en planes de ejecución.
+
+
+
+##  **4. INCREMENTAL_STATS**
+
+*   **¿Qué es?**  
+    Permite actualizar estadísticas **por partición** en tablas particionadas.
+*   **¿Para qué sirve?**  
+    Evita recalcular estadísticas completas en tablas enormes.
+*   **Ventajas:**
+    *   Ahorra tiempo y recursos en tablas grandes.
+    *   Ideal para entornos de data warehouse.
+*   **Desventajas:**
+    *   Solo disponible en Enterprise Edition.
+    *   Configuración más compleja.
+*   **¿Cuándo usar?**
+    *   **Sí:** Tablas particionadas con millones de filas.
+    *   **No:** Tablas pequeñas o sin particiones.
+*   **Consideraciones críticas:**
+    *   Requiere habilitar `INCREMENTAL = ON` al crear estadísticas.
+    *   Compatible con `UPDATE STATISTICS` por partición.
+
+
+
+##  **Importancia y Cuidado**
+
+*   **Estadísticas = corazón del optimizador.**  
+    Si están desactualizadas → planes malos → rendimiento pobre.
+*   **En tu caso (288 GB RAM, 64 cores, 10 TB):**
+    *   Activa **AUTO_CREATE** y **AUTO_UPDATE**.
+    *   Activa **ASYNC** para evitar bloqueos.
+    *   Usa **INCREMENTAL_STATS** en tablas particionadas.
+*   **Monitoreo crítico:**
+    *   DMV: `sys.stats`, `sys.dm_db_stats_properties`.
+    *   Jobs de mantenimiento: `UPDATE STATISTICS` o `sp_updatestats`.
+
+
+# Validar si esta activado 
+
+```
+SELECT name AS DatabaseName,
+       is_auto_create_stats_on,
+       is_auto_update_stats_on,
+       is_auto_update_stats_async_on
+FROM sys.databases;
+
+
+SELECT name, is_incremental
+FROM sys.stats
+WHERE object_id = OBJECT_ID('TuTabla');
+
+
+```
 
 
 ---
