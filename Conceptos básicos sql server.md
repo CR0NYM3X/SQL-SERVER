@@ -504,9 +504,7 @@ Los procesadores modernos tienen cachés multinivel para reducir la latencia ent
 
 ## ¿Qué es Soft-NUMA?
 
-es una característica de SQL Server (desde la versión 2016 se activa automáticamente) que permite dividir los núcleos de CPU de un único socket grande (o un servidor sin NUMA físico) en múltiples grupos lógicos, que SQL Server llama nodos Soft-NUMA.
-
-
+es una característica de SQL Server crea varios nodos Soft-Numa logicos  (desde la versión 2016 se activa automáticamente) que permite dividir los núcleos de CPU de un único socket grande (o un servidor sin NUMA físico) en múltiples grupos lógicos, que SQL Server llama nodos Soft-NUMA.  
 
 **Objetivo:**
 *   El objetivo es mejorar la escalabilidad y el rendimiento al crear particiones lógicas de los recursos, lo que beneficia a las estructuras internas del motor de base de datos.
@@ -548,6 +546,14 @@ es una característica de SQL Server (desde la versión 2016 se activa automáti
 SELECT node_id, memory_node_id, online_scheduler_count, processor_group
 FROM sys.dm_os_nodes
 WHERE node_state_desc = 'ONLINE';
+
+"SELECT * FROM sys.dm_os_schedulers WHERE status = 'VISIBLE ONLINE';
+
+
+-- Hardware information from SQL Server 2022  (Query 18) (Hardware Info)
+SELECT cpu_count AS [Logical CPU Count], scheduler_count, (socket_count * cores_per_socket) AS [Physical Core Count], socket_count AS [Socket Count], cores_per_socket, numa_node_count, physical_memory_kb/1024 AS [Physical Memory (MB)], max_workers_count AS [Max Workers Count], affinity_type_desc AS [Affinity Type], sqlserver_start_time AS [SQL Server Start Time], DATEDIFF(hour, sqlserver_start_time, GETDATE()) AS [SQL Server Up Time (hrs)], virtual_machine_type_desc AS [Virtual Machine Type], softnuma_configuration_desc AS [Soft NUMA Configuration], sql_memory_model_desc, container_type_desc FROM sys.dm_os_sys_info WITH (NOLOCK) OPTION (RECOMPILE);
+
+
 ```
 
 
