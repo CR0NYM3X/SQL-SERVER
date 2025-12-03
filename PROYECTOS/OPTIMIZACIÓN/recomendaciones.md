@@ -1104,8 +1104,39 @@ Sí, ambos usan **versionado en tempdb**, pero:
 *   Si habilitas **READ\_COMMITTED\_SNAPSHOT**, todas las lecturas en READ COMMITTED serán con versión.
 *   Si habilitas **ALLOW\_SNAPSHOT\_ISOLATION**, puedes usar SNAPSHOT en tus transacciones.
 
+---
 
- 
+# Cost Threshold for Parallelism
+En caso de tener un alto nivel de paralelismo  en waiting_tasks_count y bajo número promedio de espera entonces estas bien pero considera que puedes estar utilizando paralelismo en consultas que no lo requieren.
+
+```
+ SELECT TOP (50)
+    qs.query_hash,
+    qs.total_worker_time / NULLIF(qs.execution_count, 0) AS avg_cpu_time,
+    qs.total_elapsed_time / NULLIF(qs.execution_count, 0) AS avg_duration,
+    qs.execution_count,
+    CAST(qp.query_plan AS NVARCHAR(MAX)) AS plan_text,
+    qp.query_plan
+FROM sys.dm_exec_query_stats AS qs
+CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp
+WHERE CAST(qp.query_plan AS NVARCHAR(MAX)) LIKE N'%PhysicalOp="Parallelism"%'
+-- WHERE qp.query_plan.exist('//RelOp[@PhysicalOp="Parallelism"]') = 1 -- 
+ORDER BY avg_cpu_time DESC;
+
+
+
+SELECT
+    wait_type,
+    wait_time_ms,
+    waiting_tasks_count,
+    -- Calcula el tiempo de espera promedio por tarea
+    (wait_time_ms / waiting_tasks_count) AS avg_wait_time_ms
+FROM sys.dm_os_wait_stats
+WHERE wait_type IN ('CXPACKET', -- Este es el indicador primario del paralelismo. Un alto tiempo de espera en CXPACKET significa que un thread (parte del plan paralelo) está esperando a que los otros threads terminen su trabajo para que todos puedan sincronizarse.
+					'CXCONSUMER') -- Este es el thread coordinador esperando el resultado de los threads paralelos. Un alto CXCONSUMER significa que el thread coordinador está inactivo esperando que los subprocesos completen el trabajo.
+ORDER BY wait_time_ms DESC;
+```
+
 
 # Links 
 ```
