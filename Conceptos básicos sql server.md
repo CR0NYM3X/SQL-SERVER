@@ -610,17 +610,71 @@ Cuando el sistema operativo le reporta a SQL Server que existe una estructura NU
 En este escenario, el Soft-NUMA ya **no es necesario** para crear la partición *básica* de recursos.
 
 
+## 🧠 Proceso  Automático de Soft-NUMA 
+
+El flujo de decisión que sigue el motor de SQL Server (`sqlservr.exe`) para particionar los núcleos lógicos de un *socket* o de un nodo NUMA grande es el siguiente:
+
+### 1. Detección de la Topología de Hardware
+
+SQL Server primero consulta al sistema operativo para determinar la topología de la CPU.
+
+* **¿Hay NUMA Físico?**
+    * **Si SÍ (Hardware NUMA):** SQL Server identifica los límites de cada nodo NUMA físico. La decisión de Soft-NUMA se aplicará *dentro* de esos nodos físicos.
+    * **Si NO (Solo un Socket Grande o VM mal configurada):** SQL Server trata todos los núcleos visibles como un solo nodo grande.
+
+### 2. Aplicación de la Regla de Activación (Heurística)
+
+SQL Server evalúa cada nodo (físico o el único nodo grande sin NUMA) con la siguiente regla:
+
+* **Regla:** Si un nodo tiene **8 o más núcleos lógicos**, SQL Server decide aplicar la partición Soft-NUMA.
+    * **Motivo:** Se considera que por debajo de 8 núcleos, el *overhead* de la coordinación de *threads* no es un problema de escalabilidad significativo, y el costo de dividir estructuras internas no se justifica.
+
+### 3. Cálculo de la Partición (El Flujo Semántico)
+
+Si se cumple la regla (8 o más núcleos), SQL Server calcula el número de nodos Soft-NUMA y los núcleos por nodo utilizando un proceso de división simple y consistente:
+
+* **Paso 3a: División por el Múltiplo de 8.**
+    El número de núcleos del nodo se divide en la mayor cantidad de grupos posible, con el tamaño preferente de **8 núcleos lógicos** por nodo Soft-NUMA.
+    * *Ejemplo:* Si el nodo tiene **16 núcleos**, se crean **2 nodos Soft-NUMA** (16 / 8 = 2).
+
+* **Paso 3b: Manejo del Sobrante.**
+    Si el número total de núcleos no es divisible exactamente por 8, se aplica la partición más equitativa posible, intentando mantener los nodos del mismo tamaño.
+    * *Ejemplo 1:* Si el nodo tiene **12 núcleos**, se dividiría en **2 nodos Soft-NUMA**, cada uno con **6 núcleos** (12 / 2 = 6).
+    * *Ejemplo 2:* Si el nodo tiene **18 núcleos**, se dividiría en **2 nodos Soft-NUMA**, uno con **9** y el otro con **9** (18 / 2 = 9).
+
+### 4. Creación de Objetos Internos
+
+Una vez definida la topología Soft-NUMA, SQL Server **asigna** recursos específicos a cada nodo Soft-NUMA recién creado.
+
+* **Asignación de Schedulers:** Se crea un *scheduler* de CPU dedicado para cada nodo Soft-NUMA.
+* **Partición del Buffer Pool:** La memoria caché de datos se particiona para que cada nodo Soft-NUMA tenga acceso optimizado a la sección de memoria que le corresponde.
+
+ 
  
 ### Scheduler
 
-*   Es el planificador de tareas dentro del sistema operativo y SQL Server.
-*   Decide qué hilo se ejecuta en qué núcleo y cuándo.
+Los **Schedulers** (Planificadores) en SQL Server son componentes internos fundamentales del motor de base de datos responsables de gestionar y asignar los **subprocesos (threads)** de trabajo a los **núcleos de CPU** disponibles.
+En esencia, son el mecanismo de **SQL Server** para manejar la concurrencia y asegurarse de que el trabajo se distribuya eficientemente en el hardware.
 
-En SQL Server:
+ 
+## ⚙️ Concepto y Función Principal
 
-*   Cada scheduler se asigna a un CPU lógico.
-*   Si tienes 64 cores lógicos, tendrás 64 schedulers.
-*   Problemas comunes: `SOS_SCHEDULER_YIELD` (espera por CPU).
+### 1. Gestión de la CPU
+
+Cada **núcleo lógico** de CPU que SQL Server utiliza es mapeado a un *Scheduler*. Si tu servidor tiene 16 núcleos lógicos, SQL Server crea 16 *Schedulers*.
+
+* **Asignación de Subprocesos:** La función principal del *Scheduler* es mantener un control de los subprocesos de trabajo y moverlos entre los tres estados principales:
+    * **RUNNING (Ejecutándose):** El subproceso está activo en el núcleo de la CPU.
+    * **RUNNABLE (Ejecutable):** El subproceso está listo para ejecutarse y esperando su turno para ser asignado a la CPU.
+    * **SUSPENDED (Suspendido):** El subproceso está esperando que se complete un recurso (como una lectura de disco, un bloqueo, o un recurso de red).
+
+### 2. Coordinación de Concurrencia
+
+Los *Schedulers* no solo gestionan el tiempo de CPU, sino que también actúan como el punto de control para la **concurrencia** dentro de SQL Server:
+
+* **Supervisión:** El *Scheduler* se asegura de que ningún subproceso acapare el núcleo por demasiado tiempo, forzando periódicamente a los subprocesos a ceder el control (este es el concepto de *cooperative scheduling* o **planificación cooperativa** que utiliza SQL Server).
+* **Gestión de Trabajadores:** Los *Schedulers* manejan los subprocesos que realizan el trabajo de las consultas entrantes. Estos subprocesos se conocen como **SQL OS Workers** (Trabajadores del Sistema Operativo de SQL Server).
+ 
 
  
 ---
