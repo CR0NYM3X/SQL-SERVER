@@ -571,7 +571,7 @@ WaitTypes AS (
 	    ('HADR_FILESTREAM_IOMGR_IOCOMPLETION', 'Espera en operaciones FILESTREAM en Always On.', 'Latencia en I/O FILESTREAM.'),
 	
 	    -- CPU y Paralelismo
-	    ('SOS_SCHEDULER_YIELD', 'El hilo de SQL Server cede voluntariamente la CPU para que otros hilos puedan ejecutarse.', 'Presión Alta de CPU. El servidor está saturado de trabajo y las consultas tienen que esperar su turno para procesar.'),
+	    ('SOS_SCHEDULER_YIELD', 'El hilo de SQL Server cede voluntariamente la CPU para que otros hilos puedan ejecutarse y no quede esperando.', 'Presión Alta de CPU. El servidor está saturado de trabajo y las consultas tienen que esperar su turno para procesar.'),
 	    ('CXPACKET', 'Esperando que los hilos paralelos en una consulta se sincronicen y avancen juntos.', 'Paralelismo Excesivo o Desbalanceado. El grado de paralelismo (MAXDOP) es demasiado alto, o el plan de ejecución está desequilibrado.'),
 	    ('CXCONSUMER', 'Un hilo consumidor de un plan paralelo está esperando que un hilo productor le entregue filas.', 'Procesamiento Paralelo Desbalanceado. La producción de datos entre los hilos no es uniforme (sesgo de datos).'),
 	    ('CXROWSET_SYNC', 'Sincronización en operaciones paralelas con rowsets.', 'Paralelismo en consultas complejas.'),
