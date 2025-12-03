@@ -207,7 +207,7 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 	
 	-- Consulta para ver uso del plan cache:
 	-- Si hay muchos planes ad-hoc y alta presión en cache, es candidato.
-	SELECT cacheobjtype, objtype, COUNT(*) AS Cantidad FROM sys.dm_exec_cached_plans GROUP BY cacheobjtype, objtype;
+	SELECT cacheobjtype,objtype AS TipoObjeto,COUNT(*) AS Cantidad,SUM(CAST(size_in_bytes AS BIGINT)) / 1024 / 1024 AS TamañoMB FROM sys.dm_exec_cached_plans GROUP BY cacheobjtype,objtype ORDER BY Cantidad DESC;
 	
 	-- Monitorear waits CXPACKET y SOS_SCHEDULER_YIELD:
 	-- Si son muy altos, indica problemas de paralelismo y contención.
