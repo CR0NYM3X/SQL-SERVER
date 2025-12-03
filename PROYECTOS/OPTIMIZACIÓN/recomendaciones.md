@@ -212,8 +212,12 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 	-- Monitorear waits CXPACKET y SOS_SCHEDULER_YIELD:
 	-- Si son muy altos, indica problemas de paralelismo y contención.
 	SELECT wait_type, waiting_tasks_count, wait_time_ms FROM sys.dm_os_wait_stats WHERE wait_type IN ('CXPACKET','SOS_SCHEDULER_YIELD');
+	SELECT wait_type, waiting_tasks_count, wait_time_ms FROM sys.dm_os_wait_stats WHERE wait_type LIKE 'PAGELATCH%';
 	
-
+	-- Uso del buffer pool
+	SELECT COUNT(*) AS total_pages, database_id
+	FROM sys.dm_os_buffer_descriptors
+	GROUP BY database_id;
 
     ```
 
@@ -250,6 +254,42 @@ Aumenta el número de **buckets en el plan cache** para reducir la contención e
 
 *   Aumenta el número de buckets en el plan cache, reduciendo la probabilidad de que dos hilos compitan por el mismo bucket.
 *   Menos contención → mejor escalabilidad en entornos con muchísimas consultas ad hoc.
+
+
+ 
+###  ¿Qué son los “giros” (spins) en SQL Server?
+
+Cuando dos hilos (threads) quieren acceder a un recurso compartido (por ejemplo, el **plan cache**), SQL Server usa un mecanismo llamado **spinlock** para sincronización.  
+Un spinlock funciona así:
+
+1.  El hilo intenta tomar el recurso.
+2.  Si está ocupado, **no se duerme** inmediatamente (como un bloqueo normal), sino que **gira en un bucle** (spin) verificando repetidamente si el recurso se libera.
+3.  Cada “giro” es una iteración en ese bucle.
+
+Esto se hace porque dormir y despertar un hilo es costoso, así que SQL Server prefiere girar un poco esperando que el recurso se libere rápido.
+
+ 
+
+###  ¿Por qué importa cuántos giros hay?
+
+*   **spins\_per\_collision** = promedio de giros por cada colisión.
+*   Si este número es **alto**, significa que los hilos están gastando **mucho tiempo de CPU girando sin hacer trabajo útil** → contención severa.
+
+Ejemplo:
+
+*   Si `spins_per_collision = 343`, el hilo gira 343 veces por cada colisión.
+*   Si `spins_per_collision = 33,994`, el hilo gira 33,994 veces → **CPU desperdiciada**.
+
+ 
+
+###  ¿Qué son los backoffs?
+
+Cuando SQL Server detecta que girar demasiado no ayuda, hace un **backoff**:
+
+*   El hilo se detiene un momento (sleep) antes de volver a intentar.
+*   **backoffs** = cuántas veces ocurrió esto.
+*   Si hay millones de backoffs, significa que la contención es tan alta que girar no sirve y el sistema está pausando hilos constantemente → **latencia y pérdida de rendimiento**.
+ 
 
 ---
 
