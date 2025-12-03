@@ -1590,6 +1590,45 @@ SELECT
 FROM sys.dm_os_sys_info;
 
 
+------------------ REVISAR LA CANTIDAD DE RESPALDOS QUE SE HACEN ------------
+
+-- BACKUP DATABASE successfully processed   
+-- BACKUP failed to complete the command BACKUP DATABASE
+EXEC sp_readerrorlog 0, 1, 'BACKUP DATABASE'; 
+
+
+SELECT 
+    database_name,
+    CASE type
+        WHEN 'D' THEN 'Full'
+        WHEN 'I' THEN 'Differential'
+        WHEN 'L' THEN 'Log'
+        ELSE type
+    END AS BackupType,
+    COUNT(*) AS TotalBackups,
+    MIN(backup_start_date) AS FirstBackup,
+    MAX(backup_finish_date) AS LastBackup,
+    DATEDIFF(MINUTE, MIN(backup_start_date), MAX(backup_finish_date)) AS IntervalMinutes
+FROM msdb.dbo.backupset
+  WHERE backup_start_date > DATEADD(DAY, -1, GETDATE()) -- últimos 1 día
+          -- and  database_name = 'MIDBNAME'
+GROUP BY database_name,type
+ORDER BY TotalBackups DESC;
+
+
+SELECT TOP 100
+    a.backup_start_date,
+    a.type,
+    a.database_name,
+    a.backup_finish_date
+FROM msdb.dbo.backupset AS a
+where database_name = 'MIDBNAME'
+ORDER BY a.backup_start_date DESC;
+
+
+ 
+
+
 ```
 
 
