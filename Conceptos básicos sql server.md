@@ -504,11 +504,12 @@ Los procesadores modernos tienen cachés multinivel para reducir la latencia ent
 
 ## ¿Qué es Soft-NUMA?
 
-**Soft-NUMA** es una característica de software en SQL Server que divide nodos NUMA físicos en nodos lógicos más pequeños para mejorar la distribución de carga.  
-Soft-NUMA **no crea memoria local nueva**, solo divide la asignación lógica de CPUs y schedulers dentro del mismo nodo físico.
+es una característica de SQL Server (desde la versión 2016 se activa automáticamente) que permite dividir los núcleos de CPU de un único socket grande (o un servidor sin NUMA físico) en múltiples grupos lógicos, que SQL Server llama nodos Soft-NUMA.
+
+
 
 **Objetivo:**
-
+*   El objetivo es mejorar la escalabilidad y el rendimiento al crear particiones lógicas de los recursos, lo que beneficia a las estructuras internas del motor de base de datos.
 *   Reducir contención en servidores con muchos cores (ej. 64).
 *   Balancear schedulers y memoria.
 
@@ -578,6 +579,30 @@ Supongamos:
     *   Mejor balanceo de schedulers.
     *   Menos competencia por recursos internos.
     *   Optimización en cargas OLTP muy concurrentes.
+
+
+
+### ¿Qué Pasa si NO Tienes NUMA Físico?
+
+Si tu servidor o máquina virtual (VM) no tiene nodos NUMA físicos (todo se reporta como un solo nodo 0), SQL Server activará Soft-NUMA para dividir los recursos lógicos, si se cumplen los requisitos de núcleos:
+
+SQL Server divide los núcleos lógicos en nodos Soft-NUMA más pequeños
+
+* **Beneficios Clave:**
+  * **Schedulers:** Se crean **schedulers** independientes para cada nodo Soft-NUMA, mejorando la gestión de subprocesos.
+  * **Escritores Diferidos (Lazy Writer):** Se crea un subproceso de **Lazy Writer** por cada nodo, mejorando el rendimiento de las E/S y la administración de la memoria.
+  * **Partición Interna:** SQL Server particiona estructuras internas (como las de caché de búfer) a nivel de nodo Soft-NUMA, reduciendo la contención de bloqueos internos (*latches*).
+
+
+## 1. 🥇 Prioridad: NUMA Física (Hardware NUMA)
+
+Cuando el sistema operativo le reporta a SQL Server que existe una estructura NUMA física (múltiples nodos de CPU/memoria), SQL Server hace lo siguiente:
+
+1.  **Adopta la Topología:** Utiliza inmediatamente los nodos físicos (Node 0, Node 1, etc.) para alinear sus estructuras internas.
+2.  **Alineación de Recursos:** Crea **schedulers** (planificadores), **lazy writers**, y particiona el **Buffer Pool** (caché de datos) para que cada estructura pertenezca a su nodo NUMA físico. Esto asegura que los procesos de un nodo accedan preferentemente a la memoria local de ese nodo, que es el objetivo principal de NUMA.
+
+En este escenario, el Soft-NUMA ya **no es necesario** para crear la partición *básica* de recursos.
+
 
  
 ### Scheduler
