@@ -856,7 +856,7 @@ Las **estadísticas** son fundamentales para que el **optimizador de consultas**
 ##  **1. AUTO_CREATE_STATISTICS**
 
 *   **¿Qué es?**  
-    Permite que SQL Server cree automáticamente estadísticas en columnas usadas en predicados (WHERE, JOIN) cuando no existen.
+    Permite que SQL Server Crea automáticamente estadísticas para columnas que no tienen estadísticas  usadas en predicados (WHERE, JOIN) cuando se ejecutan consultas que las necesitan.    
 *   **¿Para qué sirve?**  
     Ayuda al optimizador a tener información precisa sin intervención manual.
 *   **Ventajas:**
@@ -869,6 +869,7 @@ Las **estadísticas** son fundamentales para que el **optimizador de consultas**
     *   **Sí:** En la mayoría de los entornos OLTP y OLAP.
     *   **No:** Si tienes un diseño muy controlado y creas estadísticas manualmente.
 *   **Consideraciones críticas:**
+	*  Mantenerlo activado en la mayoría de los casos, porque ayuda al optimizador a generar mejores planes sin intervención manual.
     *   No desactivar en sistemas dinámicos.
     *   Monitorear cantidad de estadísticas para evitar sobrecarga.
 
@@ -898,6 +899,7 @@ Las **estadísticas** son fundamentales para que el **optimizador de consultas**
 
 *   **¿Qué es?**  
     Permite que la actualización de estadísticas ocurra **asíncronamente**, evitando que la consulta espere.
+    Si está activado, la consulta sigue ejecutándose con estadísticas viejas y la actualización ocurre en segundo plano.
 *   **¿Para qué sirve?**  
     Evita bloqueos por actualización de estadísticas.
 *   **Ventajas:**
@@ -906,11 +908,13 @@ Las **estadísticas** son fundamentales para que el **optimizador de consultas**
 *   **Desventajas:**
     *   La primera consulta después del cambio puede usar estadísticas obsoletas.
 *   **¿Cuándo usar?**
-    *   **Sí:** En sistemas con alta concurrencia y consultas críticas.
-    *   **No:** Si necesitas máxima precisión en cada ejecución.
+    *   **Sí:**  Activar en entornos con alta concurrencia y consultas largas donde no quieres bloqueos.
+    *   **No:**  Desactivar en entornos donde la precisión del plan es crítica (OLTP muy sensible).
 *   **Consideraciones críticas:**
     *   Activar junto con `AUTO_UPDATE_STATISTICS`.
     *   Monitorear impacto en planes de ejecución.
+    *   Si desactivas AUTO_UPDATE_STATISTICS, el modo asíncrono no tiene efecto.
+	* Si activas ambos, el comportamiento será asíncrono y no sincrono.
 
 
 
