@@ -21,15 +21,6 @@ Cada fila en `sys.dm_os_memory_clerks` representa un tipo de memoria usada por u
 *   **`virtual_memory_committed_kb`** → Memoria virtual comprometida.
 *   **`awe_allocated_kb`** → Memoria asignada con AWE (en versiones antiguas).
 *   **`memory_node_id`** → Nodo NUMA al que pertenece.
-
-### ✅ **¿Qué puedes analizar con esto?**
-
-*   **Buffer Pool**: `MEMORYCLERK_SQLBUFFERPOOL` → indica cuánto ocupa el cache de datos.
-*   **Plan Cache**:
-    *   `CACHESTORE_SQLCP` → planes ad-hoc.
-    *   `CACHESTORE_OBJCP` → planes compilados (procedimientos).
-*   **Lock Manager**: `MEMORYCLERK_LOCK_MANAGER` → memoria usada para bloqueos.
-*   **Query Execution**: `MEMORYCLERK_SQLQUERYEXECUTOR` → memoria para ejecución de consultas.
  
 ### ✅ **Casos prácticos donde es útil**
 
@@ -37,6 +28,80 @@ Cada fila en `sys.dm_os_memory_clerks` representa un tipo de memoria usada por u
 *   Identificar **plan cache inflado** (ej. demasiados planes ad-hoc).
 *   Ver si el **Buffer Pool** está usando la memoria esperada.
 *   Analizar impacto de **NUMA** en asignación de memoria.
+
+ 
+
+## Qué significa cada `Memory Clerk Type`
+
+1.  **MEMORYCLERK\_SQLBUFFERPOOL**  
+
+*   **Qué es:** El **Buffer Pool** (núcleo del motor). Aquí viven las **páginas de datos e índices (8 KB)**, más metadatos asociados.
+*   **Para qué se usa:** Lecturas/escrituras de datos, caché de páginas; impacta directo en el **hit ratio** y el **Page Life Expectancy (PLE)**.
+*   **Interpretación:** Es normal que sea el mayor consumidor. Si está muy alto y el sistema se mantiene estable, es bueno (más datos en memoria = menos IO). Si el OS sufre presión de memoria, ajusta `max server memory`.
+
+2.  **OBJECTSTORE\_LOCK\_MANAGER** 
+
+*   **Qué es:** Memoria del **Lock Manager** (estructuras para S, X, IS, IX, etc.).
+*   **Para qué se usa:** Control de **concurrencia**. Cada lock/owner/lock hash ocupa memoria.
+*   **Interpretación:** Alto consumo suele indicar **muchas transacciones abiertas** o **workloads con alta contención** (muchos locks). Revisa esperas `LCK_*`, tamaño/tiempo de transacciones, y considera **RCSI/Snapshot** si aplica.
+
+3.  **CACHESTORE\_SQLCP**  
+
+*   **Qué es:** **Plan cache** para **SQL ad‑hoc** (sentencias dinámicas no parametrizadas).
+*   **Para qué se usa:** Guardar planes compilados de consultas ad-hoc.
+*   **Interpretación:** Si este valor es grande comparado con `CACHESTORE_OBJCP`, suele indicar **exceso de consultas con literales** (poca reutilización de planes).  
+    **Acción:** Promueve **parametrización** (sp, parametrized queries, `forced parameterization` o plantillas) para reducir compilaciones y memoria.
+
+4.  **MEMORYCLERK\_SOSNODE**  
+
+*   **Qué es:** Estructuras por **nodo SOS/NUMA**: schedulers, colas, workers, signals.
+*   **Para qué se usa:** Ejecutores y coordinación por **NUMA**.
+*   **Interpretación:** Normal. Crece con número de CPUs/schedulers y carga concurrente. Útil vigilar si hay **skew** entre nodos.
+
+5.  **MEMORYCLERK\_SQLSTORENG**  
+
+*   **Qué es:** **Storage Engine** (general). Estructuras internas del motor de almacenamiento (b‑trees, allocation, etc.).
+*   **Para qué se usa:** Metadatos y estructuras auxiliares para acceder a páginas/índices.
+*   **Interpretación:** Normal; escala con número de objetos y actividad.
+
+6.  **MEMORYCLERK\_SQLLOGPOOL**  
+
+*   **Qué es:** **Log Pool / Log Buffer** y estructuras relacionadas al **transaction log**.
+*   **Para qué se usa:** Agrupar y gestionar escrituras del log (group commit).
+*   **Interpretación:** Normal. Si ves esperas altas **`WRITELOG`**, revisa latencia del disco del log y tamaño del log buffer no suele ser el problema sino el I/O.
+
+7.  **USERSTORE\_SCHEMAMGR**  
+
+*   **Qué es:** **User store** para **metadata de esquemas** (definiciones de objetos, permisos/tokens asociados).
+*   **Para qué se usa:** Acelerar validaciones, compilación y acceso a catálogo.
+*   **Interpretación:** Normal en bases con muchas tablas/procs o cambios frecuentes en objetos. Si es muy alto y junto con `CACHESTORE_SQLCP`/`OBJCP`, revisa patrones de **DDL** y limpieza de objetos.
+
+8.  **MEMORYCLERK\_SQLCLR**  
+
+*   **Qué es:** Memoria usada por **CLR** (.NET) dentro del proceso de SQL Server.
+*   **Para qué se usa:** Funciones/procedimientos CLR, ensamblados cargados, objetos del runtime.
+*   **Interpretación:** Si utilizas CLR, ver algo aquí es normal. Si crece mucho, podría **competir con el buffer pool**. Revisa que el código CLR sea eficiente y necesario.
+
+9.  **CACHESTORE\_OBJCP**  
+
+*   **Qué es:** **Plan cache** para **procedimientos almacenados (object plans)**.
+*   **Para qué se usa:** Reutiliza planes de `CREATE PROCEDURE`.
+*   **Interpretación:** En OLTP sano deberías ver **buena proporción aquí**. Si `SQLCP` >> `OBJCP`, hay mucho ad-hoc (ver punto 3). Fomenta uso de **procedimientos** o consultas parametrizadas.
+
+10. **MEMORYCLERK\_SQLGENERAL**  
+
+*   **Qué es:** Uso **general/misceláneo** del motor (varias estructuras que no caen en otras categorías).
+*   **Para qué se usa:** Auxiliares del engine.
+*   **Interpretación:** Normal. Solo preocupa si crece de forma descontrolada y acompaña síntomas de presión de memoria.
+
+> Nota: Los valores que muestras están en **MB** (megabytes).
+
+
+
+
+
+
+
  
 ---
 
