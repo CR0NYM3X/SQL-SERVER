@@ -803,7 +803,7 @@ La **RAM (Random Access Memory)** es un tipo de memoria volátil que almacena da
     *   **Beneficio:** Aislamiento de cargas, previsibilidad y protección del rendimiento crítico.
 
 *   **Memory Manager / Memory Brokers / Memory Clerks**
-    *   **Qué es:** Infraestructura interna que mide demanda y distribuye memoria entre caches; cada “clerk” es un contador/administrador por área.
+    *   **Qué es:** Infraestructura interna que mide demanda y distribuye memoria entre caches; cada “clerk” es un contador/administrador por área. rastrea y administra el uso de memoria por diferentes partes del motor
     *   **Uso:** Ajuste dinámico entre plan cache, data cache, grants, columnstore, etc.
     *   **Beneficio:** Balance automático según presión de memoria; evita sobrecrecimiento de una cache a costa de otra.
 
