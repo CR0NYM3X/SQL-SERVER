@@ -1086,6 +1086,22 @@ Problemas comunes si no se controla:
 *   **Patrones de uso:** Picos durante cargas masivas o procesos ETL.
 
 ```SQL
+SELECT
+    -- RAM física total del servidor (MB)
+    CAST(total_physical_memory_kb / 1024.0 AS DECIMAL(18,2)) AS [Servidor_RAM_Total_MB],
+
+    -- RAM reservada para SQL Server (configuración max server memory en MB)
+    (SELECT CAST(value AS INT) FROM sys.configurations WHERE name = 'max server memory (MB)') AS [SQLServer_RAM_Reservada_MB],
+
+    -- RAM que SQL Server está usando actualmente (Buffer Pool en MB)
+    CAST(
+        (SELECT cntr_value FROM sys.dm_os_performance_counters
+         WHERE object_name LIKE '%Memory Manager%'
+           AND counter_name = 'Total Server Memory (KB)') / 1024.0 AS DECIMAL(18,2)
+    ) AS [SQLServer_RAM_Usando_MB]
+FROM sys.dm_os_sys_memory;
+
+
 -- SQL Server Process Address space info  (Query 6) (Process Memory)
 -- (shows whether locked pages is enabled, among other things)
 SELECT physical_memory_in_use_kb/1024 AS [SQL Server Memory Usage (MB)],
@@ -1165,11 +1181,16 @@ SELECT * FROM sys.dm_exec_query_memory_grants;
 --    ¿Para qué sirve?
 --        Diagnóstico de consumo de memoria por cada área del motor.
 
-SELECT TOP(10) mc.[type] AS [Memory Clerk Type], 
-       CAST((SUM(mc.pages_kb)/1024.0) AS DECIMAL (15,2)) AS [Memory Usage (MB)] 
+ 
+SELECT 
+  TOP(10)
+  mc.type AS [Memory Clerk Type],
+  CAST(SUM(mc.pages_kb 
+           + mc.virtual_memory_committed_kb 
+           + mc.shared_memory_committed_kb) / 1024.0 AS DECIMAL(18,2)) AS [Total Usage (MB)]
 FROM sys.dm_os_memory_clerks AS mc WITH (NOLOCK)
-GROUP BY mc.[type]  
-ORDER BY SUM(mc.pages_kb) DESC OPTION (RECOMPILE);
+GROUP BY mc.type
+ORDER BY [Total Usage (MB)] DESC;
 
 
 
