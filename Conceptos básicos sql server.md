@@ -781,147 +781,277 @@ La **RAM (Random Access Memory)** es un tipo de memoria volátil que almacena da
 
 
 
+---
 
- 
+# **Arquitectura de memoria de SQL Server** 
 
-# **Memoria en SQL Server: Conceptos Clave**
+## 1) Configuración base y gobernanza de memoria
 
-##  **1. Buffer Pool**
+*   **Min / Max Server Memory**
+    *   **Qué es:** Límites que determinan el rango de memoria que SQL Server puede utilizar.
+    *   **Uso:** `max server memory` evita que SQL Server consuma toda la RAM del servidor; `min server memory` asegura un piso mínimo (aunque no fuerza reserva inmediata).
+    *   **Beneficio:** Estabilidad del sistema evitando presión de memoria al OS y otras apps; predictibilidad del rendimiento.
 
-*   **¿Qué es?**  
-    Es la **zona principal de memoria** en SQL Server donde se almacenan páginas de datos y planes de ejecución para evitar accesos al disco.
-*   **¿Para qué sirve?**  
-    Reduce I/O en disco, acelerando consultas.
-*   **Función:**  
-    Mantener datos y objetos en memoria para acceso rápido.
-*   **Ventajas:**
-    *   Disminuye latencia.
-    *   Mejora rendimiento en OLTP y OLAP.
-*   **¿Se activa?**  
-    Automático. Se ajusta con `max server memory` y `min server memory`.
-*   **Nivel:**  
-    Software (SQL Server administra la memoria física del hardware).
-*   **Consideraciones:**
-    *   Ajustar tamaño según carga.
-    *   Evitar que el OS quede sin memoria.
-*   **¿Cuándo usar?**  
-    Siempre, es parte del motor.
+*   **NUMA Awareness**
+    *   **Qué es:** SQL Server es consciente de nodos NUMA y procura asignar memoria local al nodo del scheduler.
+    *   **Uso:** Asigna caches y workers por nodo para minimizar latencias de memoria.
+    *   **Beneficio:** Menores tiempos de acceso y mejor escalabilidad en servidores multi-socket.
 
+*   **Resource Governor**
+    *   **Qué es:** Mecanismo para **limitar y priorizar** uso de CPU y **memoria de consultas** por grupos de recursos.
+    *   **Uso:** Controla **Memory Grants** (ver sección 4) por workload (por ejemplo, evitar que un reporte grande estrelle el OLTP).
+    *   **Beneficio:** Aislamiento de cargas, previsibilidad y protección del rendimiento crítico.
 
-
-##  **2. Memory Grants**
-
-*   **¿Qué es?**  
-    Cantidad de memoria que SQL Server asigna a una consulta para operaciones como **sort** o **hash join**.
-*   **¿Para qué sirve?**  
-    Evitar que consultas grandes saturen la memoria.
-*   **Función:**  
-    Controlar uso de memoria en operaciones intensivas.
-*   **Ventajas:**
-    *   Previene bloqueos por falta de memoria.
-*   **¿Se activa?**  
-    Automático, pero se puede monitorear con `sys.dm_exec_query_memory_grants`.
-*   **Nivel:**  
-    Software.
-*   **Consideraciones:**
-    *   Consultas mal optimizadas pueden pedir más memoria.
-    *   Ajustar `workload` y estadísticas.
-*   **¿Cuándo usar?**  
-    Siempre, es interno.
+*   **Memory Manager / Memory Brokers / Memory Clerks**
+    *   **Qué es:** Infraestructura interna que mide demanda y distribuye memoria entre caches; cada “clerk” es un contador/administrador por área.
+    *   **Uso:** Ajuste dinámico entre plan cache, data cache, grants, columnstore, etc.
+    *   **Beneficio:** Balance automático según presión de memoria; evita sobrecrecimiento de una cache a costa de otra.
 
 
 
-##  **3. Memory Clerk**
+## 2) Dentro del Buffer Pool (el núcleo)
 
-*   **¿Qué es?**  
-    Componentes internos que **administran diferentes áreas de memoria** (Buffer Pool, Cache, etc.).
-*   **¿Para qué sirve?**  
-    Controlar y reportar consumo de memoria por tipo.
-*   **Función:**  
-    Cada clerk gestiona una parte específica (ej. `CACHESTORE_SQLCP` para planes).
-*   **Ventajas:**
-    *   Permite diagnóstico detallado.
-*   **¿Se activa?**  
-    Automático.
-*   **Nivel:**  
-    Software.
-*   **Consulta:**
-    ```sql
-    SELECT type, pages_kb FROM sys.dm_os_memory_clerks ORDER BY pages_kb DESC;
-    ```
+> El **Buffer Pool** contiene las **páginas de datos de 8 KB** y varias estructuras auxiliares.
 
+*   **Data Cache (Buffer Cache)**
+    *   **Qué es:** Conjunto de páginas de datos e índices leídas desde disco (8 KB).
+    *   **Uso:** Casi todas las consultas acceden primero al buffer cache; si la página está, lectura es desde memoria.
+    *   **Beneficio:** **Latencia mínima** de lectura; reduce IO a disco; mejora QPS.
+    *   **Indicadores:** `Page Life Expectancy (PLE)`, `Buffer cache hit ratio`.
 
+*   **Buffer Descriptors**
+    *   **Qué es:** Metadatos por página (estado, referencias, dirty/clean, LRU).
+    *   **Uso:** Control del ciclo de vida de páginas en cache.
+    *   **Beneficio:** Gestión eficiente del reemplazo y escritura diferida.
 
-##  **4. Cache (Plan Cache y Data Cache)**
+*   **Free Lists / LRU Chains**
+    *   **Qué es:** Listas para páginas libres y colas de reemplazo (least-recently-used).
+    *   **Uso:** Entregan páginas a nuevos lectores/escritores y recuperan páginas menos utilizadas.
+    *   **Beneficio:** Mantiene alto el **hit ratio** optimizando reutilización.
 
-*   **¿Qué es?**
-    *   **Plan Cache:** Almacena planes de ejecución compilados.
-    *   **Data Cache:** Páginas de datos en memoria.
-*   **¿Para qué sirve?**  
-    Evitar recompilar consultas y reducir I/O.
-*   **Función:**  
-    Mejorar rendimiento reutilizando recursos.
-*   **Ventajas:**
-    *   Ahorra CPU.
-    *   Reduce latencia.
-*   **¿Se activa?**  
-    Automático.
-*   **Nivel:**  
-    Software.
-*   **Consideraciones:**
-    *   Consultas ad-hoc pueden fragmentar el cache.
-    *   Usar parámetros para reutilización.
+*   **Log Buffer (no es 8KB pages, pero vive en memoria del motor)**
+    *   **Qué es:** Buffer circular en RAM para agrupar **registros de log** antes de escribir a disco.
+    *   **Uso:** Reduce syscalls, permite **group commit**.
+    *   **Beneficio:** Mayor throughput de transacciones; menor latencia de commit.
 
+*   **Checkpoint / Dirty Page Writer**
+    *   **Qué es:** Procesos que vacían páginas sucias del buffer pool al disco (datafile), para limitar recuperación de crash.
+    *   **Uso:** **Checkpoint** marca puntos de consistencia; **dirty writer** descarga continuamente bajo presión.
+    *   **Beneficio:** **Recuperación rápida**, control de latencia de escritura, estabilidad.
 
+*   **Lazy Writer**
+    *   **Qué es:** Proceso que hace “sweep” sobre el buffer pool para liberar páginas frías cuando hay presión.
+    *   **Uso:** Mantiene un umbral de páginas libres disponible.
+    *   **Beneficio:** Previene pausas largas por faltante de memoria; suaviza el flujo.
 
-##  **Otros términos importantes**
-
-*   **Stolen Memory:** Memoria tomada del Buffer Pool para otras tareas.
-*   **Reserved Memory:** Memoria reservada para operaciones críticas.
-*   **Target Memory:** Memoria que SQL Server intenta alcanzar según carga.
+*   **Read-Ahead Manager**
+    *   **Qué es:** Prefetch de páginas que probablemente se necesiten (scans y patrones de acceso).
+    *   **Uso:** Carga anticipada al buffer pool.
+    *   **Beneficio:** Reduce tiempos de espera por IO durante scans o joins grandes.
 
 
 
-##  **Características importantes**
+## 3) Caches de planes y metadatos (dentro/ligado al buffer pool)
 
-*   SQL Server **no usa toda la RAM física** automáticamente → se configura con `max server memory`.
-*   Desde SQL Server 2016, el motor es **NUMA-aware** y gestiona memoria por nodos.
-*   Usa **Lazy Writer** para liberar páginas no usadas.
+*   **Plan Cache (Cache Stores: SQL Plans, Obj Plans, Bound Trees)**
+    *   **Qué es:** Almacena **planes de ejecución** ya compilados y sus árboles lógicos.
+    *   **Uso:** Reutiliza planes para sentencias parametrizadas y procedimientos; evita recompilaciones costosas.
+    *   **Beneficio:** Menor CPU, menor latencia en compilación; mayor throughput.
 
+*   **Procedure Cache**
+    *   **Qué es:** Subconjunto del plan cache enfocado en procedimientos.
+    *   **Uso:** Reutilización del plan del `CREATE PROCEDURE`.
+    *   **Beneficio:** Rendimiento consistente en workloads OLTP.
 
+*   **Metadata Cache**
+    *   **Qué es:** Datos de catálogo, definiciones de objetos (sys.\*) cacheadas.
+    *   **Uso:** Acelera consultas de catálogo y validaciones de objetos.
+    *   **Beneficio:** Menor costo de acceso a metadatos; mejora tiempos de compilación.
 
-##  **Ventajas del manejo de memoria en SQL Server**
+*   **TokenAndPermUserStore**
+    *   **Qué es:** Cache de tokens de seguridad/roles/permisos.
+    *   **Uso:** Evita revalidar permisos en cada llamada.
+    *   **Beneficio:** Menos CPU en autenticación/autorización interna.
 
-*   Optimiza rendimiento sin intervención manual.
-*   Escala en servidores grandes.
-*   Reduce I/O y CPU.
-
-##  **Desventajas**
-
-*   Configuración incorrecta puede causar:
-    *   Paginación en OS.
-    *   Bloqueos por falta de memoria.
-*   Consultas mal diseñadas pueden consumir excesiva memoria.
-
-
-
-##  **¿Es hardware o software?**
-
-*   **Hardware:** La RAM física.
-*   **Software:** SQL Server administra la memoria asignada por el OS.
-
+*   **Cache de conexiones / Session cache**
+    *   **Qué es:** Algunas estructuras de sesión/plan reusables.
+    *   **Uso:** Minimiza costo de setup de ejecución.
+    *   **Beneficio:** Más transacciones por segundo.
 
 
-##  **Tipos de memoria en SQL Server**
 
-*   **Buffer Pool:** Datos y planes.
-*   **Query Workspace:** Para operaciones complejas.
-*   **Plan Cache:** Planes compilados.
-*   **Log Cache:** Para transacciones.
-*   **Columnstore Object Pool:** Para índices columnstore.
- 
- 
- 
+## 4) Memoria para ejecución de consultas (grants / workspace)
 
+*   **Memory Grants (Query Workspace)**
+    *   **Qué es:** Reserva temporal de memoria para **operadores** (Sort, Hash Join, Hash Aggregate, Window functions, Exchange).
+    *   **Uso:** Asignada al inicio de la ejecución según cardinalidad y costos; se libera al terminar.
+    *   **Beneficio:** Permite que **operadores trabajen en memoria**, evitando spills a tempdb; rendimiento de consultas complejo.
+
+*   **Spills a TempDB**
+    *   **Qué es:** Cuando el grant es insuficiente, el operador vuelca datos a **tempdb** (archivos temporales).
+    *   **Uso:** Sorts/hash en disco.
+    *   **Beneficio:** Continuidad de ejecución bajo presión; **contras:** mayor latencia/IO.
+
+*   **Parallelism Exchange Buffers**
+    *   **Qué es:** Buffers para mover filas entre hilos y distribuir/reunir datos.
+    *   **Uso:** Necesarios en planes paralelos (Gather, Repartition).
+    *   **Beneficio:** Escala en CPU; mejor tiempo total en consultas grandes.
+
+
+
+## 5) TempDB y Versioning (fuera y dentro, pero crítico)
+
+*   **TempDB Page Cache** (usa buffer pool)
+    *   **Qué es:** Páginas temporales para tablas temporales (#), variables table, worktables.
+    *   **Uso:** Soporta operaciones intermedias de consultas, ordenamientos, hash, row versioning.
+    *   **Beneficio:** Agilidad de operaciones complejas; soporte a funcionalidades del motor.
+
+*   **Version Store (Row Versioning)**
+    *   **Qué es:** Almacén en tempdb de versiones de filas para **RCSI**, **Snapshot Isolation**, **online index operations**, triggers, etc.
+    *   **Uso:** Mantiene versiones antiguas para lecturas consistentes sin bloquear.
+    *   **Beneficio:** **Reducción de bloqueos**, mayor concurrencia; **costo:** espacio/IO en tempdb.
+
+
+
+## 6) Columnstore e índices avanzados
+
+*   **Columnstore Object Pool**
+    *   **Qué es:** Cache dedicada para **segmentos columnstore** altamente comprimidos.
+    *   **Uso:** Carga y recicla segmentos en memoria para scans analíticos.
+    *   **Beneficio:** Throughput muy alto en **analíticos**; reducción de IO por compresión.
+
+*   **Columnstore Delta Store (filares)**
+    *   **Qué es:** Área para inserciones antes de comprimir en segmentos (rowstore temporal).
+    *   **Uso:** Absorbe cargas OLTP sobre índices columnstore.
+    *   **Beneficio:** Permite cargas mixtas OLTP/Analítico; luego compacta.
+
+*   **Batch Mode Execution Buffers**
+    *   **Qué es:** Memoria para ejecución en modo batch (vectorizada) en columnstore y, desde versiones recientes, también rowstore en ciertos casos.
+    *   **Uso:** Procesa múltiples filas como paquetes (batches).
+    *   **Beneficio:** **Menor CPU**, mayor rendimiento en analíticos.
+
+
+
+## 7) In-Memory OLTP (Hekaton)
+
+*   **Memory-Optimized Data**
+    *   **Qué es:** Tablas y índices **en memoria** (no paginados, estructura latch-free).
+    *   **Uso:** Almacenamiento de datos residente íntegramente en RAM; logging optimizado.
+    *   **Beneficio:** Latencias muy bajas; alto throughput; evita contención de latches/locks.
+
+*   **Checkpoint Files (para In-Memory)**
+    *   **Qué es:** Archivos de datos y delta para durabilidad.
+    *   **Uso:** Persistencia periódica; recuperación tras reinicio.
+    *   **Beneficio:** Durabilidad con mínimo impacto en latencia.
+
+*   **Memoria reservada por base de datos (contadores por objeto)**
+    *   **Qué es:** Cuotas de memoria por tablas/índices en memoria.
+    *   **Uso:** Controla crecimiento; alerta sobre presiones.
+    *   **Beneficio:** Previene OOM en In-Memory; gobernanza fina.
+
+
+
+## 8) CLR, Linked Servers y otros componentes “fuera” del buffer pool
+
+*   **CLR (Common Language Runtime)**
+    *   **Qué es:** Memoria usada por código administrado (funciones/procs CLR).
+    *   **Uso:** Objetos/datos del runtime .NET dentro del proceso SQL Server.
+    *   **Beneficio:** Extensibilidad; **costo:** puede competir con el buffer pool.
+
+*   **Linked Servers / OLE DB / SSIS dentro del proceso**
+    *   **Qué es:** Memoria para proveedores y operaciones externas ejecutadas en el proceso.
+    *   **Uso:** Conversión de datos, buffers, marshalling.
+    *   **Beneficio:** Integración; **riesgo:** presión fuera del control del buffer pool.
+
+*   **XP y componentes externos**
+    *   **Qué es:** Extended procedures u otras DLLs pueden reservar memoria nativa.
+    *   **Uso:** Funcionalidades extendidas.
+    *   **Beneficio:** Capacidades adicionales; **cuidado:** fugas o alto consumo.
+
+*   **Network Buffers**
+    *   **Qué es:** Buffers para enviar/recibir datos a clientes.
+    *   **Uso:** Agregación de paquetes, TDS streams.
+    *   **Beneficio:** Throughput de consultas remotas; latencia de respuesta.
+
+> Nota histórica: en 32-bit existía el **MemToLeave** para grandes objetos afuera del AWE. En 64-bit ya no se usa ese término, pero el concepto de **memoria fuera del buffer pool** permanece para estos componentes.
+
+
+
+## 9) Estructuras de bloqueo, transacciones y catálogos
+
+*   **Lock Manager / Lock Hashes**
+    *   **Qué es:** Estructuras en memoria para administrar **locks** (S, X, IS, IX, etc.).
+    *   **Uso:** Control de concurrencia y consistencia.
+    *   **Beneficio:** Correctitud transaccional; **costo:** memoria proporcional a número de locks.
+
+*   **Latches / Spinlocks (no son “secciones”, pero consumen memoria mínima)**
+    *   **Qué es:** Mecanismos de sincronización de bajo nivel.
+    *   **Uso:** Protegen estructuras internas (páginas, índices).
+    *   **Beneficio:** Consistencia sin overhead de locks; **impacto:** CPU.
+
+*   **Transaction Log Cache (además del Log Buffer)**
+    *   **Qué es:** Bloques en memoria para manejo del log de transacciones.
+    *   **Uso:** Coordinación de VLFs, cola de escritura.
+    *   **Beneficio:** Mejor commit throughput.
+
+*   **Catálogo y compilación**
+    *   **Qué es:** Caches para metadatos, histogramas de estadísticas (parte del plan/metadata).
+    *   **Uso:** Compilación precisa de planes.
+    *   **Beneficio:** Selección de planes más eficientes.
+
+
+
+## 10) Monitoreo y ajustes (para que lo operes con seguridad)
+
+*   **DMVs clave**
+    *   `sys.dm_os_memory_clerks`: consumo por **clerk** (plan cache, buffer pool, columnstore, etc.).
+    *   `sys.dm_os_memory_brokers`: distribución/pressures de memoria.
+    *   `sys.dm_exec_query_memory_grants`: grants activos y pendientes.
+    *   `sys.dm_os_ring_buffers`: eventos de memoria, errores/avisos.
+    *   `sys.dm_os_sys_info`: total de memoria y nodos NUMA.
+    *   `sys.dm_exec_cached_plans`, `sys.dm_exec_query_stats`, `sys.dm_exec_sql_text`: planes y uso.
+    *   `sys.dm_db_file_space_usage` (tempdb): tamaño del **version store** y trabajo temporal.
+    *   `sys.dm_db_xtp_memory_*` (In-Memory OLTP): uso de memoria por objetos optimizados.
+
+*   **Procesos que influyen en memoria**
+    *   **Auto-Tuning/Feedback (Cardinality Estimator/Adaptive)**: pueden cambiar grants y estrategias de unión.
+    *   **Garbage collection de plan cache**: remueve planes no usados bajo presión.
+    *   **Columnstore Tuple Mover**: compacta delta stores en segmentos.
+
+*   **Indicadores prácticos**
+    *   **PLE** por NUMA node, hit ratio, IO/sec de data/log, esperas por `RESOURCE_SEMAPHORE` (insuficiente grant), `PAGEIOLATCH` (IO a datafiles), `WRITELOG` (latencia de log), `CXPACKET/CXCONSUMER` (paralelismo).
+    *   **Spills detectados**: eventos `sort_warning`, `hash_warning` vía XE.
+
+
+
+## 11) Beneficios por sección (resumen ejecutivo)
+
+*   **Buffer Pool / Data Cache:** Reduce IO de lectura → respuesta rápida.
+*   **Plan Cache:** Evita recompilación → menos CPU, más TPS/QPS.
+*   **Memory Grants:** Ejecución en memoria de operadores → menos tempdb, menor latencia.
+*   **TempDB / Version Store:** Concurrencia alta sin bloqueos → estabilidad en picos.
+*   **Columnstore Pools:** Analíticos veloces y comprimidos → ahorro de IO y CPU.
+*   **In-Memory OLTP:** Latencias micro → throughput extremo en OLTP crítico.
+*   **CLR/externos:** Extensibilidad con cuidado → evitar que compitan con buffer pool.
+*   **Lock/Trans/Network buffers:** Correctitud transaccional y entrega ágil al cliente.
+
+
+
+## 12) Buenas prácticas para dimensionar y evitar sorpresas
+
+1.  **Fija `max server memory`** dejando margen al OS y servicios:
+    *   Windows + drivers + antivirus + SSIS/SSAS/AG: deja **10–25%** del total fuera de SQL Server (ajusta según carga).
+2.  **Activa y configura `Resource Governor`** si tienes cargas mixtas: limita `max memory grant` por grupo.
+3.  **Optimiza planes para reducir grants:**
+    *   Estadísticas actualizadas, evitar sobreestimaciones; usa parametrización adecuada.
+4.  **Vigila `tempdb`:**
+    *   Múltiples datafiles iguales, trace flags (antiguos) ya integrados en versiones modernas; monitorea **version store**.
+5.  **Plan cache sano:**
+    *   Evita SQL ad-hoc con literales (usa parametrización), controla recompilaciones.
+6.  **Columnstore:** Usa en tablas de gran volumen analítico; revisa segmentación y diccionarios.
+7.  **In-Memory OLTP:** Estima memoria y crecimiento por tabla/índice; monitorea `xtp` DMVs.
+8.  **NUMA:** Preferir `soft-NUMA` y afinidad equilibrada; evita skew de memoria/CPU.
+9.  **Monitorea esperas y DMVs** regularmente y ajusta `max server memory` si ves presión (bajo PLE, alto PAGEIOLATCH).
+10. **Evita componentes pesados externos** dentro del proceso (CLR no seguro, drivers) si no es indispensable.
 
  
