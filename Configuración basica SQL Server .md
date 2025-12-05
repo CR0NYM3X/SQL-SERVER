@@ -1,4 +1,18 @@
-# 
+# Ver configuraciones 
+La configuracion a nivel DB tiene mas prioridad ante la de nivel instancia por lo que primero toma la de nivel db 
+```
+-- Configuración a nivel de instancia o global 
+SELECT * FROM sys.configurations;
+
+-- Configuración a nivel de instancia o global 
+EXECUTE sp_configure 'query wait'
+
+--  Configuración a nivel de base de datos.
+SELECT * FROM sys.database_scoped_configurations;
+
+```
+---
+
 
 1. **Query Governor Cost Limit** - Esta configuración previene que se ejecuten consultas que el optimizador estima tomarán más tiempo del especificado:
 
