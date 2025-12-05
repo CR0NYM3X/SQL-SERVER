@@ -372,7 +372,10 @@ Un **procesador (CPU)** es el cerebro del computador, encargado de ejecutar inst
 
 - **Clock Speed (Frecuencia):** Velocidad de ejecución (GHz).
 - **Pipeline:** Flujo de instrucciones dividido en etapas.
-- **Hyper-Threading:** Tecnología para ejecutar múltiples hilos por núcleo.
+- **Hyper-Threading:** Tecnología para ejecutar múltiples hilos por núcleo. Ejemplo con 8 núcleos físicos y Hyper-Threading activado tendrá 16 hilos lógicos, Un hilo comparte los recursos del núcleo físico (ALU, caché, etc.), por lo que no duplica la potencia, solo mejora la eficiencia cuando el núcleo está esperando datos.
+-  Núcleo (Core):   unidad física de procesamiento dentro del CPU. Cada núcleo puede ejecutar una instrucción a la vez (o más con técnicas avanzadas).
+- Hilo (Thread) : Es una unidad lógica de ejecución que el sistema operativo ve como un procesador. Con Hyper-Threading, cada núcleo físico puede manejar 2 hilos (o más en otras arquitecturas).
+
 - **NUMA:** Arquitectura de memoria no uniforme.
 - **Cache Miss / Hit:** Acceso exitoso o fallido a la cache.
 - **Instruction Set (ISA):** Conjunto de instrucciones soportadas (x86, ARM).
@@ -409,6 +412,7 @@ Un **procesador (CPU)** es el cerebro del computador, encargado de ejecutar inst
 
 
 ## Cores físicos vs lógicos
+El sistema operativo  procesadores lógicos y los trata como CPUs independientes para asignar tareas, pero no suma los físicos y los lógicos.
 
 - **Cores físicos:** Núcleos reales dentro del procesador. Cada uno ejecuta instrucciones de manera independiente.
 - **Cores lógicos:** Se crean mediante tecnologías como Hyper-Threading (Intel) o SMT (AMD).
@@ -472,10 +476,12 @@ Los procesadores modernos tienen cachés multinivel para reducir la latencia ent
 
 ## ¿Qué es NUMA?
 
-**NUMA (Non-Uniform Memory Access)** es una arquitectura de hardware que divide la memoria en nodos asociados a grupos de CPU.
+**NUMA (Non-Uniform Memory Access)** es una arquitectura de hardware que divide la memoria en nodos asociados a grupos de CPU y el acceso a la memoria depende del nodo unicamente. 
+Cada socket físico normalmente se representa como un nodo NUMA.
+
 
 *   Cada nodo tiene su propia memoria RAM local.
-*   Acceder a memoria local es más rápido que acceder a memoria de otro nodo.
+*   Esto permite que cada nodo acceda más rápido a su memoria local y reduce la latencia en sistemas con múltiples procesadores
 
 **Objetivo:** Mejorar el rendimiento en servidores con muchos procesadores evitando cuellos de botella en acceso a memoria.
 
@@ -485,26 +491,12 @@ Los procesadores modernos tienen cachés multinivel para reducir la latencia ent
 *   Mejor escalabilidad en servidores multiprocesador.
 *   Optimiza cargas paralelas (OLTP, OLAP).
 
-### Desventajas
-
-*   Acceso a memoria remota es más lento.
-*   Requiere que el software (SQL Server, OS) sea NUMA-aware.
-*   Configuración incorrecta puede causar desequilibrio.
-
-### ¿Cuándo usarlo?
-
-*   Siempre que el hardware lo soporte (servidores grandes).
-*   SQL Server lo detecta automáticamente.
-
-### ¿Cuándo no?
-
-*   No se puede desactivar si el hardware es NUMA.
-*   No tiene sentido en servidores pequeños (pocos cores).
-
+ 
+  
 
 ## ¿Qué es Soft-NUMA?
 
-es una característica de SQL Server crea varios nodos Soft-Numa logicos  (desde la versión 2016 se activa automáticamente) que permite dividir los núcleos de CPU de un único socket grande (o un servidor sin NUMA físico) en múltiples grupos lógicos, que SQL Server llama nodos Soft-NUMA.  
+es una característica de SQL Server crea varios nodos Soft-Numa logicos  (desde la versión 2016 se activa automáticamente) que permite dividir los núcleos de CPU de un único socket grande (o un servidor sin NUMA físico) en múltiples grupos lógicos, que SQL Server llama nodos Soft-NUMA.   Soft-NUMA no asigna memoria local física como lo hace un nodo NUMA real.
 
 **Objetivo:**
 *   El objetivo es mejorar la escalabilidad y el rendimiento al crear particiones lógicas de los recursos, lo que beneficia a las estructuras internas del motor de base de datos.
@@ -517,10 +509,6 @@ es una característica de SQL Server crea varios nodos Soft-Numa logicos  (desde
 *   Reduce contención en spinlocks.
 *   Permite ajustar `MAXDOP` por nodo lógico.
 
-### Desventajas
-
-*   Configuración manual puede ser compleja.
-*   No siempre necesario si la carga está bien balanceada.
 
 ### ¿Cuándo usarlo?
 
@@ -531,8 +519,6 @@ es una característica de SQL Server crea varios nodos Soft-Numa logicos  (desde
 
 *   Servidores pequeños.
 *   Si la carga no presenta problemas de escalabilidad.
-
-
 
 ## Consideraciones
 
@@ -557,11 +543,21 @@ SELECT cpu_count AS [Logical CPU Count], scheduler_count, (socket_count * cores_
 ```
 
 
+ 
+ 
+
 ## Cómo se activa Soft-NUMA
 
 *   Automático en SQL Server 2016+.
 *   Manual: Configuración avanzada o parámetros de inicio.
 *   No requiere cambios en hardware.
+
+  **Configuración opcional**
+    *   Puedes deshabilitar o habilitar Soft-NUMA con:
+        ```sql
+        ALTER SERVER CONFIGURATION SET SOFTNUMA = OFF | ON
+        ```
+    *   Requiere reinicio del motor para aplicar cambios.  
 
 
 ## Ejemplo práctico de Soft-NUMA
@@ -569,7 +565,8 @@ SELECT cpu_count AS [Logical CPU Count], scheduler_count, (socket_count * cores_
 Supongamos:
 
 *   Servidor con 64 cores físicos y 2 nodos NUMA físicos (32 cores cada uno).
-*   SQL Server detecta que cada nodo NUMA físico tiene más de 8 cores → entonces crea Soft-NUMA dividiendo cada nodo físico en 4 nodos lógicos (8 cores cada uno).
+*   SQL Server detecta que cada nodo NUMA físico tiene más de 8 cores → entonces crea Soft-NUMA Por defecto, SQL Server divide el nodo en grupos de 8 núcleos (aunque puede variar entre 4 y 8). 
+   
 
 **Resultado:**
 
