@@ -412,7 +412,7 @@ Un **procesador (CPU)** es el cerebro del computador, encargado de ejecutar inst
 
 
 ## Cores físicos vs lógicos
-El sistema operativo  procesadores lógicos y los trata como CPUs independientes para asignar tareas, pero no suma los físicos y los lógicos.
+El sistema operativo ve procesadores lógicos y los trata como CPUs independientes para asignar tareas, pero no suma los físicos y los lógicos. las Maquinas virtuales usan vCPU (v=Virtual) estos provienen de los Procesadores logicos de Hyper-Threading, por lo que no es como que en la maquina virtual pueda activar el Hyper-Threading ya que ya lo estas usando  , ya que el Hyper-Threading se activa en desde la BIOS/UEFI 
 
 - **Cores físicos:** Núcleos reales dentro del procesador. Cada uno ejecuta instrucciones de manera independiente.
 - **Cores lógicos:** Se crean mediante tecnologías como Hyper-Threading (Intel) o SMT (AMD).
