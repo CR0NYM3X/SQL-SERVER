@@ -1211,8 +1211,18 @@ Sí, ambos usan **versionado en tempdb**, pero:
 
 ---
 
-# Cost Threshold for Parallelism
-En caso de tener un alto nivel de paralelismo  en waiting_tasks_count y bajo número promedio de espera entonces estas bien pero considera que puedes estar utilizando paralelismo en consultas que no lo requieren.
+# MAXDOP y CTFP 
+Maximo grado de paralelismo (MAXDOP) y Cost Threshold for Parallelism (CTFP)  
+
+Configuración Recomendada para OLTP:
+MAXDOP: Generalmente 4 u 8. El límite de 8 es preferido para sistemas OLTP de alta escala, independientemente del número total de núcleos, ya que minimiza el riesgo de esperas CXPACKET.   
+CTFP: Alto (50 a 100)
+
+
+Configuración Recomendada para DW/OLAP:
+MAXDOP: 8 a 16. En servidores configurados con múltiples nodos NUMA, si el número de (Logical Proces)LPs por nodo es superior a 8 (pero la carga de trabajo es principalmente DW), 16 puede ser el valor más beneficioso, siempre respetando la regla del nodo NUMA.   
+CTFP: Moderado (20 a 50). Un valor más bajo que en OLTP asegura que las consultas analíticas costosas utilicen el paralelismo.
+
 
 ```
  SELECT TOP (50)
