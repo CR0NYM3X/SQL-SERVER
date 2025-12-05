@@ -10,6 +10,38 @@ EXECUTE sp_configure 'query wait'
 --  Configuración a nivel de base de datos.
 SELECT * FROM sys.database_scoped_configurations;
 
+----------------- OBTENER TODAS LAS CONFIGURACIONES scoped--
+SET NOCOUNT ON;
+
+IF OBJECT_ID('tempdb..#db_scoped_configs') IS NOT NULL
+    DROP TABLE #db_scoped_configs;
+
+CREATE TABLE #db_scoped_configs (
+    database_name                     sysname        NOT NULL,
+    configuration_id                  int            NOT NULL,
+    name                              sysname        NOT NULL,
+    value                             sql_variant    NULL,
+    value_for_secondary               sql_variant    NULL,
+    is_value_default                  bit            NOT NULL
+);
+
+EXEC master..sp_MSforeachdb N'
+    IF DB_ID(''?'' ) > 4 AND DATABASEPROPERTYEX(''?'' , ''Status'') = ''ONLINE''
+    BEGIN
+        USE [?];
+        INSERT INTO #db_scoped_configs
+        SELECT DB_NAME(), configuration_id, name, value, value_for_secondary,
+               is_value_default
+        FROM sys.database_scoped_configurations;
+    END
+';
+
+SELECT *
+FROM #db_scoped_configs
+ORDER BY database_name, configuration_id;
+
+ 
+
 ```
 ---
 
