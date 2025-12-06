@@ -683,10 +683,9 @@ Permitir que SQL Server gestione el crecimiento y truncamiento del log de manera
 
 1.  Inicio lento de la base de datos
        Durante el arranque, SQL Server debe revisar todos los VLFs para la recuperación.
-       Si hay miles, el tiempo de inicio aumenta significativamente.
-	
+       Si hay miles, el tiempo de inicio aumenta significativamente.	
 
-2.  Backups del log más lentos
+2.  Backups y restauracion del log más lentos
        El backup del log procesa cada VLF.
        Más VLFs = más tiempo para recorrerlos.
 
@@ -741,21 +740,13 @@ No existe un número fijo universal, pero la regla práctica es:
 
 ### ✅ Cómo se crean los VLFs (algoritmo clásico hasta SQL Server 2019)
 
-   Crecimiento < 64 MB → 4 VLFs (cada uno ≈ ¼ del tamaño).
-   Crecimiento 64 MB – 1 GB → 8 VLFs (cada uno ≈ ⅛ del tamaño).
-   Crecimiento > 1 GB → 16 VLFs (cada uno ≈ 1/16 del tamaño).  
-
-
-En SQL Server 2022, el algoritmo se optimizó:
-
-   ≤ 64 MB → 1 VLF.
-   64 MB – 1 GB → 8 VLFs.
-   > 1 GB → 16 VLFs. 
-
+   Crecimiento < 64 MB → 4 VLFs de tamaño 256 KB.
+   Crecimiento 64 MB – 1 GB → 8 VLFs de tamaño 64 MB.
+   Crecimiento > 1 GB → 16 VLFs de tamaño 512 MB.  
 
  
-
  
+  
  
 #  Correccion en caso de un problema de muchos VLF 
 
