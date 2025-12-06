@@ -1378,7 +1378,81 @@ WHERE counter_name = 'Workfiles Created/sec';
 
 ---
 
+ 
 
+### 1\. ¿Qué significa "Scan Point Revalidation"?
+
+Imagina que estás leyendo un libro (haciendo un "Scan" de una tabla o índice). Mientras estás leyendo la página 10, alguien arranca la página 11 y la mueve a la página 50 (esto pasa por una actualización o inserción de datos, un "Page Split").
+
+Cuando intentas pasar a la página 11, SQL Server se da cuenta de que ya no está donde debería. Se ve obligado a detenerse, **"revalidar" su posición** y buscar dónde continuaron los datos para no perderse nada.
+
+  * **Tu situación:** Esto le está ocurriendo a tu servidor **904 veces por segundo**.
+  * **La causa:** Tienes consultas largas (reportes o scans masivos) corriendo al mismo tiempo que muchas modificaciones (INSERT/UPDATE/DELETE) sobre las mismas tablas.
+
+
+
+### 2\. ¿En qué afecta a tu Servidor?
+
+Este problema tiene dos impactos principales:
+
+1.  **Uso Innecesario de CPU:** Cada revalidación obliga al motor a gastar ciclos de procesador buscando de nuevo la ruta correcta en el árbol del índice (B-Tree).
+2.  **Lentitud en Consultas Largas:** Las consultas que están leyendo datos se pausan brevemente cientos de veces por segundo, alargando su tiempo de ejecución total.
+
+ 
+### 3\. Cómo Validarlo (Paso a Paso)
+
+Primero, confirma si el valor sigue siendo alto o fue un evento aislado.
+
+#### Paso A: Consultar el contador en tiempo real
+
+Ejecuta este script para ver el valor actual acumulado y monitorear su crecimiento.
+
+```sql
+SELECT 
+    object_name,
+    counter_name,
+    cntr_value AS [Total_Revalidations],
+    'Monitorea este valor durante 10 segundos. Si sube rápidamente, el problema está activo.' as Nota
+FROM sys.dm_os_performance_counters
+WHERE counter_name = 'Scan Point Revalidations/sec';
+```
+
+#### Paso B: Identificar las Tablas Conflictivas
+
+Generalmente, esto sucede en tablas con índices muy fragmentados o con mucha actividad. No hay una vista directa que diga "es la tabla X", pero puedes inferirlo buscando tablas con muchos `Page Splits`, ya que los movimientos de página son la causa raíz.
+
+```sql
+-- Buscar índices con alta contención y splits
+SELECT TOP 10
+    DB_NAME(ios.database_id) AS DatabaseName,
+    OBJECT_NAME(ios.object_id, ios.database_id) AS TableName,
+    i.name AS IndexName,
+    ios.leaf_allocation_count AS PageSplits_Writes,
+    ios.range_scan_count AS Scans_Reads
+FROM sys.dm_db_index_operational_stats(NULL, NULL, NULL, NULL) AS ios
+JOIN sys.indexes AS i ON ios.object_id = i.object_id AND ios.index_id = i.index_id
+WHERE ios.leaf_allocation_count > 0 -- Tablas que se están moviendo mucho
+ORDER BY ios.leaf_allocation_count DESC;
+```
+
+ 
+
+### 4\. ¿Cómo Corregirlo?
+
+El objetivo es evitar que los datos se muevan tanto mientras se leen.
+
+1.  **Reducir Fragmentación (Mantenimiento):** Si las páginas están llenas al 100%, cualquier cambio fuerza un movimiento de página (Page Split).
+      * **Acción:** Reconstruir índices (Rebuild) y configurar un **Fill Factor** (Factor de Relleno) adecuado (ej. 80% o 90%) en las tablas con mucha escritura. Esto deja "espacio vacío" en las páginas para que los nuevos datos entren sin mover todo el libro.
+2.  **Optimizar Consultas (Evitar Scans):**
+      * **Acción:** Si tienes consultas que leen *toda* la tabla (`Table Scan`), intenta mejorarlas con índices para que solo lean las filas necesarias (`Index Seek`). Si leen menos datos, hay menos probabilidad de que se topen con un cambio en medio de la lectura.
+3.  **Revisar Niveles de Aislamiento:**
+      * **Acción:** Si es viable para tu aplicación, el uso de **Read Committed Snapshot Isolation (RCSI)** puede ayudar a que los lectores no se bloqueen ni sufran tanto por los cambios de los escritores, aunque esto aumenta el uso de TempDB.
+
+**Resumen para Directivos (si lo necesitas):**
+
+> "El sistema pierde tiempo reubicándose porque los datos se mueven de lugar mientras se intentan leer. Necesitamos optimizar el mantenimiento de las tablas (índices) para dejar 'espacios en blanco' que permitan actualizaciones sin desordenar la estructura."
+
+---
 # Links 
 ```
 Extensiones de SQL Server, PFS, GAM, SGAM e IAM y corrupciones relacionadas -> https://techcommunity.microsoft.com/blog/sqlserversupport/sql-server-extents-pfs-gam-sgam-and-iam-and-related-corruptions/1606011
