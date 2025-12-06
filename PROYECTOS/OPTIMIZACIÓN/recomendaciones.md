@@ -1251,6 +1251,132 @@ WHERE wait_type IN ('CXPACKET', -- Este es el indicador primario del paralelismo
 					'CXCONSUMER') -- Este es el thread coordinador esperando el resultado de los threads paralelos. Un alto CXCONSUMER significa que el thread coordinador está inactivo esperando que los subprocesos completen el trabajo.
 ORDER BY wait_time_ms DESC;
 ```
+---
+
+ 
+
+# 1\. ¿Qué significa "Worktables from Cache Ratio"?
+
+Para entenderlo, hay que definir qué es una **Worktable**:
+Cuando SQL Server ejecuta consultas complejas (con muchos `ORDER BY`, `GROUP BY`, `UNION`, o manejo de variables tipo `XML`/`LOB`), a menudo necesita crear "borradores" o tablas temporales internas para procesar esos datos. Estas son las **Worktables**.
+
+  * **El Escenario Ideal:** SQL Server crea una Worktable, la usa y, al terminar, **guarda la estructura vacía en la memoria (Caché)**. Cuando llega otra consulta similar, **reutiliza** esa estructura en lugar de crear una nueva desde cero. Esto es rápido y eficiente.
+  * **Tu Problema (Ratio Bajo):** El reporte indica que SQL Server **no está reutilizando** estas tablas lo suficiente (probablemente el ratio está por debajo del 90%). Está destruyendo y creando nuevas tablas constantemente.
+
+**¿Por qué menciona la Memoria?**
+Si el servidor tiene **presión de memoria (poca RAM)**, SQL Server se ve obligado a limpiar la caché constantemente para liberar espacio. Al hacerlo, borra las Worktables guardadas. Cuando entra la siguiente consulta, tiene que gastar CPU y disco (TempDB) para crear la tabla de nuevo.
+
+ 
+
+### 2\. ¿Cómo impacta esto? (Para tu presentación)
+
+Si necesitas agregarlo a tu lista de riesgos:
+
+  * **Impacto:** **Sobrecarga de CPU y Latencia en Consultas Complejas.**
+  * **Explicación:** El servidor gasta recursos valiosos construyendo y destruyendo estructuras internas repetidamente debido a la falta de memoria para retenerlas, ralentizando reportes y procesos masivos.
+
+
+### 3\. Cómo Validarlo (Paso a Paso)
+
+Debes confirmar si el valor es realmente bajo y si está correlacionado con la falta de memoria.
+
+#### Paso A: Consultar el contador actual
+
+Ejecuta este script en tu instancia `MUEBLESSQL`. El valor ideal debe ser superior al **90%**.
+
+```sql
+SELECT
+    object_name,
+    counter_name,
+    cntr_value,
+    CASE 
+        WHEN counter_name = 'Worktables From Cache Ratio' THEN 'Este valor es el acumulado, ver siguiente consulta para el ratio real'
+        ELSE 'Valor Base'
+    END as Nota
+FROM sys.dm_os_performance_counters
+WHERE counter_name IN ('Worktables From Cache Ratio', 'Worktables From Cache Base')
+AND object_name LIKE '%Access Methods%';
+```
+
+*Nota: Los contadores "Ratio" en SQL Server son un poco truculentos de leer directamente. La forma correcta de ver el porcentaje actual instantáneo es calculándolo:*
+
+```sql
+-- Script para calcular el Porcentaje Real Actual
+DECLARE @Ratio1 BIGINT, @Base1 BIGINT
+DECLARE @Ratio2 BIGINT, @Base2 BIGINT
+
+-- Primera toma
+SELECT @Ratio1 = cntr_value FROM sys.dm_os_performance_counters WHERE counter_name = 'Worktables From Cache Ratio'
+SELECT @Base1 = cntr_value FROM sys.dm_os_performance_counters WHERE counter_name = 'Worktables From Cache Base'
+
+-- Esperar 5 segundos para medir actividad actual
+WAITFOR DELAY '00:00:05'
+
+-- Segunda toma
+SELECT @Ratio2 = cntr_value FROM sys.dm_os_performance_counters WHERE counter_name = 'Worktables From Cache Ratio'
+SELECT @Base2 = cntr_value FROM sys.dm_os_performance_counters WHERE counter_name = 'Worktables From Cache Base'
+
+-- Cálculo
+SELECT 
+    (CAST((@Ratio2 - @Ratio1) AS FLOAT) / NULLIF((@Base2 - @Base1), 0)) * 100 AS [Porcentaje_Worktables_Desde_Cache]
+```
+
+  * **Si el resultado es \< 90%:** El problema es real.
+  * **Si el resultado es \> 90%:** Puede haber sido un pico momentáneo cuando se corrió el assessment.
+
+### Resumen de Solución
+
+1.  **Validar RAM:** Si el PLE es bajo, la solución primaria es **aumentar la Memoria RAM** (o corregir el `Max Server Memory` si está mal configurado).
+2.  **Optimizar Código:** Si hay consultas específicas con muchos `Table Spools` en el plan de ejecución, esas consultas deben reescribirse (mejorar índices, evitar cursores, simplificar lógica).
+
+
+----
+
+
+# 1\. ¿Qué significa "Workfiles Created per sec"?
+
+Cuando SQL Server ejecuta una consulta que requiere unir tablas grandes (Hash Join) o agrupar datos (Hash Aggregate), solicita una cantidad específica de Memoria RAM (Memory Grant) basada en las estadísticas.
+
+  * **El Escenario Ideal:** Toda la operación ocurre en la Memoria RAM. Es instantáneo.
+  * **Tu Problema (El "Spill"):** SQL Server calculó mal o no tiene suficiente memoria. Los datos no caben en la RAM asignada, por lo que el motor **crea un archivo temporal (Workfile) en el disco (TempDB)** para guardar el excedente y poder procesarlo.
+  * **La Métrica:** Tienes **555 archivos creados por segundo**. Esto significa que **555 veces cada segundo**, SQL Server deja de trabajar en memoria (nanosegundos) para escribir/leer en disco (milisegundos). Es un freno de mano gigantesco.
+
+> **Diferencia clave:**
+>
+>   * **Worktables:** Generalmente usadas para `LOBs`, `spools` o tablas temporales internas.
+>   * **Workfiles:** Específicamente causados por **Hash Joins** y **Hash Aggregates** que se desbordan (Spill) a TempDB.
+ 
+### 2\. ¿Cómo impacta esto? (Para tu lista de riesgos)
+
+  * **Impacto:** **Lentitud extrema en reportes y saturación de I/O en TempDB.**
+  * **Explicación:** Convertimos operaciones que deberían ser de pura CPU/RAM en operaciones de disco físico. Esto satura el almacenamiento y alarga drásticamente los tiempos de ejecución.
+
+
+### 3\. Cómo Validarlo (Paso a Paso)
+
+Debemos encontrar las consultas que están provocando estos "Hash Warnings".
+
+#### Paso A: Confirmar la métrica actual
+
+Ejecuta esto para ver si el contador sigue alto o fue un pico.
+
+```sql
+SELECT 
+    object_name,
+    counter_name,
+    cntr_value AS [Total_Workfiles_Created],
+    'Este es un contador acumulativo. Monitorealo por un intervalo para ver la velocidad por segundo.' as Nota
+FROM sys.dm_os_performance_counters
+WHERE counter_name = 'Workfiles Created/sec';
+```
+ 
+### Soluciones Comunes
+
+1.  **Actualizar Estadísticas:** La causa \#1 es que SQL Server estima mal cuánta memoria necesita. Ejecuta `UPDATE STATISTICS` en las tablas involucradas.
+2.  **Memoria:** Si el servidor tiene poca RAM general, aumentar la memoria reduce estos desbordamientos.
+3.  **Índices:** Crear índices que cubran la consulta (Covering Indexes) puede eliminar la necesidad de hacer Hash Joins costosos, cambiándolos a Nested Loops que usan menos memoria.
+
+---
 
 
 # Links 
