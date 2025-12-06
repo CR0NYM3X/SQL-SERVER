@@ -1354,6 +1354,48 @@ CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS qt
 WHERE qs.total_spills > 0    -- Filtra consultas con spills
 ORDER BY avg_spills_per_exec DESC;
 
+
+
+-- dm_db_task_space_usage : Monitorear el espacio que cada tarea (task) dentro de una sesión está usando en TempDB 
+-- útil para identificar consultas que consumen mucho TempDB
+
+--    Objetos temporales de usuario (tablas temporales, variables de tabla).
+--   Objetos internos (worktables, workfiles, hash joins, sort, version store).
+
+-- Query para monitoreo general
+
+SELECT 
+    session_id,
+    SUM(user_objects_alloc_page_count) * 8 / 1024 AS UserObjects_MB,
+    SUM(internal_objects_alloc_page_count) * 8 / 1024 AS InternalObjects_MB
+FROM sys.dm_db_task_space_usage
+GROUP BY session_id
+ORDER BY InternalObjects_MB DESC;
+
+
+-- Query para monitoreo detallado con usuario y consulta
+SELECT 
+    s.session_id,
+    s.login_name,
+    r.status,
+    t.UserObjects_MB,
+    t.InternalObjects_MB,
+    SUBSTRING(st.text, 1, 200) AS query_text
+FROM (
+    SELECT 
+        session_id,
+        SUM(user_objects_alloc_page_count) * 8 / 1024 AS UserObjects_MB,
+        SUM(internal_objects_alloc_page_count) * 8 / 1024 AS InternalObjects_MB
+    FROM sys.dm_db_task_space_usage
+    GROUP BY session_id
+) t
+JOIN sys.dm_exec_sessions s ON t.session_id = s.session_id
+JOIN sys.dm_exec_requests r ON t.session_id = r.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) AS st
+WHERE s.session_id != @@SPID
+ORDER BY InternalObjects_MB DESC;
+
+
 ```
 
 
