@@ -1380,7 +1380,7 @@ WHERE counter_name = 'Workfiles Created/sec';
 
  
 
-### 1\. ¿Qué significa "Scan Point Revalidation"?
+# 1\. ¿Qué significa "Scan Point Revalidation"?
 
 Imagina que estás leyendo un libro (haciendo un "Scan" de una tabla o índice). Mientras estás leyendo la página 10, alguien arranca la página 11 y la mueve a la página 50 (esto pasa por una actualización o inserción de datos, un "Page Split").
 
