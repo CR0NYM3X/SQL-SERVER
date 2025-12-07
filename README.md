@@ -26,6 +26,8 @@
 
 # Páginas para info de sql server:
 ```
+https://learn.microsoft.com/es-es/sql/relational-databases/sql-server-guides?view=sql-server-ver17
+
 --- Clubs de DBAS MSSQL  <br>
 https://www.sqlshack.com/
 https://sqlrambling.net/category/sql/security-sql/
