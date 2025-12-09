@@ -1219,6 +1219,9 @@ https://learn.microsoft.com/es-es/sql/relational-databases/security/sql-server-s
 
 ### CONFIGURACIONES DE SEGURIDAD
 ```SQL
+
+trucos de pentesting en postgresql -> https://hackviser.com/tactics/pentesting/services/mssql
+
 --- Tecnicas de seguridad:
 https://jotelulu.com/blog/como-mejorar-la-seguridad-de-tu-sql-server/
 
