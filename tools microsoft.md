@@ -107,8 +107,9 @@
 16. **Redgate SQL Toolbelt**  
    - Conjunto de herramientas para desarrollo, comparación de esquemas, backups, y más.
 
-17. [**Sentryone plan explorer, sql querystrees**](https://github.com/ErikEJ/SqlQueryStress)
-18. **[SQLCHECK -> Para solucionar y diagnosticar problemas de configuración de Kerberos relacionados con SQL Server](https://learn.microsoft.com/es-es/troubleshoot/sql/database-engine/connect/using-kerberosmngr-sqlserver)**
+17. **Sentryone plan explorer
+18. [sql querystrees**](https://github.com/ErikEJ/SqlQueryStress)
+19. **[SQLCHECK -> Para solucionar y diagnosticar problemas de configuración de Kerberos relacionados con SQL Server](https://learn.microsoft.com/es-es/troubleshoot/sql/database-engine/connect/using-kerberosmngr-sqlserver)**
 
 
 [Tools de Microsoft](https://github.com/microsoft/CSS_SQL_Networking_Tools/tree/main) <br>
