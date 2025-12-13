@@ -133,3 +133,30 @@ GO
 ```
  
  
+# Que hacer si cambian el hostname del S.O 
+
+```SQL
+-- Tutorial : https://www.youtube.com/watch?v=xIcCU0oaavE
+-------- Esto Requiere reinicio de la instancia
+
+-- Eliminar el nombre anterior
+EXEC sp_dropserver 'SRVSQL01';
+
+-- Agregar el nuevo hostname nombre como local
+EXEC sp_addserver 'SRVSQLPROD', 'local';
+
+
+-- Consultar
+SELECT @@SERVERNAME AS NombreServidorSQL;
+
+
+SELECT SERVERPROPERTY('MachineName') AS HostnameWindows,
+       SERVERPROPERTY('ServerName') AS NombreInstancia, -- este es el importante de la instancia
+       SERVERPROPERTY('InstanceName') AS NombreInstanciaSQL;
+
+SELECT name, data_source, is_linked FROM sys.servers ;
+
+
+
+```
+
