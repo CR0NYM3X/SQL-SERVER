@@ -26,6 +26,14 @@ where USER_NAME(grantee_principal_id) in('public','guest','dbo')
 order by USER_NAME(grantee_principal_id),permission_name,OBJECT_NAME(major_id) 
  ```
 
+# Descubrir contraseña con fuerza bruta 
+```sql
+-- Ver si la contraseña 'MiPass123!' coincide con el login 'usuarioX'
+SELECT 
+    name AS login,
+    PWDCOMPARE('MiPass123!', password_hash) AS coincide
+FROMFROM sys.sql_logins
+```
 
 
 
