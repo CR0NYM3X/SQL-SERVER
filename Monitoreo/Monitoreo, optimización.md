@@ -1356,7 +1356,105 @@ EXEC sp_query_store_clear_hints @query_id = 123;
 - Algunos trace flags ya están **obsoletos o integrados por defecto** en versiones recientes (2016+).
 - Consulta la [documentación oficial de Microsoft](https://learn.microsoft.com/en-us/sql/t-sql/database-console-commands/dbcc-traceon-trace-flags-transact-sql?view=sql-server-ver17) para verificar compatibilidad y efectos secundarios.
 - Usa `DBCC TRACESTATUS(-1);` para ver qué trace flags están activos.
+---
 
+ 
+
+# 📄 ¿Por qué NO se recomienda usar SHRINK en SQL Server? (Caso práctico)
+
+## ✅ Escenario planteado
+
+*   **Disco:** 1 TB
+*   **Base de datos:** inicialmente 300 GB
+*   **Crecimiento:** +200 GB (total 500 GB)
+*   **Acción:** se depuraron datos que ocupaban esos 200 GB, ahora hay **200 GB libres internamente**.
+
+**Pregunta:** ¿Es malo hacer SHRINK en este caso? ¿Por qué afecta la fragmentación si los 200 GB ya están libres?
+
+
+## 🔍 Explicación técnica
+
+Aunque los 200 GB estén “vacíos” después de la depuración, el problema del **SHRINK** no es por los datos eliminados, sino por **cómo SQL Server reorganiza las páginas internas para reducir el archivo físico**:
+
+*   El archivo sigue teniendo páginas distribuidas en todo el espacio (500 GB).
+*   Cuando ejecutas `DBCC SHRINKFILE` o `DBCC SHRINKDATABASE`, SQL Server **mueve páginas activas desde el final hacia el inicio** para liberar espacio.
+*   Este movimiento **rompe el orden lógico** de las páginas que conforman los índices.
+*   Resultado: **fragmentación interna y externa** → más lecturas, más I/O, peor rendimiento.
+
+
+
+## ⚠️ ¿Por qué es malo en este caso?
+
+*   **Fragmentación masiva:** todos los índices se desordenan.
+*   **Alto consumo de I/O:** SHRINK es costoso y puede bloquear procesos.
+*   **Ciclo dañino:** si la base vuelve a crecer, tendrás el patrón **grow–shrink–grow**, que degrada rendimiento.
+*   **No es necesario:** el espacio libre interno se reutiliza automáticamente sin SHRINK.
+
+
+
+## ✅ ¿Cuándo sí conviene SHRINK?
+
+*   **Evento único y definitivo:** después de una purga masiva que no se repetirá.
+*   **Reubicación de archivos:** para ajustar tamaño final planeado.
+*   **Emergencia:** falta de espacio en disco.
+
+> Incluso en estos casos: hazlo en **ventana de mantenimiento**, apunta a un **tamaño objetivo** y **reindexa** después.
+
+
+
+## 🔐 Buenas prácticas
+
+1.  **Deja el tamaño si el crecimiento futuro es probable.**
+2.  **Nunca programes SHRINK automático.**
+3.  **Después de SHRINK:**
+    *   `ALTER INDEX ... REBUILD`
+    *   `UPDATE STATISTICS`
+4.  **Ajusta autogrowth:** usa MB fijos, no porcentajes.
+5.  **Para el log:** haz backup antes de SHRINK y revisa VLFs.
+
+
+
+## 🛠 Scripts útiles
+
+### Ver fragmentación antes de decidir
+
+```sql
+SELECT 
+    dbschemas.[name] AS 'Schema',
+    dbtables.[name] AS 'Table',
+    dbindexes.[name] AS 'Index',
+    indexstats.avg_fragmentation_in_percent
+FROM sys.dm_db_index_physical_stats(DB_ID(), NULL, NULL, NULL, 'SAMPLED') AS indexstats
+INNER JOIN sys.tables dbtables ON indexstats.object_id = dbtables.object_id
+INNER JOIN sys.schemas dbschemas ON dbtables.schema_id = dbschemas.schema_id
+INNER JOIN sys.indexes dbindexes ON dbindexes.object_id = dbtables.object_id
+    AND indexstats.index_id = dbindexes.index_id
+WHERE indexstats.database_id = DB_ID()
+ORDER BY indexstats.avg_fragmentation_in_percent DESC;
+```
+
+### SHRINK controlado (solo si es necesario)
+
+```sql
+-- Reducir archivo de datos a 300 GB (307200 MB)
+DBCC SHRINKFILE (MiBase_data, 307200);
+
+-- Reindexar para corregir fragmentación
+ALTER INDEX ALL ON dbo.MiTabla REBUILD WITH (ONLINE = ON);
+
+-- Actualizar estadísticas
+EXEC sp_updatestats;
+```
+
+
+## 📌 Resumen 
+
+*   **NO uses SHRINK como mantenimiento regular.**
+*   Úsalo **solo en casos excepcionales**, con tamaño objetivo y reindexación posterior.
+*   Planifica tamaño y crecimiento para evitar ciclos dañinos.
+
+
+###
  
 
 # Bibliografías : 
