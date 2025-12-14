@@ -38,3 +38,39 @@
 
 ### Aggregation
 significa que el motor está realizando una operación para agrupar o resumir datos.
+
+
+
+---
+
+
+### ✅ Stream Aggregate
+
+   Más eficiente cuando:
+       Los datos ya están ordenados por las columnas del `GROUP BY` (por ejemplo, porque hay un índice clustered o el plan anterior los ordenó).
+   Ventajas:
+       Muy bajo consumo de memoria.
+       Operación secuencial, rápida si el orden existe.
+   Desventajas:
+       Si los datos no están ordenados, SQL Server debe hacer un Sort previo, lo que puede ser costoso.
+
+
+
+### ✅ Hash Aggregate
+
+   Más eficiente cuando:
+       Los datos están desordenados y sería caro ordenarlos.
+   Ventajas:
+       No necesita ordenamiento.
+       Escala bien para datos desordenados.
+   Desventajas:
+       Alto consumo de memoria (puede hacer spilling a disco).
+       Menos eficiente que Stream si los datos ya están ordenados.
+
+
+
+### Regla práctica:
+
+   Si tienes un índice que soporta el orden del `GROUP BY` → Stream Aggregate será más eficiente.
+   Si no hay orden y ordenar sería caro → Hash Aggregate es mejor opción.
+
