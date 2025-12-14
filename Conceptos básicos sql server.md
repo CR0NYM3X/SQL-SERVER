@@ -1052,3 +1052,43 @@ La **RAM (Random Access Memory)** es un tipo de memoria volátil que almacena da
 10. **Evita componentes pesados externos** dentro del proceso (CLR no seguro, drivers) si no es indispensable.
 
  
+#  *worktables* y *workfiles*
+En SQL Server, los *worktables* y *workfiles* son estructuras temporales que el motor crea en *tempdb* para procesar consultas complejas (por ejemplo, `ORDER BY`, `GROUP BY`, `HASH JOIN`, cursores, o funciones como `DISTINCT`). Un valor alto de *Workfiles Created/sec* y un *Worktables from Cache Ratio* bajo (12%) significa que SQL Server está generando muchos objetos temporales en disco en lugar de reutilizarlos en memoria, lo cual indica presión de memoria y consultas poco optimizadas.
+
+
+## 🔎 ¿Qué son los *Worktables* y *Workfiles*?
+- **Worktables**: Tablas internas en *tempdb* que SQL Server usa para almacenar resultados intermedios de operaciones como:
+  - Ordenamientos (`ORDER BY`)
+  - Agrupaciones (`GROUP BY`)
+  - Cursores
+  - Operaciones con `DISTINCT`
+- **Workfiles**: Archivos temporales relacionados, usados principalmente para:
+  - *Hash joins* (unión por hash)
+  - *Hash aggregates* (agregaciones por hash)
+  - Cuando los conjuntos de datos son demasiado grandes para manejarse en memoria.
+
+
+
+## 🚦 Qué significa para tu rendimiento
+- **Alta creación de workfiles/worktables** = presión sobre *tempdb* y memoria.  
+- **Bajo ratio de caché** = poca reutilización, más costo en CPU y disco.  
+- **Impacto**: consultas más lentas, mayor uso de disco, posible contención en *tempdb*.
+ 
+## 🛠️ Recomendaciones prácticas
+1. **Revisar consultas problemáticas**  
+   - Identifica cuáles generan muchos *worktables* (usa *Query Store* o *Extended Events*).  
+   - Optimiza `JOIN`, `GROUP BY`, y evita operaciones innecesarias con `DISTINCT`.
+
+2. **Optimizar índices**  
+   - Asegúrate de tener índices adecuados para evitar que SQL Server tenga que ordenar/agrupar en *tempdb*.  
+
+3. **Revisar memoria del servidor**  
+   - Si el servidor tiene poca memoria, SQL Server recurrirá más a *tempdb*.  
+   - Considera aumentar memoria o ajustar configuración de *max server memory*.
+
+4. **Configurar *tempdb***  
+   - Usa múltiples archivos de datos para *tempdb* (generalmente 1 archivo por núcleo hasta 8).  
+   - Asegúrate de que *tempdb* esté en discos rápidos.
+
+
+✅ En resumen: tus métricas indican que SQL Server está usando intensivamente *tempdb* para manejar consultas, lo que refleja **consultas pesadas y/o falta de memoria**. El foco debe estar en **optimizar las consultas e índices** y **asegurar suficiente memoria y configuración adecuada de *tempdb***.
