@@ -154,6 +154,8 @@ Resource Governor in SQL Server -> https://www.youtube.com/watch?v=G_y_TW1TeE0
 Taller de configuración Database-Mail -> https://www.youtube.com/watch?v=w2xYTTg9mP0
 
 
+# Contenedores
+Running SQL Server in Containers -> https://medium.com/@lorenzouriel/running-sql-server-in-containers-3a044a98222c
 
 
 
