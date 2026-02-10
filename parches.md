@@ -12,9 +12,10 @@ CATÁLOGO DE PARCHES VOLTDB	 	https://docs.voltdb.com/
 CATÁLOGO DE PARCHES ORACLE	 	https://support.oracle.com/knowledge/Oracle%20Database%20Products/742060_1.html													
 CATÁLOGO DE PARCHES MYSQL		https://dev.mysql.com/doc/relnotes/													
 
+
 LIFE CYCLES POSTGRESQL 		https://www.postgresql.org/support/versioning/													
 LIFE CYCLES MSSQL		https://learn.microsoft.com/en-us/sql/sql-server/end-of-support/sql-server-end-of-support-overview?view=sql-server-ver16
-LIFE CYCLES MSSQL	  https://learn.microsoft.com/es-es/lifecycle/products/?products=sql-server						
+LIFE CYCLES MSSQL	  https://learn.microsoft.com/es-es/lifecycle/products/?products=sql-server		 | https://endoflife.date/mssqlserver				
 LIFE CYCLES MONGODB		https://www.mongodb.com/support-policy/lifecycles													
 LIFE CYCLES DB2		https://www.ibm.com/support/pages/db2-distributed-end-support-eos-dates													
 LIFE CYCLES MARIADB		https://mariadb.org/about/													
