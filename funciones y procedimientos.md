@@ -127,6 +127,20 @@ SELECT dbo.AddNumbers(10, 20) AS Resultado
 Asegura que el procedimiento se ejecute con los permisos del propietario, cuando creeas un objeto no se asigna automaticamente un propietario, tienes que agregarlo de manera manual , en caso de no asignarlo , este tomara  el usuario owner de la DB donde esta el objeto y usara sus permisos 
 ```sql
 
+EXECUTE AS SELF : 
+
+¿Quién es el ejecutor?: El código se ejecuta como la persona que creó o modificó el procedimiento por última vez.
+Vínculo dinámico: Si el usuario "Ana" crea el procedimiento, el código corre como "Ana". Si después "Pedro" modifica el procedimiento (ALTER), el contexto cambia automáticamente a "Pedro".
+Uso común: Útil cuando quieres que el procedimiento siempre tenga los permisos de quien lo mantiene actualmente.
+
+
+EXECUTE AS OWNER: 
+
+¿Quién es el ejecutor?: El código se ejecuta como el propietario actual del procedimiento almacenado.
+Estabilidad: A diferencia de SELF, si alguien más modifica el procedimiento (un ALTER), el contexto de ejecución no cambia, a menos que también cambies quién es el dueño del procedimiento.
+Jerarquía: Normalmente, el propietario es el esquema (como dbo). Si el procedimiento pertenece a dbo, se ejecutará con los altísimos privilegios de dbo, sin importar quién lo haya alterado últimamente.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 /*********** CREAMOS LAS BASE DE DATOS ***********\
