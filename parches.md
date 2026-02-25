@@ -62,7 +62,7 @@ La diferencia principal es que Microsoft deja de mejorar el producto para enfoca
 * **NO recibes:** Correcciones de errores que no sean de seguridad (bugs menores), a menos que tengas un contrato de soporte premium muy específico.
 
 ### 2. Comparativa: Estándar vs. Extendido
-[link Microsoft ](https://learn.microsoft.com/es-es/sql/sql-server/end-of-support/sql-server-end-of-support-overview?view=sql-server-ver17)
+[link Microsoft ](https://learn.microsoft.com/es-es/lifecycle/policies/fixed#extended-support)
 | Característica | Soporte Estándar (Mainstream) | Soporte Extendido (Extended) |
 | --- | --- | --- |
 | **Parches de Seguridad** | ✅ Incluidos | ✅ Incluidos |
