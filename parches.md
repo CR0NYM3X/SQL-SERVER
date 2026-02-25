@@ -51,6 +51,36 @@ Aquí hay un resumen en una tabla para mayor claridad:
 | Soporte Principal   | 5 años       | - Actualizaciones de seguridad y no seguridad.<br>- Nuevas funcionalidades y mejoras.<br>- Soporte gratuito y solicitudes de cambio. |
 | Soporte Extendido   | 5 años       | - Solo actualizaciones de seguridad.<br>- No hay nuevas funcionalidades.<br>- Soporte técnico disponible, pero usualmente con costo. |
 
+
+
+### 1. Solo Seguridad, nada de "mimos"
+
+La diferencia principal es que Microsoft deja de mejorar el producto para enfocarse solo en protegerlo:
+
+* **SÍ recibes:** Actualizaciones de seguridad críticas y parches contra vulnerabilidades (los famosos boletines de seguridad).
+* **NO recibes:** Nuevas funcionalidades, mejoras de rendimiento, cambios en la interfaz o soporte para nuevas tecnologías de hardware/SO.
+* **NO recibes:** Correcciones de errores que no sean de seguridad (bugs menores), a menos que tengas un contrato de soporte premium muy específico.
+
+### 2. Comparativa: Estándar vs. Extendido
+
+| Característica | Soporte Estándar (Mainstream) | Soporte Extendido (Extended) |
+| --- | --- | --- |
+| **Parches de Seguridad** | ✅ Incluidos | ✅ Incluidos |
+| **Nuevas Funciones** | ✅ Sí | ❌ No |
+| **Cambios de Diseño** | ✅ Sí | ❌ No |
+| **Garantía (Reclamos)** | ✅ Activa | ❌ Expirada |
+| **Costo de Parches** | Gratis para todos | Gratis para todos |
+| **Soporte Técnico** | Incluido en licencias | Requiere contrato de pago |
+
+ 
+### 3. ¿Por qué es importante para ti?
+
+Si tienes **SQL Server 2019 Enterprise**, ahora mismo estás en esta fase. Esto implica:
+
+* **Tu base de datos es segura:** Microsoft sigue vigilando que nadie pueda hackearte a través de agujeros en el motor de SQL.
+* **Estás en "congelación":** Si encuentras un error que hace que una consulta específica sea lenta o que una herramienta visual falle (pero que no sea un riesgo de seguridad), Microsoft probablemente no lo arreglará. Te dirán: *"Actualiza a la versión 2022 o 2025"*.
+* **Cumplimiento (Compliance):** Para auditorías (como PCI-DSS o ISO 27001), estar en Soporte Extendido suele ser **aceptable**, ya que el sistema sigue recibiendo parches de seguridad. Una vez que termina el Extendido, el software se considera "End of Life" (EoL) y es un riesgo legal y técnico.
+ 
  
 
 # Explicacion de "SELECT @@VERSION "
@@ -492,6 +522,9 @@ UpdateLevel: CU22
 
 ### OTROS Enlaces 
 ```SQL
+
+Directiva de ciclo de vida fijado -> https://learn.microsoft.com/es-es/lifecycle/policies/fixed
+
 -- Parches
 https://sqlserverbuilds.blogspot.com/
 
