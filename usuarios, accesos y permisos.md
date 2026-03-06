@@ -875,3 +875,48 @@ select name,authentication_type,authentication_type_desc from sys.database_princ
 4 : Microsoft Entra authentication
 
 ```
+
+# Borrar usuarios con login
+
+```
+USE [master];
+GO
+
+DECLARE @TargetUser NVARCHAR(128) = 'user_test';
+DECLARE @SQL NVARCHAR(MAX);
+
+-- Construimos el comando dinámico en una variable para evitar el error de sintaxis
+SET @SQL = '
+    USE [?];
+    IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = ''' + @TargetUser + ''')
+    BEGIN
+        PRINT ''Eliminando usuario [' + @TargetUser + '] de la base de datos: [?]'';
+        
+        -- Cambiar dueño de esquemas si el usuario posee alguno (Evita errores de dependencia)
+        DECLARE @RenameSQL NVARCHAR(MAX) = '''';
+        SELECT @RenameSQL += ''ALTER AUTHORIZATION ON SCHEMA::['' + name + ''] TO [dbo]; ''
+        FROM sys.schemas 
+        WHERE principal_id = USER_ID(''' + @TargetUser + ''');
+        
+        EXEC sp_executesql @RenameSQL;
+
+        DROP USER [' + @TargetUser + '];
+    END
+';
+
+-- Ejecutamos el comando en todas las bases de datos
+EXEC sp_MSforeachdb @SQL;
+
+ 
+
+-- 3. Borrar el LOGIN a nivel de servidor
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = @TargetUser)
+BEGIN
+    PRINT 'Eliminando login de servidor: [' + @TargetUser + ']';
+    DECLARE @DropLoginSQL NVARCHAR(MAX) = 'DROP LOGIN [' + @TargetUser + ']';
+    EXEC(@DropLoginSQL);
+END
+GO
+
+```
+
