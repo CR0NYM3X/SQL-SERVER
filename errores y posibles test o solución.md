@@ -12,6 +12,7 @@ SELECT SERVERPROPERTY('IsIntegratedSecurityOnly')
 ```
 **Para cambiar la contraseña del usuario y dominio**
 ```
+https://passwordreset.microsoftonline.com/
 https://aka.ms/ssprsetup
 https://mysignins.microsoft.com/security-info
 https://myaccount.microsoft.com
