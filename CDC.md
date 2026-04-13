@@ -86,3 +86,129 @@ SELECT * FROM sys.schemas WHERE name LIKE '%cdc%';
 ```sql
 SELECT * FROM sys.tables WHERE schema_id IN (SELECT schema_id FROM sys.schemas WHERE name LIKE 'cdc');
 ```
+
+
+---
+# Laboratorio 
+ 
+
+## Paso 1: Configuración del Entorno
+Primero, creamos la base de datos y la tabla que queremos proteger.
+
+```sql
+CREATE DATABASE LabCDC;
+GO
+USE LabCDC;
+
+CREATE SCHEMA Finanzas;
+GO
+
+CREATE TABLE Finanzas.Cuentas (
+    CuentaID INT PRIMARY KEY,
+    Titular VARCHAR(50),
+    Saldo DECIMAL(18,2)
+);
+```
+
+---
+
+## Paso 2: Habilitar CDC (El Momento de la Creación)
+Aquí es donde SQL Server despliega su artillería.
+
+### A. A nivel Base de Datos
+```sql
+EXEC sys.sp_cdc_enable_db;
+```
+**¿Qué creó SQL Server aquí?**
+* **Esquema `cdc`**: Un espacio aislado para los objetos de auditoría.
+* **Tablas de Metadatos**: `cdc.change_tables`, `cdc.lsn_time_mapping`, etc.
+
+### B. A nivel Tabla
+```sql
+EXEC sys.sp_cdc_enable_table 
+    @source_schema = 'Finanzas', 
+    @source_name = 'Cuentas', 
+    @role_name = NULL; -- Sin restricciones de acceso por ahora
+```
+
+**¿Qué creó SQL Server aquí? (Objetos por Default)**
+1.  **Tabla de Cambio (`cdc.Finanzas_Cuentas_CT`)**: Donde se guardarán los rastros.
+2.  **Jobs del Agente**: `cdc.LabCDC_capture` (el minero) y `cdc.LabCDC_cleanup` (el conserje).
+3.  **Funciones de Consulta**: `cdc.fn_cdc_get_all_changes_Finanzas_Cuentas`.
+
+---
+
+## Paso 3: Simulación de Transacciones
+Vamos a generar actividad para ver al CDC en acción.
+
+```sql
+-- 1. Insertamos un registro
+INSERT INTO Finanzas.Cuentas VALUES (1, 'Juan Perez', 1000.00);
+
+-- 2. Actualizamos el saldo (Juan gasta dinero)
+UPDATE Finanzas.Cuentas SET Saldo = 800.00 WHERE CuentaID = 1;
+
+-- 3. Borramos el registro
+DELETE FROM Finanzas.Cuentas WHERE CuentaID = 1;
+```
+
+---
+
+## Paso 4: Inspección de los Objetos Creados
+
+### 1. Consultando la Tabla de Metadatos (El Mapa)
+Sirve para saber qué estamos rastreando y desde qué momento (`start_lsn`).
+```sql
+SELECT name, capture_instance, role_name FROM cdc.change_tables;
+```
+**Salida simulada:**
+| name | capture_instance | role_name |
+| :--- | :--- | :--- |
+| Cuentas | Finanzas_Cuentas | NULL |
+
+### 2. Consultando la "Caja Negra" (`cdc.Finanzas_Cuentas_CT`)
+Aquí es donde vive el historial.
+```sql
+SELECT __$operation, __$update_mask, CuentaID, Titular, Saldo 
+FROM cdc.Finanzas_Cuentas_CT;
+```
+**Salida interpretada para el usuario:**
+| `__$operation` | Significado | Saldo | Nota |
+| :--- | :--- | :--- | :--- |
+| **2** | INSERT | 1000.00 | Aparece el saldo inicial. |
+| **3** | UPDATE (Antes) | 1000.00 | El valor que *iba* a cambiar. |
+| **4** | UPDATE (Después) | 800.00 | El valor nuevo. |
+| **1** | DELETE | 800.00 | El registro que se eliminó. |
+
+
+
+### 3. Consultando el Mapeo de Tiempo (`cdc.lsn_time_mapping`)
+¿Quieres saber a qué hora exacta ocurrió el cambio? Esta tabla traduce los códigos LSN a reloj humano.
+```sql
+SELECT start_lsn, tran_end_time FROM cdc.lsn_time_mapping;
+```
+**Salida simulada:**
+| start_lsn | tran_end_time |
+| :--- | :--- |
+| 00000026:000001B8:0001 | 2026-04-13 10:20:15 |
+
+---
+
+## Paso 5: Cómo lo usa un experto (La Función)
+En lugar de mirar la tabla `_CT` directamente, usamos la función que el CDC creó para nosotros. Esto nos da una vista limpia.
+
+```sql
+DECLARE @from_lsn binary(10) = sys.fn_cdc_get_min_lsn('Finanzas_Cuentas');
+DECLARE @to_lsn binary(10) = sys.fn_cdc_get_max_lsn();
+
+SELECT * FROM cdc.fn_cdc_get_all_changes_Finanzas_Cuentas(@from_lsn, @to_lsn, 'all');
+```
+
+---
+
+## Resumen del Laboratorio para el Principiante
+
+* **¿Para qué sirve?** Para saber **quién** cambió **qué** y **cuándo**, sin ponerle "triggers" (disparadores) lentos a la tabla original.
+* **¿Por qué es mejor?** Porque lee el log de transacciones. Es como si un detective leyera el diario del banco en lugar de estar vigilando al cajero todo el tiempo.
+* **Lo más importante:** Si el "Capture Job" se detiene, dejas de ver cambios. Si el "Cleanup Job" se detiene, tu disco se llena.
+ 
