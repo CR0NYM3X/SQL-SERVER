@@ -177,8 +177,53 @@ SELECT      * FROM    #sp_who2 WHERE       login like '%respa%'  ORDER BY    SPI
 ************ ELIMINAMOS TABLA ************
 drop table #sp_who2
 ```
+---
+# Tiempo de ejecucion de query | slow querys 
+```
 
+-- ========================================================================
+-- Identificar consultas con alto tiempo de ejecución en SQL Server
+-- ========================================================================
 
+DECLARE @MinutosEjecucion INT = 5000; -- <-- AJUSTA AQUÍ EL TIEMPO MÍNIMO (en minutos)
+
+SELECT 
+    r.session_id AS [SPID],
+    r.status AS [Estado],
+    r.cpu_time AS [Tiempo_CPU_ms],
+    r.total_elapsed_time / 1000 AS [Segundos_Transcurridos],
+    (r.total_elapsed_time / 1000) / 60 AS [Minutos_Transcurridos],
+    SUBSTRING(st.text, (r.statement_start_offset/2)+1,   
+        ((CASE r.statement_end_offset  
+            WHEN -1 THEN DATALENGTH(st.text)  
+            ELSE r.statement_end_offset  
+          END - r.statement_start_offset)/2) + 1) AS [Query_Exacta],
+    st.text AS [Query_Completa_Batch],
+    qp.query_plan AS [Plan_Ejecucion],
+    r.command AS [Comando],
+    s.login_name AS [Usuario],
+    s.host_name AS [Equipo_Cliente],
+    DB_NAME(r.database_id) AS [Base_Datos],
+    r.blocking_session_id AS [Bloqueado_Por_SPID],
+    r.wait_type AS [Tipo_Espera],
+    r.percent_complete AS [Porcentaje_Avance_SQL] -- Util para BACKUPs, RESTOREs, ALTER INDEX, etc.
+FROM 
+    sys.dm_exec_requests r
+INNER JOIN 
+    sys.dm_exec_sessions s ON r.session_id = s.session_id
+OUTER APPLY 
+    sys.dm_exec_sql_text(r.sql_handle) st
+OUTER APPLY 
+    sys.dm_exec_query_plan(r.plan_handle) qp
+WHERE 
+    s.is_user_process = 1 -- Solo procesos de usuarios (ignora procesos del sistema)
+    AND r.session_id <> @@SPID -- Ignora esta misma query que estás ejecutando
+    AND r.total_elapsed_time >= (@MinutosEjecucion * 60 * 1000) -- Conversión de minutos a milisegundos
+ORDER BY 
+    r.total_elapsed_time DESC;
+
+```
+---
 # Información que puede servir:
 - ver máximo de conexiones
 ```
