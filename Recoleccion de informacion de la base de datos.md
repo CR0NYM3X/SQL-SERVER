@@ -6,6 +6,7 @@ wmic csproduct get name, identifyingnumber
 ```sql
 select     (SELECT local_net_address FROM sys.dm_exec_connections where   session_id = @@SPID  ) IP_SERVER, -- select cast(connectionproperty ('local_net_address') as varchar)  as ip_server  
 	   (SELECT  local_tcp_port FROM sys.dm_exec_connections where   session_id = @@SPID  ) PORT_SERVER,
+		(SELECT  client_net_address FROM sys.dm_exec_connections where   session_id = @@SPID  ) [IP de tu Computadora (Cliente)],
             @@SERVERNAME hostname,
 	    @@servicename instancia,
            (SELECT SUBSTRING(@@version, 1, CHARINDEX( CHAR(10), @@version) - 1) ) version ,
