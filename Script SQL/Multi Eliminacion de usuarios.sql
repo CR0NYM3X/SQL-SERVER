@@ -1,5 +1,6 @@
 --------------------------------------------------------------------------------------------------
--- DBA SQUAD VANGUARD BLACK-OPS: SQL SERVER LOGIN & USER ANNIHILATOR (v10.1 FINAL)
+-- DBA SQUAD VANGUARD BLACK-OPS: SQL SERVER LOGIN & USER ANNIHILATOR (v10.2 FINAL)
+-- Mejora v10.2: Punto y coma defensivo (;WITH). Evita el Error 319 de compilación de sintaxis.
 -- Mejora v10.1: Destructor de Duplicados Automático (Protege contra errores de copy-paste).
 -- Mejora v10.0: Entrada Determinística (ANSI SQL VALUES). Soporte nativo para nombres con espacios.
 -- Mejora v9.0: Telemetría Forense Exacta (Reporta BD, Tipo y Nombre en Hardcoding).
@@ -16,15 +17,14 @@ CREATE TABLE #TargetList (TargetName NVARCHAR(128));
 
 INSERT INTO #TargetList (TargetName)
 VALUES 
-    ('users1'),            
-    ('DOMINIO.COM\user2')
-    ('Usuario Con Espacios'); -- El sistema eliminará este duplicado automáticamente
+   ('DOMINIO.COM\juan.perez')
+   ,('systest'); -- Se recomienda terminar con punto y coma, pero si se olvida, el código ya está blindado.
 
 --------------------------------------------------------------------------------------------------
 -- 1.5. MOTOR DE AUTO-DEDUPLICACIÓN Y SANITIZACIÓN 
 --------------------------------------------------------------------------------------------------
--- A. Eliminar duplicados accidentales inyectados por el usuario
-WITH CTE_Duplicates AS (
+-- A. Eliminar duplicados accidentales inyectados por el usuario (PUNTO Y COMA DEFENSIVO AÑADIDO)
+;WITH CTE_Duplicates AS (
     SELECT TargetName, ROW_NUMBER() OVER(PARTITION BY TargetName ORDER BY TargetName) as row_num
     FROM #TargetList
 )
@@ -213,14 +213,14 @@ BEGIN
     SET @Msg = '>>> FASE 3: ERRADICACIÓN DE LOGINS (NIVEL INSTANCIA) <<<'; RAISERROR (@Msg, 10, 1) WITH NOWAIT;
     SET @Msg = '==================================================================='; RAISERROR (@Msg, 10, 1) WITH NOWAIT;
 
-    -- SEGUNDA DEFENSA DE DUPLICIDAD (Por si acaso, usamos DISTINCT en el Cursor)
-    DECLARE LoginExecCursor CURSOR LOCAL FAST_FORWARD FOR SELECT DISTINCT LoginName FROM #FoundLogins;
+    DECLARE LoginExecCursor CURSOR LOCAL FAST_FORWARD FOR SELECT LoginName FROM #FoundLogins;
     OPEN LoginExecCursor; FETCH NEXT FROM LoginExecCursor INTO @CurrentTarget;
 
     IF @@CURSOR_ROWS = 0 BEGIN SET @Msg = '   -> Ningún Login a nivel servidor para eliminar.'; RAISERROR (@Msg, 10, 1) WITH NOWAIT; END
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        -- Verificar si fue blindado por el Radar o dependencias
         IF EXISTS (SELECT 1 FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT)
         BEGIN
             DECLARE @FinalReason NVARCHAR(MAX) = (SELECT TOP 1 Reason FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT);
