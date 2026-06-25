@@ -1,39 +1,46 @@
+
+
+
 --------------------------------------------------------------------------------------------------
--- DBA SQUAD VANGUARD BLACK-OPS: SQL SERVER LOGIN & USER ANNIHILATOR (v10.2 FINAL)
--- Mejora v10.2: Punto y coma defensivo (;WITH). Evita el Error 319 de compilación de sintaxis.
--- Mejora v10.1: Destructor de Duplicados Automático (Protege contra errores de copy-paste).
--- Mejora v10.0: Entrada Determinística (ANSI SQL VALUES). Soporte nativo para nombres con espacios.
--- Mejora v9.0: Telemetría Forense Exacta (Reporta BD, Tipo y Nombre en Hardcoding).
--- Mejora v8.0: Radar Global de Hardcoding (Escaneo de sys.sql_modules).
+-- DBA SQUAD VANGUARD BLACK-OPS: SQL SERVER LOGIN & USER ANNIHILATOR (v10.7 FINAL)
+-- Mejora v10.7: AutoClean Seguro (Homónimo). SOLO transfiere esquemas que se llamen IGUAL que el usuario.
+-- Mejora v10.6: Módulo Auto-Clean controlado por Panel de Mando.
+-- Mejora v10.5: Corrección estricta DDL en DROP USER.
+-- Mejora v10.2: Punto y coma defensivo (;WITH). 
+-- Mejora v10.0: Entrada Determinística (ANSI SQL VALUES).
 --------------------------------------------------------------------------------------------------
 
 SET NOCOUNT ON;
 
 --------------------------------------------------------------------------------------------------
--- 1. ZONA DE CARGA DE OBJETIVOS (Ingresa los usuarios entre comillas simples y separados por coma)
+-- 1. ZONA DE CARGA E INTERRUPTORES TÁCTICOS DE SEGURIDAD (PANEL DE MANDO)
 --------------------------------------------------------------------------------------------------
+-- [ 1 = ACTIVO / ENCENDIDO ]  ---  [ 0 = APAGADO / IGNORAR ]
+DECLARE @CheckSchemas         BIT = 0; -- Apagado: No frena el borrado si es dueño de un Esquema
+DECLARE @CheckRoles           BIT = 0; -- Apagado: No frena el borrado si es dueño de un Rol
+DECLARE @AutoTransferSchemas  BIT = 1; -- ENCENDIDO: Transfiere esquemas a [dbo] SOLO SI se llaman igual que el usuario
+DECLARE @CheckCodeModules     BIT = 1; -- ENCENDIDO: Busca Hardcoding dentro de Funciones, SPs y Vistas
+
 IF OBJECT_ID('tempdb..#TargetList') IS NOT NULL DROP TABLE #TargetList;
 CREATE TABLE #TargetList (TargetName NVARCHAR(128));
 
 INSERT INTO #TargetList (TargetName)
 VALUES 
-   ('DOMINIO.COM\juan.perez')
-   ,('systest'); -- Se recomienda terminar con punto y coma, pero si se olvida, el código ya está blindado.
+    ('DOMINIO:COM\jua.perez'),
+    ('jose'), -- Ejemplo para esquema homónimo
+    ('sysnew'); -- <-- [Ingresa tus objetivos aquí]
 
 --------------------------------------------------------------------------------------------------
 -- 1.5. MOTOR DE AUTO-DEDUPLICACIÓN Y SANITIZACIÓN 
 --------------------------------------------------------------------------------------------------
--- A. Eliminar duplicados accidentales inyectados por el usuario (PUNTO Y COMA DEFENSIVO AÑADIDO)
 ;WITH CTE_Duplicates AS (
     SELECT TargetName, ROW_NUMBER() OVER(PARTITION BY TargetName ORDER BY TargetName) as row_num
     FROM #TargetList
 )
 DELETE FROM CTE_Duplicates WHERE row_num > 1;
 
--- B. Limpiar espacios en blanco residuales
 UPDATE #TargetList SET TargetName = LTRIM(RTRIM(TargetName));
 
--- C. PROTECCIÓN DE SISTEMA: Eliminar cuentas críticas de la lista de objetivos
 DELETE FROM #TargetList 
 WHERE TargetName IN ('sa', 'dbo', 'guest', 'INFORMATION_SCHEMA', 'sys') 
    OR TargetName LIKE 'NT SERVICE\%' 
@@ -72,21 +79,23 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
     SET @DynamicSQL = N'USE [' + @CurrentDB + N'];
     
-    -- A. Buscar si el usuario existe físicamente en la BD
     INSERT INTO #FoundUsers (DBName, UserName)
     SELECT DB_NAME(), dp.name FROM sys.database_principals dp 
     INNER JOIN #TargetList t ON dp.name COLLATE DATABASE_DEFAULT = t.TargetName COLLATE DATABASE_DEFAULT;
     
-    -- B. ESCÁNER FORENSE: Extrae el Tipo de Objeto y el Nombre exacto si hay Hardcoding
-    INSERT INTO #SkippedLogins (LoginName, Reason)
-    SELECT DISTINCT t.TargetName, 
-           ''BD ['' + DB_NAME() + ''] -> Objeto: ['' + o.type_desc COLLATE DATABASE_DEFAULT + ''] Nombre: ['' + SCHEMA_NAME(o.schema_id) COLLATE DATABASE_DEFAULT + ''].['' + o.name COLLATE DATABASE_DEFAULT + '']''
-    FROM sys.sql_modules sm
-    INNER JOIN sys.objects o ON sm.object_id = o.object_id
-    CROSS JOIN #TargetList t
-    WHERE sm.definition COLLATE DATABASE_DEFAULT LIKE N''%'' + t.TargetName COLLATE DATABASE_DEFAULT + N''%'';
+    IF (@ChkCode = 1)
+    BEGIN
+        INSERT INTO #SkippedLogins (LoginName, Reason)
+        SELECT DISTINCT t.TargetName, 
+               ''BD ['' + DB_NAME() + ''] -> Objeto: ['' + o.type_desc COLLATE DATABASE_DEFAULT + ''] Nombre: ['' + SCHEMA_NAME(o.schema_id) COLLATE DATABASE_DEFAULT + ''].['' + o.name COLLATE DATABASE_DEFAULT + '']''
+        FROM sys.sql_modules sm
+        INNER JOIN sys.objects o ON sm.object_id = o.object_id
+        CROSS JOIN #TargetList t
+        WHERE sm.definition COLLATE DATABASE_DEFAULT LIKE N''%'' + t.TargetName COLLATE DATABASE_DEFAULT + N''%'';
+    END
     ';
-    EXEC sp_executesql @DynamicSQL;
+    EXEC sp_executesql @DynamicSQL, N'@ChkCode BIT', @ChkCode = @CheckCodeModules;
+    
     FETCH NEXT FROM RadarCursor INTO @CurrentDB;
 END
 CLOSE RadarCursor; DEALLOCATE RadarCursor;
@@ -136,7 +145,7 @@ END
 CLOSE GhostCursor; DEALLOCATE GhostCursor;
 
 --------------------------------------------------------------------------------------------------
--- 5. FASE DE ANIQUILACIÓN: BASES DE DATOS (CON DEFENSA DE DEPENDENCIAS)
+-- 5. FASE DE ANIQUILACIÓN: BASES DE DATOS (CON AUTO-CLEAN SEGURO / HOMÓNIMO)
 --------------------------------------------------------------------------------------------------
 IF @FoundCount > 0
 BEGIN
@@ -156,24 +165,48 @@ BEGIN
 
         WHILE @@FETCH_STATUS = 0
         BEGIN
-            -- Verificar si el Radar Global ya lo blindó por estar en código fuente
             IF EXISTS (SELECT 1 FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT)
             BEGIN
                 DECLARE @CodeReason NVARCHAR(500) = (SELECT TOP 1 Reason FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT);
-                DECLARE @LogMsg1 NVARCHAR(2000) = '      (-) [BLINDADO] [' + @CurrentTarget + '] Riesgo: Hardcodeado en ' + @CodeReason;
+                DECLARE @LogMsg1 NVARCHAR(2000) = '      (-) [BLINDADO PREVIAMENTE] [' + @CurrentTarget + '] Motivo: ' + @CodeReason;
                 RAISERROR (@LogMsg1, 10, 1) WITH NOWAIT;
             END
             ELSE
             BEGIN
-                -- Verificar dependencias relacionales
+                -- Inyectar las variables de control al script dinámico
                 SET @DynamicSQL = N'USE [' + @CurrentDB + N'];
                 DECLARE @PrinID INT = DATABASE_PRINCIPAL_ID(@TargetParam);
                 DECLARE @DepMsg NVARCHAR(500) = '''';
 
-                IF EXISTS (SELECT 1 FROM sys.schemas WHERE principal_id = @PrinID)
+                -- >>>> MÓDULO AUTO-CLEANSE (SOLO ESQUEMAS HOMÓNIMOS) <<<<
+                IF (@AutoTx = 1 AND EXISTS (SELECT 1 FROM sys.schemas WHERE principal_id = @PrinID AND name COLLATE DATABASE_DEFAULT = @TargetParam COLLATE DATABASE_DEFAULT))
+                BEGIN
+                    DECLARE @SchName NVARCHAR(128);
+                    DECLARE @AlterSQL NVARCHAR(MAX);
+                    
+                    -- Seleccionamos estrictamente esquemas que se llamen IGUAL que el usuario
+                    DECLARE SchCursor CURSOR LOCAL FAST_FORWARD FOR 
+                    SELECT name FROM sys.schemas WHERE principal_id = @PrinID AND name COLLATE DATABASE_DEFAULT = @TargetParam COLLATE DATABASE_DEFAULT;
+                    
+                    OPEN SchCursor; FETCH NEXT FROM SchCursor INTO @SchName;
+                    WHILE @@FETCH_STATUS = 0
+                    BEGIN
+                        SET @AlterSQL = N''ALTER AUTHORIZATION ON SCHEMA::['' + @SchName + N''] TO [dbo];'';
+                        EXEC sp_executesql @AlterSQL;
+                        
+                        DECLARE @TxMsg NVARCHAR(2000) = ''      (>) [AUTOCLEAN SEGURO] Esquema homónimo ['' + @SchName + ''] transferido a [dbo].'';
+                        RAISERROR (@TxMsg, 10, 1) WITH NOWAIT;
+                        
+                        FETCH NEXT FROM SchCursor INTO @SchName;
+                    END
+                    CLOSE SchCursor; DEALLOCATE SchCursor;
+                END
+
+                -- Validaciones relacionales (Atrapará cualquier otro esquema NO homónimo o Roles si los interruptores están en 1)
+                IF (@ChkSchemas = 1 AND EXISTS (SELECT 1 FROM sys.schemas WHERE principal_id = @PrinID))
                     SET @DepMsg = @DepMsg + ''[Dueño de Esquema] '';
                 
-                IF EXISTS (SELECT 1 FROM sys.database_principals WHERE owning_principal_id = @PrinID)
+                IF (@ChkRoles = 1 AND EXISTS (SELECT 1 FROM sys.database_principals WHERE owning_principal_id = @PrinID))
                     SET @DepMsg = @DepMsg + ''[Dueño de Rol] '';
 
                 IF LEN(@DepMsg) > 0
@@ -185,18 +218,21 @@ BEGIN
                 ELSE
                 BEGIN
                     BEGIN TRY
-                        DROP USER ['' + @TargetParam + ''];
+                        -- [CORRECCIÓN V10.5 DDL ESTRICTA]: DROP USER no soporta variables internas, se concatena desde afuera.
+                        DROP USER [' + @CurrentTarget + N'];
                         DECLARE @SuccessMsg NVARCHAR(2000) = ''      (+) [EXITO] Usuario erradicado: ['' + @TargetParam + '']'';
                         RAISERROR (@SuccessMsg, 10, 1) WITH NOWAIT;
                     END TRY
                     BEGIN CATCH
                         DECLARE @ErrMsg NVARCHAR(2000) = ''      (X) [FALLO] Error al borrar ['' + @TargetParam + '']: '' + ERROR_MESSAGE();
                         RAISERROR (@ErrMsg, 10, 1) WITH NOWAIT;
-                        INSERT INTO #SkippedLogins (LoginName, Reason) VALUES (@TargetParam, ''BD ['' + DB_NAME() + ''] -> Error no capturado'');
+                        INSERT INTO #SkippedLogins (LoginName, Reason) VALUES (@TargetParam, ''BD ['' + DB_NAME() + ''] -> Error no capturado: '' + ERROR_MESSAGE());
                     END CATCH
                 END';
 
-                EXEC sp_executesql @DynamicSQL, N'@TargetParam NVARCHAR(128)', @TargetParam = @CurrentTarget;
+                EXEC sp_executesql @DynamicSQL, 
+                     N'@TargetParam NVARCHAR(128), @ChkSchemas BIT, @ChkRoles BIT, @AutoTx BIT', 
+                     @TargetParam = @CurrentTarget, @ChkSchemas = @CheckSchemas, @ChkRoles = @CheckRoles, @AutoTx = @AutoTransferSchemas;
             END
             FETCH NEXT FROM UserExecCursor INTO @CurrentTarget;
         END
@@ -220,7 +256,6 @@ BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        -- Verificar si fue blindado por el Radar o dependencias
         IF EXISTS (SELECT 1 FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT)
         BEGIN
             DECLARE @FinalReason NVARCHAR(MAX) = (SELECT TOP 1 Reason FROM #SkippedLogins WHERE LoginName COLLATE DATABASE_DEFAULT = @CurrentTarget COLLATE DATABASE_DEFAULT);
