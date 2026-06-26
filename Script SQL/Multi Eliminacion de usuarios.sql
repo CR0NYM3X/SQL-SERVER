@@ -1,5 +1,5 @@
 
-
+--- Agregar una opcion para poder matar el proceso del usuario en caso de que lo este usando, mejorar la parte que ingresa a cada base de datos, por lo que una vez que ingresa a una base de datos, debe hacer todo lo que solicitaron
 
 --------------------------------------------------------------------------------------------------
 -- DBA SQUAD VANGUARD BLACK-OPS: SQL SERVER LOGIN & USER ANNIHILATOR (v10.7 FINAL)
