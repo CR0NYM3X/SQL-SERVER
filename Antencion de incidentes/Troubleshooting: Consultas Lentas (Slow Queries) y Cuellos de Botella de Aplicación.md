@@ -12,17 +12,34 @@ Para evaluar el impacto de una consulta, debemos revisar su tiempo total transcu
 **Comando de diagnóstico:**
 
 ```sql
+
+
 SELECT 
     r.session_id,
-    r.status,
     r.command,
+    s.host_name AS [Host],
+    c.client_net_address AS [IP_Client],
+    s.login_name AS [User],
+    DB_NAME(r.database_id) AS [BD],
+    1 AS [Cantidad de Querys], -- Constante 1, ya que es el detalle por consulta activa
+    r.status AS [Status],
+    s.program_name AS [Application],
     r.start_time,
-    r.total_elapsed_time / 1000 AS elapsed_time_sec,
-    r.wait_type,
-    r.wait_time / 1000 AS current_wait_sec
+    r.total_elapsed_time / 1000 AS [DuraciónSg], -- Representado en segundos
+    SUBSTRING(t.text, (r.statement_start_offset/2)+1, 
+    ((CASE r.statement_end_offset WHEN -1 THEN DATALENGTH(t.text) ELSE r.statement_end_offset END - r.statement_start_offset)/2) + 1) AS [Query(s)],
+     r.wait_type
 FROM sys.dm_exec_requests r
-WHERE r.session_id > 50 AND r.session_id <> @@SPID
+INNER JOIN sys.dm_exec_sessions s 
+    ON r.session_id = s.session_id
+LEFT JOIN sys.dm_exec_connections c 
+    ON s.session_id = c.session_id
+CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
+WHERE r.session_id > 50 
+  AND r.session_id <> @@SPID
 ORDER BY r.total_elapsed_time DESC;
+
+ 
 
 ```
 
@@ -120,3 +137,17 @@ Para evitar que este incidente se repita y vuelva a tumbar los recursos de la ba
 * **Implementar Paginación Estricta:** Queda prohibido hacer extracciones históricas (`fecha < @P0`) sin límite. El repositorio Java debe utilizar paginación (e.g., `Pageable` en Spring Boot) o lotes (`FETCH NEXT 1000 ROWS ONLY`) para procesar bloques de información digeribles.
 * **Proyecciones de Datos (Uso de DTOs):** El ORM está haciendo un virtual `SELECT *` trayendo 71 columnas de la entidad. Se debe crear un objeto DTO (*Data Transfer Object*) que consulte **únicamente** las 3 o 4 columnas estrictamente necesarias para el cálculo o reporte.
 * **Configurar Timeouts en el Driver JDBC:** Es inaceptable que una conexión sobreviva 13 horas en un estado colgado. Se deben configurar los parámetros `queryTimeout` y `socketTimeout` en la cadena de conexión de la aplicación para abortar automáticamente cualquier consulta que supere los 60 o 120 segundos.
+
+
+
+# Preguntas 
+**Diferencia entre `running` en Sessions y `suspended` en Requests**
+
+Muestran el estado a dos niveles distintos de la arquitectura interna de SQL Server:
+
+* **`sys.dm_exec_sessions.status = 'running'` (Nivel Conexión/Sesión):**
+Indica la condición general del canal de comunicación. Al haber enviado una consulta que aún no finaliza, la sesión se marca como **activa/en ejecución**. Solamente cambia a `sleeping` cuando la consulta termina por completo y la sesión queda a la espera de que el cliente envíe una nueva instrucción.
+* **`sys.dm_exec_requests.status = 'suspended'` (Nivel Hilo/Procesador):**
+Indica qué está haciendo el hilo (*thread*) de CPU asignado a esa instrucción en este milisegundo. Cuando un hilo necesita esperar por cualquier recurso (un candado de tabla, lectura de disco o el ack de red `ASYNC_NETWORK_IO`), SQL Server pasa la solicitud al estado **suspendido** para liberar el procesador hasta que el recurso esté disponible.
+
+En resumen: **La sesión está activa (`running`), pero su hilo de trabajo interno está pausado (`suspended`) esperando a que la aplicación Java lea los datos.**
