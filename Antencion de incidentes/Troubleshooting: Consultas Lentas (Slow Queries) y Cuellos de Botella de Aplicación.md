@@ -13,12 +13,12 @@ Para evaluar el impacto de una consulta, debemos revisar su tiempo total transcu
 
 ```sql
 
-
 SELECT 
     r.session_id,
     r.command,
     s.host_name AS [Host],
     c.client_net_address AS [IP_Client],
+    c.local_net_address AS [IP_Server], -- IP del Servidor de SQL Server
     s.login_name AS [User],
     DB_NAME(r.database_id) AS [BD],
     1 AS [Cantidad de Querys], -- Constante 1, ya que es el detalle por consulta activa
@@ -28,7 +28,7 @@ SELECT
     r.total_elapsed_time / 1000 AS [DuraciónSg], -- Representado en segundos
     SUBSTRING(t.text, (r.statement_start_offset/2)+1, 
     ((CASE r.statement_end_offset WHEN -1 THEN DATALENGTH(t.text) ELSE r.statement_end_offset END - r.statement_start_offset)/2) + 1) AS [Query(s)],
-     r.wait_type
+    r.wait_type
 FROM sys.dm_exec_requests r
 INNER JOIN sys.dm_exec_sessions s 
     ON r.session_id = s.session_id
