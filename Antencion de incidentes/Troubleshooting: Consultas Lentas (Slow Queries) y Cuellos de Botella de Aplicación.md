@@ -39,7 +39,7 @@ WHERE r.session_id > 50
   AND r.session_id <> @@SPID
 ORDER BY r.total_elapsed_time DESC;
 
- 
+ SELECT CONNECTIONPROPERTY('local_net_address') AS [IP_Server];
 
 ```
 
